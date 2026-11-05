@@ -1,0 +1,56 @@
+{
+  "lang": "es",
+  "category": "history",
+  "items": [
+    {
+      "id": "es-history-001",
+      "difficulty": "easy",
+      "text": "La rueda se inventó hace miles de años y cambió la forma de viajar.",
+      "explanation": "Las ruedas más antiguas que se conocen datan de hacia el 3500 a. C. Los carros con ruedas facilitaron el transporte de personas y cargas pesadas.",
+      "source": {
+        "title": "Wikipedia: Rueda",
+        "url": "https://es.wikipedia.org/wiki/Rueda"
+      }
+    },
+    {
+      "id": "es-history-002",
+      "difficulty": "easy",
+      "text": "Los antiguos egipcios construyeron grandes pirámides de piedra para sus reyes.",
+      "explanation": "Las pirámides eran tumbas reales. La Gran Pirámide de Guiza se construyó hacia el 2600 a. C. para el faraón Keops.",
+      "source": {
+        "title": "Wikipedia: Pirámide de Keops",
+        "url": "https://es.wikipedia.org/wiki/Pir%C3%A1mide_de_Keops"
+      }
+    },
+    {
+      "id": "es-history-003",
+      "difficulty": "hard",
+      "text": "El Muro de Berlín dividió la ciudad desde 1961 hasta el 9 de noviembre de 1989, y Alemania se reunificó en 1990.",
+      "explanation": "El muro fue levantado por Alemania Oriental el 13 de agosto de 1961. Tras su apertura en 1989, Alemania se reunificó el 3 de octubre de 1990.",
+      "source": {
+        "title": "Wikipedia: Muro de Berlín",
+        "url": "https://es.wikipedia.org/wiki/Muro_de_Berl%C3%ADn"
+      }
+    },
+    {
+      "id": "es-history-004",
+      "difficulty": "hard",
+      "text": "Cristóbal Colón cruzó el Atlántico en 1492 con tres barcos, la Pinta, la Niña y la Santa María, y llegó a las Bahamas.",
+      "explanation": "Colón desembarcó en las Bahamas en octubre de 1492. Su primer viaje fue financiado por la Corona española y zarpó con tres barcos.",
+      "source": {
+        "title": "Wikipedia: Cristóbal Colón",
+        "url": "https://es.wikipedia.org/wiki/Crist%C3%B3bal_Col%C3%B3n"
+      }
+    },
+    {
+      "id": "es-history-005",
+      "difficulty": "hard",
+      "text": "La Revolución francesa comenzó el 14 de julio de 1789 con la toma de la Bastilla, una prisión de París, y cambió la política de Europa.",
+      "explanation": "Se considera que la Revolución francesa comenzó con la toma de la Bastilla, el 14 de julio de 1789, y que puso fin a la monarquía absoluta en Francia.",
+      "source": {
+        "title": "Wikipedia: Revolución francesa",
+        "url": "https://es.wikipedia.org/wiki/Revoluci%C3%B3n_francesa"
+      }
+    }
+  ]
+}

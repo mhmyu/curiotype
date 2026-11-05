@@ -1,0 +1,56 @@
+{
+  "lang": "id",
+  "category": "science",
+  "items": [
+    {
+      "id": "id-science-001",
+      "difficulty": "easy",
+      "text": "Bulan butuh waktu hampir satu bulan untuk mengelilingi Bumi satu kali.",
+      "explanation": "Bulan butuh sekitar 27 hari untuk sekali mengelilingi Bumi dan sekitar 29,5 hari untuk melewati semua fasenya.",
+      "source": {
+        "title": "Wikipedia: Moon",
+        "url": "https://en.wikipedia.org/wiki/Moon"
+      }
+    },
+    {
+      "id": "id-science-002",
+      "difficulty": "easy",
+      "text": "Tumbuhan hijau memakai cahaya matahari untuk membuat makanannya sendiri.",
+      "explanation": "Tumbuhan membuat gula dari karbon dioksida dan air dengan bantuan energi cahaya, lalu melepaskan oksigen. Proses ini disebut fotosintesis.",
+      "source": {
+        "title": "Wikipedia: Photosynthesis",
+        "url": "https://en.wikipedia.org/wiki/Photosynthesis"
+      }
+    },
+    {
+      "id": "id-science-003",
+      "difficulty": "easy",
+      "text": "Bunyi membutuhkan sesuatu untuk merambat, seperti udara atau air.",
+      "explanation": "Bunyi adalah getaran, jadi ia butuh medium seperti udara, air, atau benda padat. Bunyi tidak dapat merambat melalui ruang hampa.",
+      "source": {
+        "title": "Wikipedia: Sound",
+        "url": "https://en.wikipedia.org/wiki/Sound"
+      }
+    },
+    {
+      "id": "id-science-004",
+      "difficulty": "hard",
+      "text": "Kecepatan cahaya di ruang hampa tepat 299.792.458 meter per detik, dan nilai itu dipakai untuk mendefinisikan satu meter.",
+      "explanation": "Sejak 1983 satu meter didefinisikan sebagai jarak yang ditempuh cahaya di ruang hampa dalam 1/299.792.458 detik.",
+      "source": {
+        "title": "Wikipedia: Speed of light",
+        "url": "https://en.wikipedia.org/wiki/Speed_of_light"
+      }
+    },
+    {
+      "id": "id-science-005",
+      "difficulty": "hard",
+      "text": "Dmitri Mendeleev menerbitkan tabel periodiknya pada tahun 1869, dan menyisakan ruang kosong untuk unsur seperti galium dan germanium yang baru ditemukan kemudian.",
+      "explanation": "Mendeleev menyusun unsur menurut massa atom dan memperkirakan ada unsur yang belum ditemukan. Galium (1875) dan germanium (1886) cocok dengan prediksinya.",
+      "source": {
+        "title": "Wikipedia: Dmitri Mendeleev",
+        "url": "https://en.wikipedia.org/wiki/Dmitri_Mendeleev"
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "lang": "id",
+  "category": "technology",
+  "items": [
+    {
+      "id": "id-technology-001",
+      "difficulty": "easy",
+      "text": "Baterai menyimpan energi agar perangkat bisa menyala tanpa colokan listrik.",
+      "explanation": "Baterai mengubah energi kimia yang tersimpan menjadi listrik. Baterai isi ulang dapat dipakai lagi setelah diisi daya.",
+      "source": {
+        "title": "Wikipedia: Electric battery",
+        "url": "https://en.wikipedia.org/wiki/Electric_battery"
+      }
+    },
+    {
+      "id": "id-technology-002",
+      "difficulty": "easy",
+      "text": "Komputer mengikuti daftar langkah yang disebut program.",
+      "explanation": "Program adalah sekumpulan perintah yang ditulis dalam bahasa pemrograman. Komputer menjalankan perintah itu satu per satu.",
+      "source": {
+        "title": "Wikipedia: Computer program",
+        "url": "https://en.wikipedia.org/wiki/Computer_program"
+      }
+    },
+    {
+      "id": "id-technology-003",
+      "difficulty": "easy",
+      "text": "Robot adalah mesin yang dapat mengerjakan tugas dengan sendirinya.",
+      "explanation": "Robot ada banyak jenisnya, dari lengan pabrik sampai penyedot debu rumah. Banyak yang mengikuti program, dan sebagian memakai sensor untuk bereaksi terhadap sekitarnya.",
+      "source": {
+        "title": "Wikipedia: Robot",
+        "url": "https://en.wikipedia.org/wiki/Robot"
+      }
+    },
+    {
+      "id": "id-technology-004",
+      "difficulty": "hard",
+      "text": "Wahana Voyager 1, yang diluncurkan NASA pada tahun 1977, adalah benda buatan manusia terjauh dari Bumi, lebih dari 20 miliar kilometer jauhnya.",
+      "explanation": "Voyager 1 keluar dari heliosfer Matahari pada 2012 dan memasuki ruang antarbintang. Wahana ini membawa piringan emas berisi suara dan gambar dari Bumi.",
+      "source": {
+        "title": "Wikipedia: Voyager 1",
+        "url": "https://en.wikipedia.org/wiki/Voyager_1"
+      }
+    },
+    {
+      "id": "id-technology-005",
+      "difficulty": "hard",
+      "text": "Ada Lovelace menulis apa yang sering disebut program komputer pertama pada tahun 1843 untuk Mesin Analitis milik Charles Babbage.",
+      "explanation": "Lovelace menambahkan catatan pada sebuah makalah tentang mesin Babbage. Catatannya memuat algoritma untuk menghitung bilangan Bernoulli.",
+      "source": {
+        "title": "Wikipedia: Ada Lovelace",
+        "url": "https://en.wikipedia.org/wiki/Ada_Lovelace"
+      }
+    }
+  ]
+}

@@ -1,0 +1,441 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/*
+ * Theme mapping. `inline` makes utilities (bg-surface, text-text-muted, ...)
+ * read the CSS variables from tokens.css at runtime, so switching between light
+ * and dark needs no extra classes. Tailwind's default palette is removed
+ * (`--color-*: initial`), so only the design palette colors can be used.
+ */
+@theme inline {
+  --color-*: initial;
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-error: var(--error);
+  --color-border: var(--border);
+  --color-typing-pending: var(--typing-pending);
+  --color-typing-correct: var(--typing-correct);
+}
+
+@theme {
+  /*
+   * The --astro-font-* variables are created by the <Font /> component (see
+   * astro.config.mjs). These are not `inline` on purpose: Tailwind's own
+   * --default-font-family points at --font-sans, which must therefore be a real variable.
+   */
+  --font-heading: var(--astro-font-heading);
+  --font-ui: var(--astro-font-ui);
+  --font-typing: var(--astro-font-typing);
+  /* Inter is the default text font for the whole page. */
+  --font-sans: var(--astro-font-ui);
+
+  /*
+   * Type scale. Sizes are in rem so they
+   * follow the user's browser setting. Use e.g. `text-figure sm:text-figure-lg`.
+   */
+  --text-figure: 2rem;
+  --text-figure--line-height: 1.1;
+  --text-figure--letter-spacing: 0.02em;
+  --text-figure--font-weight: 700;
+  --text-figure-lg: 2.5rem;
+  --text-figure-lg--line-height: 1.1;
+  --text-figure-lg--letter-spacing: 0.02em;
+  --text-figure-lg--font-weight: 700;
+  --text-h1: 1.5rem;
+  --text-h1--line-height: 1.2;
+  --text-h1--letter-spacing: 0.02em;
+  --text-h1--font-weight: 700;
+  --text-h1-lg: 2rem;
+  --text-h1-lg--line-height: 1.2;
+  --text-h1-lg--letter-spacing: 0.02em;
+  --text-h1-lg--font-weight: 700;
+  --text-h2: 1.25rem;
+  --text-h2--line-height: 1.3;
+  --text-h2--letter-spacing: 0.8px;
+  --text-h2--font-weight: 600;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.3;
+  --text-h3--letter-spacing: 0.8px;
+  --text-h3--font-weight: 600;
+  --text-body-long: 1rem;
+  --text-body-long--line-height: 1.6;
+  --text-body-long--font-weight: 400;
+  --text-ui: 0.9375rem;
+  --text-ui--line-height: 1.4;
+  --text-ui--font-weight: 600;
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 500;
+  /* Typing text: the user's fontSize setting picks sm, md (default) or lg. */
+  --text-typing-sm: 1rem;
+  --text-typing-sm--line-height: 1.6;
+  --text-typing-md: 1.25rem;
+  --text-typing-md--line-height: 1.6;
+  --text-typing-lg: 1.5rem;
+  --text-typing-lg--line-height: 1.6;
+
+  /*
+   * The design "radius.sm" (12px, containers) is named `container` so it does not
+   * replace Tailwind's own `rounded-sm`. "radius.xs" (2px) is Tailwind's `rounded-xs`.
+   */
+  --radius-container: 12px;
+
+  /* Motion: 300ms with `ease` for every transition utility. */
+  --default-transition-duration: 300ms;
+  --default-transition-timing-function: ease;
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--text);
+  }
+
+  h1 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.8px;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  @media (min-width: 40rem) {
+    h1 {
+      font-size: 2rem;
+    }
+  }
+
+  /* Visible keyboard focus everywhere: 2px accent outline, 2px offset. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion: no animations or transitions, state changes stay instant. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+ * Shared controls. Plain CSS on the tokens so Astro and
+ * Svelte components use the same classes and the states follow ARIA attributes.
+ *
+ * .btn          secondary button: surface, text, 2px border.
+ * .btn-primary  call to action (Start, Restart, Try again): primary fill with a
+ *               2px on-primary border, which light mode needs because primary
+ *               alone is only 1.2:1 against the background.
+ * .field        select and other form fields.
+ * .card         result card: surface, 12px radius, shadow (light) or 1px border (dark).
+ *               Padding is left to the caller (20px for large cards).
+ *
+ * A toggle chip is a .btn with aria-pressed; the current language link is a .btn
+ * with aria-current="page". Both take the primary look, so the selected state
+ * is exposed to assistive technology and does not depend on color alone.
+ * All targets are at least 44x44px. Font and radius are literal on purpose:
+ * 12px is the design radius.sm and the font variable comes from the <Font /> tag.
+ */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    padding-inline: 1rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background-color: var(--surface);
+    color: var(--text);
+    font-family: var(--astro-font-ui);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    transition:
+      background-color 300ms ease,
+      border-color 300ms ease,
+      color 300ms ease;
+  }
+
+  .btn-primary,
+  .btn[aria-pressed='true'],
+  .btn[aria-current='page'] {
+    border-color: var(--on-primary);
+    background-color: var(--primary);
+    color: var(--on-primary);
+  }
+
+  /* `aria-disabled` keeps the button focusable (the Share button while its image is drawn). */
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    border-style: dashed;
+    color: var(--text-muted);
+    cursor: not-allowed;
+  }
+
+  @media (hover: hover) {
+    .btn:not(:disabled):not([aria-disabled='true']):hover {
+      border-color: var(--accent);
+    }
+
+    .btn-primary:not(:disabled):not([aria-disabled='true']):hover,
+    .btn[aria-pressed='true']:not(:disabled):not([aria-disabled='true']):hover,
+    .btn[aria-current='page']:not(:disabled):not([aria-disabled='true']):hover {
+      border-color: var(--on-primary);
+      background-color: color-mix(in srgb, var(--primary) 85%, var(--on-primary));
+    }
+  }
+
+  .card {
+    border-radius: 12px;
+    background-color: var(--surface);
+    box-shadow: var(--card-shadow);
+  }
+
+  /*
+   * Keyboard hint (a key name in <kbd> and its action). Shortcuts are an extra: the buttons on
+   * screen stay the main way, so the hint only shows on devices with a mouse or trackpad and
+   * stays hidden on touch screens, where there is no Esc or Enter key to press.
+   */
+  .shortcut-hint {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .shortcut-hint {
+      display: block;
+    }
+  }
+
+  .kbd {
+    display: inline-block;
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background-color: var(--surface);
+    color: var(--text);
+    font-family: var(--astro-font-ui);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .field {
+    width: 100%;
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background-color: var(--surface);
+    color: var(--text);
+    font-family: var(--astro-font-ui);
+    /* 16px: smaller text makes iOS Safari zoom the page when the field is focused. */
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  /*
+   * Home page controls row (language, mode, duration or count, filter): every control keeps its
+   * 44px height but takes only the width of its content, so four controls fit one row on a phone.
+   */
+  .controls-row {
+    display: flex;
+    flex-wrap: wrap; /* last resort: only when the controls cannot fit one row (below about 340px) */
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .controls-row > .field {
+    flex: none;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .field-compact {
+    padding-inline: 0.375rem;
+  }
+
+  /*
+   * Time readout (spec 22.4). In Time mode the duration select and the countdown share one grid
+   * cell: the select keeps the cell's size, so the countdown is exactly as wide and high and the
+   * row never shifts when a test starts. While it runs the select is hidden (not focusable, not
+   * announced) and the countdown covers the cell.
+   */
+  .readout-slot {
+    display: inline-grid;
+    flex: none;
+  }
+
+  .readout-slot > * {
+    grid-area: 1 / 1;
+  }
+
+  .readout-slot > .field {
+    width: auto;
+  }
+
+  .readout-slot[data-running='true'] > .field {
+    visibility: hidden;
+  }
+
+  /* Read-only: no border and no arrow, so it does not look like something to tap. */
+  .time-readout {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding-inline: 0.375rem;
+    color: var(--accent);
+    font-family: var(--astro-font-ui);
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The Count mode variant: a small line below the controls row, not a control (no 44px target). */
+  .time-readout-line {
+    min-height: 1.5rem;
+    padding-inline: 0;
+  }
+
+  /*
+   * Progress bar of Time mode (spec 22.5), 8px high, right above the typing box. The fill is as wide
+   * as the track and slides left inside it (translateX), so its 2px on-primary border (needed in
+   * light mode: primary alone is only 1.2:1 against the page) is never stretched. The track is the
+   * surface with a 1px border-colored outline (an inset shadow, so the height stays 8px).
+   * `--bar-now` and `--bar-next` are the share of time left now and one second from now: while the
+   * test runs the fill moves to `--bar-next` over 1s, linear; at rest (ready) it shows
+   * `--bar-now` without animation, so Retry and Esc snap back to full.
+   */
+  .time-bar {
+    overflow: hidden;
+    flex: none;
+    height: 0.5rem;
+    border-radius: var(--radius-container);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  .time-bar-fill {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--time-bar-edge, var(--on-primary));
+    border-radius: var(--radius-container);
+    background-color: var(--primary);
+    transform: translateX(calc((var(--bar-now, 1) - 1) * 100%));
+  }
+
+  .time-bar-fill[data-running='true'] {
+    transform: translateX(calc((var(--bar-next, 1) - 1) * 100%));
+    transition: transform 1s linear;
+  }
+
+  /* Dark mode: primary is 10:1 against the surface, so the border is the fill color (no ring). */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .time-bar-fill {
+      --time-bar-edge: var(--primary);
+    }
+  }
+
+  :root[data-theme='dark'] .time-bar-fill {
+    --time-bar-edge: var(--primary);
+  }
+
+  /* Reduced motion: no sliding; the bar steps once per second (it shows `--bar-now`). */
+  @media (prefers-reduced-motion: reduce) {
+    .time-bar-fill[data-running='true'] {
+      transform: translateX(calc((var(--bar-now, 1) - 1) * 100%));
+      transition: none;
+    }
+  }
+
+  .btn-icon {
+    gap: 0.25rem;
+    padding-inline: 0.625rem;
+  }
+}
+
+/*
+ * Typing caret. Shared by the typing area and the caret preview on the settings page: the element
+ * with `.caret` gets a pseudo-element, shaped by `data-caret-style` on a `.typing-text` ancestor.
+ */
+/* The caret is a pseudo-element, so it never changes the width of a character. */
+.caret {
+  position: relative;
+}
+
+.caret::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  background-color: var(--accent);
+  animation: caret-blink 1.2s ease-in-out infinite;
+}
+
+.typing-text[data-caret-style='line'] .caret::before {
+  top: 0.1em;
+  bottom: 0.1em;
+  left: 0;
+  width: 2px;
+}
+
+.typing-text[data-caret-style='underline'] .caret::before {
+  right: 0;
+  bottom: 0.05em;
+  left: 0;
+  height: 2px;
+}
+
+.typing-text[data-caret-style='block'] .caret::before {
+  inset: 0;
+  background-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+@keyframes caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  55%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+/* No blinking when reduced motion is requested: the caret stays fully visible. */
+@media (prefers-reduced-motion: reduce) {
+  .caret::before {
+    animation: none;
+  }
+}

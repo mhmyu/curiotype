@@ -1,0 +1,196 @@
+---
+import { Font, fontData } from 'astro:assets';
+import '@/styles/global.css';
+import LanguageSwitcher from '@/components/LanguageSwitcher.astro';
+import MainNav from '@/components/MainNav.astro';
+import PwaUpdater from '@/features/pwa/PwaUpdater.svelte';
+import { THEME_COLOR_DARK, THEME_COLOR_LIGHT } from '@/config/pwa';
+import { siteConfig } from '@/config/site';
+import { THEME_INIT_SCRIPT } from '@/features/settings/theme';
+import { hashInlineScript } from '@/lib/csp';
+import { LANGUAGES, getOgLocale } from '@/i18n/config';
+import type { Language } from '@/i18n/config';
+import { getDictionary, getLocalePath } from '@/i18n';
+import { getManifestPath } from '@/lib/manifest';
+import {
+  OG_IMAGE_SIZE,
+  buildAlternates,
+  buildWebApplicationJsonLd,
+  localeUrl,
+  ogImageUrl,
+  serializeJsonLd,
+} from '@/lib/seo';
+
+interface Props {
+  lang: Language;
+  title?: string;
+  description?: string;
+  /** Preload the latin file of the typing font; set it on pages that show the typing area. */
+  preloadTypingFont?: boolean;
+  /** Path of the page inside its language, without slashes ('' = home, 'settings'). Used for canonical and hreflang. */
+  path?: string;
+  /** Keep the page out of search results and skip canonical, hreflang and structured data (404). */
+  noindex?: boolean;
+  /** Add schema.org WebApplication data; set it on the home page only. */
+  jsonLd?: boolean;
+  /** Show the language switcher in the header (the 404 page has its own language links). */
+  showLanguageSwitcher?: boolean;
+  /** Show the main navigation in the header (the 404 page has no language of its own). */
+  showNav?: boolean;
+}
+
+const {
+  lang,
+  title,
+  description,
+  preloadTypingFont = false,
+  path = '',
+  noindex = false,
+  jsonLd = false,
+  showLanguageSwitcher = true,
+  showNav = true,
+} = Astro.props;
+const ui = getDictionary(lang);
+// The inline theme script is not bundled by Astro, so its hash is added to the CSP by hand,
+// computed from the same constant that is rendered below. `Astro.csp` does not exist in
+// `astro dev` (the policy is only produced by `build`), hence the optional call.
+Astro.csp?.insertScriptHash(hashInlineScript(THEME_INIT_SCRIPT));
+// The typing font has one file per subset (latin, latin-ext, vietnamese, cyrillic ...). Only the
+// first, latin, is preloaded: <Font preload> would preload every subset. The browser downloads
+// the others on demand through their `unicode-range`. The order follows LORA_SUBSETS.
+const typingFontPreloadUrl = preloadTypingFont
+  ? fontData['--astro-font-typing']?.[0]?.src[0]?.url
+  : undefined;
+// Sentence license (CC BY-SA 4.0, see LICENSE-CONTENT): link to the file in the repository when
+// it is configured, otherwise to the license text itself.
+const repoUrl = siteConfig.repoUrl;
+const licenseUrl = repoUrl
+  ? `${repoUrl}/blob/main/LICENSE-CONTENT`
+  : 'https://creativecommons.org/licenses/by-sa/4.0/';
+const pageTitle = title ? `${title} | ${ui.meta.siteName}` : ui.meta.siteName;
+const pageDescription = description ?? ui.meta.description;
+
+// Absolute URLs need the public origin (`SITE_URL` -> `Astro.site`). Without it the tags
+// that need one are left out; the rest of the SEO tags do not depend on it.
+const site = Astro.site;
+const canonicalUrl = site && !noindex ? localeUrl(site, lang, path) : undefined;
+const alternates = site && !noindex ? buildAlternates(site, path) : [];
+const otherLanguages = LANGUAGES.filter((code) => code !== lang);
+const structuredData =
+  site && jsonLd && !noindex
+    ? serializeJsonLd(
+        buildWebApplicationJsonLd({
+          site,
+          lang,
+          name: ui.meta.siteName,
+          description: pageDescription,
+        }),
+      )
+    : undefined;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Applies a saved light/dark choice before the first paint (no flash). Keep it first. -->
+    <script is:inline set:html={THEME_INIT_SCRIPT} />
+    <meta name="description" content={pageDescription} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href={getManifestPath(lang)} />
+    <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
+    {noindex && <meta name="robots" content="noindex" />}
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={ui.meta.siteName} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:locale" content={getOgLocale(lang)} />
+    {otherLanguages.map((code) => <meta property="og:locale:alternate" content={getOgLocale(code)} />)}
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+    {
+      site && (
+        <>
+          <meta property="og:image" content={ogImageUrl(site, lang)} />
+          <meta property="og:image:width" content={String(OG_IMAGE_SIZE.width)} />
+          <meta property="og:image:height" content={String(OG_IMAGE_SIZE.height)} />
+          <meta property="og:image:alt" content={ui.meta.siteName} />
+          <meta name="twitter:card" content="summary_large_image" />
+        </>
+      )
+    }
+    {structuredData && <script type="application/ld+json" set:html={structuredData} />}
+    <Font cssVariable="--astro-font-heading" preload />
+    <Font cssVariable="--astro-font-ui" preload />
+    <Font cssVariable="--astro-font-typing" />
+    {
+      typingFontPreloadUrl && (
+        <link rel="preload" href={typingFontPreloadUrl} as="font" type="font/woff2" crossorigin />
+      )
+    }
+    <title>{pageTitle}</title>
+  </head>
+  <body class="flex min-h-dvh flex-col bg-background text-text antialiased">
+    <header class="mx-auto flex w-full max-w-3xl flex-col gap-3 px-4 py-4">
+      <div class="flex items-center justify-between gap-4">
+        <a
+          href={getLocalePath(lang)}
+          class="inline-flex min-h-11 items-center font-heading text-h3 text-accent underline underline-offset-4"
+          >{ui.meta.siteName}</a
+        >
+        {showLanguageSwitcher && <LanguageSwitcher lang={lang} label={ui.nav.language} />}
+      </div>
+      {showNav && <MainNav lang={lang} ui={ui} current={path} />}
+    </header>
+    <main class="mx-auto w-full max-w-3xl flex-1 px-4 pb-10">
+      <slot />
+    </main>
+    <footer class="mx-auto w-full max-w-3xl px-4 pb-8 text-caption text-text-muted">
+      {
+        showNav && (
+          <nav aria-label={ui.footer.label} class="mb-3">
+            <ul class="flex flex-wrap gap-x-5 gap-y-1">
+              <li>
+                <a href={getLocalePath(lang, 'privacy')} class="inline-flex min-h-11 items-center text-accent underline">
+                  {ui.footer.privacy}
+                </a>
+              </li>
+              <li>
+                <a href={getLocalePath(lang, 'settings')} class="inline-flex min-h-11 items-center text-accent underline">
+                  {ui.nav.settings}
+                </a>
+              </li>
+              {repoUrl && (
+                <li>
+                  <a
+                    href={repoUrl}
+                    rel="noopener noreferrer"
+                    class="inline-flex min-h-11 items-center text-accent underline"
+                  >
+                    GitHub
+                  </a>
+                </li>
+              )}
+            </ul>
+          </nav>
+        )
+      }
+      <p>
+        {ui.footer.sentences}:
+        <a href={licenseUrl} rel="noopener noreferrer" class="text-accent underline">CC BY-SA 4.0</a>, typing
+        contributors
+      </p>
+    </footer>
+    <!-- Registers the service worker (production build only) and shows the update toast. -->
+    <PwaUpdater client:only="svelte" text={ui.pwa} />
+    <script>
+      // Cloudflare Web Analytics, loaded only when configured, in production and without DNT.
+      import { initAnalytics } from '@/lib/analytics';
+      initAnalytics();
+    </script>
+  </body>
+</html>

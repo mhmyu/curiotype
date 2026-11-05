@@ -1,0 +1,40 @@
+name: Wrong fact report
+description: Report a sentence whose fact is wrong, outdated or unclear
+title: "[Fact] "
+labels: ["fact-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping keep the sentences correct. You can write in English or Indonesian.
+        The sentence id is filled in when you come from the "Report" link on the site.
+  - type: input
+    id: sentence_id
+    attributes:
+      label: Sentence id
+      description: Shown in the title of this form when you use the "Report" link. It looks like `id-science-001`.
+      placeholder: id-science-001
+    validations:
+      required: true
+  - type: textarea
+    id: what-is-wrong
+    attributes:
+      label: What is wrong?
+      description: Which part of the sentence or its explanation is incorrect, outdated or misleading?
+    validations:
+      required: true
+  - type: textarea
+    id: correct-information
+    attributes:
+      label: What is correct?
+      description: The correct fact, in your own words. Leave it empty if you are not sure.
+    validations:
+      required: false
+  - type: input
+    id: source-url
+    attributes:
+      label: Source URL
+      description: A public page that states the correct fact. It helps us fix the sentence faster.
+      placeholder: https://
+    validations:
+      required: false

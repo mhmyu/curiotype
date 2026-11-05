@@ -1,0 +1,56 @@
+{
+  "lang": "es",
+  "category": "health",
+  "items": [
+    {
+      "id": "es-health-001",
+      "difficulty": "easy",
+      "text": "El jabón y el agua quitan muchos microbios de la piel de las manos.",
+      "explanation": "El jabón separa la suciedad y la grasa de la piel, y el agua las arrastra junto con muchos microbios.",
+      "source": {
+        "title": "Wikipedia: Lavado de manos",
+        "url": "https://es.wikipedia.org/wiki/Lavado_de_manos"
+      }
+    },
+    {
+      "id": "es-health-002",
+      "difficulty": "easy",
+      "text": "Los huesos dan forma al cuerpo y protegen los órganos blandos.",
+      "explanation": "El esqueleto humano también almacena minerales como el calcio y fabrica células de la sangre en la médula ósea.",
+      "source": {
+        "title": "Wikipedia: Hueso",
+        "url": "https://es.wikipedia.org/wiki/Hueso"
+      }
+    },
+    {
+      "id": "es-health-003",
+      "difficulty": "hard",
+      "text": "Los glóbulos rojos llevan oxígeno por todo el cuerpo con una proteína llamada hemoglobina, y un adulto produce más de 2 millones por segundo.",
+      "explanation": "La hemoglobina da su color a los glóbulos rojos y les permite llevar oxígeno desde los pulmones al resto del cuerpo.",
+      "source": {
+        "title": "Wikipedia: Glóbulo rojo",
+        "url": "https://es.wikipedia.org/wiki/Gl%C3%B3bulo_rojo"
+      }
+    },
+    {
+      "id": "es-health-004",
+      "difficulty": "hard",
+      "text": "La Organización Mundial de la Salud se fundó el 7 de abril de 1948, y cada año se celebra ese día el Día Mundial de la Salud.",
+      "explanation": "La Organización Mundial de la Salud es un organismo de las Naciones Unidas. Su constitución entró en vigor el 7 de abril de 1948.",
+      "source": {
+        "title": "Wikipedia: Organización Mundial de la Salud",
+        "url": "https://es.wikipedia.org/wiki/Organizaci%C3%B3n_Mundial_de_la_Salud"
+      }
+    },
+    {
+      "id": "es-health-005",
+      "difficulty": "hard",
+      "text": "Louis Pasteur, un químico francés, mostró en el siglo XIX que los microbios causan muchas enfermedades y que la pasteurización los reduce en los alimentos.",
+      "explanation": "Pasteur hizo experimentos en el siglo XIX que mostraron que ciertos microbios causan enfermedades, y la pasteurización reduce los microbios en alimentos como la leche.",
+      "source": {
+        "title": "Wikipedia: Louis Pasteur",
+        "url": "https://es.wikipedia.org/wiki/Louis_Pasteur"
+      }
+    }
+  ]
+}

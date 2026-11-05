@@ -1,0 +1,56 @@
+{
+  "lang": "en",
+  "category": "science",
+  "items": [
+    {
+      "id": "en-science-001",
+      "difficulty": "easy",
+      "text": "The Moon goes around the Earth about once a month.",
+      "explanation": "The Moon takes about 27 days to circle the Earth once, and about 29.5 days to go through all its phases.",
+      "source": {
+        "title": "Wikipedia: Moon",
+        "url": "https://en.wikipedia.org/wiki/Moon"
+      }
+    },
+    {
+      "id": "en-science-002",
+      "difficulty": "easy",
+      "text": "Green plants use sunlight to make food from air and water.",
+      "explanation": "Plants make sugar from carbon dioxide and water using light energy, and they release oxygen. This process is called photosynthesis.",
+      "source": {
+        "title": "Wikipedia: Photosynthesis",
+        "url": "https://en.wikipedia.org/wiki/Photosynthesis"
+      }
+    },
+    {
+      "id": "en-science-003",
+      "difficulty": "easy",
+      "text": "Sound needs something to travel through, like air or water.",
+      "explanation": "Sound is a vibration, so it needs a medium such as air, water, or a solid. It cannot travel through a vacuum.",
+      "source": {
+        "title": "Wikipedia: Sound",
+        "url": "https://en.wikipedia.org/wiki/Sound"
+      }
+    },
+    {
+      "id": "en-science-004",
+      "difficulty": "hard",
+      "text": "The speed of light in a vacuum is exactly 299,792,458 meters per second, which is why the meter is defined using it.",
+      "explanation": "Since 1983 the meter has been defined as the distance light travels in a vacuum in 1/299,792,458 of a second.",
+      "source": {
+        "title": "Wikipedia: Speed of light",
+        "url": "https://en.wikipedia.org/wiki/Speed_of_light"
+      }
+    },
+    {
+      "id": "en-science-005",
+      "difficulty": "hard",
+      "text": "Dmitri Mendeleev published his periodic table in 1869, and it left gaps for elements such as gallium and germanium, which were found later.",
+      "explanation": "Mendeleev arranged elements by atomic weight and predicted that missing ones existed. Gallium (1875) and germanium (1886) matched his predictions.",
+      "source": {
+        "title": "Wikipedia: Dmitri Mendeleev",
+        "url": "https://en.wikipedia.org/wiki/Dmitri_Mendeleev"
+      }
+    }
+  ]
+}

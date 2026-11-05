@@ -1,0 +1,56 @@
+{
+  "lang": "en",
+  "category": "technology",
+  "items": [
+    {
+      "id": "en-technology-001",
+      "difficulty": "easy",
+      "text": "A battery stores energy so a device can run without a plug.",
+      "explanation": "A battery turns stored chemical energy into electricity. Rechargeable ones can be used again after they are charged.",
+      "source": {
+        "title": "Wikipedia: Electric battery",
+        "url": "https://en.wikipedia.org/wiki/Electric_battery"
+      }
+    },
+    {
+      "id": "en-technology-002",
+      "difficulty": "easy",
+      "text": "A computer follows a list of steps called a program.",
+      "explanation": "A program is a set of instructions written in a programming language. The computer carries out the instructions one by one.",
+      "source": {
+        "title": "Wikipedia: Computer program",
+        "url": "https://en.wikipedia.org/wiki/Computer_program"
+      }
+    },
+    {
+      "id": "en-technology-003",
+      "difficulty": "easy",
+      "text": "A robot is a machine that can carry out tasks on its own.",
+      "explanation": "Robots range from factory arms to home vacuum cleaners. Many follow programs, and some use sensors to react to their surroundings.",
+      "source": {
+        "title": "Wikipedia: Robot",
+        "url": "https://en.wikipedia.org/wiki/Robot"
+      }
+    },
+    {
+      "id": "en-technology-004",
+      "difficulty": "hard",
+      "text": "The Voyager 1 probe, launched by NASA in 1977, is the farthest human-made object from Earth, more than 20 billion kilometers away.",
+      "explanation": "Voyager 1 left the Sun's heliosphere in 2012 and entered interstellar space. It carries a golden record with sounds and images of Earth.",
+      "source": {
+        "title": "Wikipedia: Voyager 1",
+        "url": "https://en.wikipedia.org/wiki/Voyager_1"
+      }
+    },
+    {
+      "id": "en-technology-005",
+      "difficulty": "hard",
+      "text": "Ada Lovelace wrote what is often called the first computer program in 1843, for Charles Babbage's Analytical Engine.",
+      "explanation": "Lovelace added notes to a paper about Babbage's machine. Her notes included an algorithm for computing Bernoulli numbers.",
+      "source": {
+        "title": "Wikipedia: Ada Lovelace",
+        "url": "https://en.wikipedia.org/wiki/Ada_Lovelace"
+      }
+    }
+  ]
+}

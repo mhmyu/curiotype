@@ -1,0 +1,41 @@
+---
+import type { Language } from '@/i18n/config';
+import { getLocalePath } from '@/i18n';
+import type { Dictionary } from '@/i18n/types';
+
+interface Props {
+  lang: Language;
+  ui: Dictionary;
+  /** Path of the current page inside its language ('' = home, 'stats', 'collection', 'settings'), as passed to BaseLayout. */
+  current: string;
+}
+
+const { lang, ui, current } = Astro.props;
+
+// One entry per page that exists. A new page adds a line here plus a `nav` label in the
+// dictionaries.
+const items = [
+  { path: '', label: ui.nav.home },
+  { path: 'stats', label: ui.nav.stats },
+  { path: 'collection', label: ui.nav.collection },
+  { path: 'settings', label: ui.nav.settings },
+];
+---
+
+<nav aria-label={ui.nav.main}>
+  <ul class="flex flex-wrap gap-2">
+    {
+      items.map((item) => (
+        <li>
+          <a
+            href={getLocalePath(lang, item.path)}
+            aria-current={item.path === current ? 'page' : undefined}
+            class="btn"
+          >
+            {item.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

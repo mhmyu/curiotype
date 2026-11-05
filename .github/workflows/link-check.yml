@@ -1,0 +1,62 @@
+name: Link check
+
+# Checks every source URL of the sentence corpus once a week (and on demand).
+# Broken links (404, 410, unknown host) fail the job and open or update ONE
+# issue labelled "content". Bot blocks, rate limits, and timeouts are only
+# listed as warnings. See MAINTAINING.md, "Handling reports".
+on:
+  schedule:
+    - cron: '17 4 * * 1' # Mondays, 04:17 UTC
+  workflow_dispatch:
+
+# Read the repository and write issues, nothing else.
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: link-check
+  cancel-in-progress: false
+
+jobs:
+  check-sources:
+    name: Check source links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # The script has no dependencies: Node runs the TypeScript file directly.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Check source links
+        id: check
+        run: node scripts/check-sources.ts --report link-check-report.md
+        continue-on-error: true
+
+      # Needs the "content" label to exist (MAINTAINING.md, section 1).
+      - name: Open or update the issue
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: 'Broken source links found by the link check'
+        run: |
+          number=$(gh issue list --label content --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number')
+          {
+            cat link-check-report.md
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "Fix or replace each source, then close this issue. The next run opens a new one if links are still broken."
+          } > issue-body.md
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file issue-body.md
+          else
+            gh issue create --title "$TITLE" --label content --body-file issue-body.md
+          fi
+
+      # Keep the run red when links are broken, so it is visible in the Actions tab.
+      - name: Fail when links are broken
+        if: steps.check.outcome == 'failure'
+        run: exit 1

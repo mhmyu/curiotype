@@ -1,0 +1,26 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { DEFAULT_LANGUAGE, LANGUAGES } from '@/i18n/config';
+import { getDictionary, getLocalePath } from '@/i18n';
+
+// One page for both languages: a static host serves a single 404 file for every unknown URL
+// and cannot tell which language the visitor wanted. Each block carries its own `lang`.
+const blocks = LANGUAGES.map((code) => ({ code, ui: getDictionary(code) }));
+const title = blocks.map(({ ui }) => ui.notFound.title).join(' / ');
+---
+
+<BaseLayout lang={DEFAULT_LANGUAGE} title={title} noindex showLanguageSwitcher={false} showNav={false}>
+  <div class="flex flex-col gap-8">
+    {
+      blocks.map(({ code, ui }) => (
+        <section lang={code} class="flex flex-col items-start gap-3">
+          <h1>{ui.notFound.title}</h1>
+          <p class="font-ui text-body-long text-text-muted">{ui.notFound.message}</p>
+          <a href={getLocalePath(code)} hreflang={code} class="btn btn-primary">
+            {ui.notFound.home}
+          </a>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>

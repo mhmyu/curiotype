@@ -1,0 +1,56 @@
+{
+  "lang": "id",
+  "category": "history",
+  "items": [
+    {
+      "id": "id-history-001",
+      "difficulty": "easy",
+      "text": "Roda ditemukan ribuan tahun lalu dan mengubah cara orang bepergian.",
+      "explanation": "Roda tertua yang diketahui berasal dari sekitar 3500 SM. Gerobak beroda segera memudahkan pengangkutan orang dan barang berat.",
+      "source": {
+        "title": "Wikipedia: Wheel",
+        "url": "https://en.wikipedia.org/wiki/Wheel"
+      }
+    },
+    {
+      "id": "id-history-002",
+      "difficulty": "easy",
+      "text": "Orang Mesir kuno membangun piramida besar dari batu untuk makam raja mereka.",
+      "explanation": "Piramida berfungsi sebagai makam raja. Piramida Agung Giza, yang dibangun sekitar 2600 SM, dibuat untuk Raja Khufu.",
+      "source": {
+        "title": "Wikipedia: Egyptian pyramids",
+        "url": "https://en.wikipedia.org/wiki/Egyptian_pyramids"
+      }
+    },
+    {
+      "id": "id-history-003",
+      "difficulty": "hard",
+      "text": "Tembok Berlin memisahkan Berlin Timur dan Berlin Barat dari tahun 1961 sampai dibuka pada 9 November 1989, dan Jerman bersatu lagi pada 1990.",
+      "explanation": "Tembok itu dibangun pada 13 Agustus 1961 oleh Jerman Timur. Setelah dibuka pada 1989, Jerman bersatu kembali pada 3 Oktober 1990.",
+      "source": {
+        "title": "Wikipedia: Berlin Wall",
+        "url": "https://en.wikipedia.org/wiki/Berlin_Wall"
+      }
+    },
+    {
+      "id": "id-history-004",
+      "difficulty": "hard",
+      "text": "Christopher Columbus menyeberangi Samudra Atlantik pada tahun 1492 dengan tiga kapal, yaitu Nina, Pinta, dan Santa Maria, atas nama Spanyol.",
+      "explanation": "Columbus mendarat di Bahama pada Oktober 1492. Pelayaran pertamanya dibiayai Kerajaan Spanyol dan ia berlayar dengan tiga kapal.",
+      "source": {
+        "title": "Wikipedia: Christopher Columbus",
+        "url": "https://en.wikipedia.org/wiki/Christopher_Columbus"
+      }
+    },
+    {
+      "id": "id-history-005",
+      "difficulty": "hard",
+      "text": "Magna Carta, yang disegel Raja John dari Inggris pada tahun 1215, membatasi kekuasaan raja dan menjadi tonggak penting dalam sejarah hukum.",
+      "explanation": "Piagam itu menyatakan bahwa raja pun harus menaati hukum. Piagam ini pertama kali diterbitkan pada Juni 1215 di Runnymede.",
+      "source": {
+        "title": "Wikipedia: Magna Carta",
+        "url": "https://en.wikipedia.org/wiki/Magna_Carta"
+      }
+    }
+  ]
+}

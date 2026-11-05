@@ -1,0 +1,56 @@
+{
+  "lang": "id",
+  "category": "health",
+  "items": [
+    {
+      "id": "id-health-001",
+      "difficulty": "easy",
+      "text": "Sabun dan air menghilangkan banyak kuman dari kulit tangan.",
+      "explanation": "Sabun mengangkat kotoran dan minyak dari kulit, lalu air membilasnya bersama banyak mikroba.",
+      "source": {
+        "title": "Wikipedia: Hand washing",
+        "url": "https://en.wikipedia.org/wiki/Hand_washing"
+      }
+    },
+    {
+      "id": "id-health-002",
+      "difficulty": "easy",
+      "text": "Tulang memberi bentuk pada tubuh dan melindungi organ yang lunak.",
+      "explanation": "Rangka manusia juga menyimpan mineral seperti kalsium dan membuat sel darah di dalam sumsum tulang.",
+      "source": {
+        "title": "Wikipedia: Bone",
+        "url": "https://en.wikipedia.org/wiki/Bone"
+      }
+    },
+    {
+      "id": "id-health-003",
+      "difficulty": "hard",
+      "text": "Sel darah merah membawa oksigen ke seluruh tubuh dengan bantuan protein bernama hemoglobin, dan tubuh orang dewasa membuat sekitar 2 juta sel baru setiap detik.",
+      "explanation": "Hemoglobin memberi warna pada sel darah merah dan memungkinkannya membawa oksigen dari paru-paru ke seluruh tubuh.",
+      "source": {
+        "title": "Wikipedia: Red blood cell",
+        "url": "https://en.wikipedia.org/wiki/Red_blood_cell"
+      }
+    },
+    {
+      "id": "id-health-004",
+      "difficulty": "hard",
+      "text": "Organisasi Kesehatan Dunia didirikan pada 7 April 1948, dan Hari Kesehatan Sedunia diperingati setiap tahun pada tanggal tersebut.",
+      "explanation": "Organisasi Kesehatan Dunia adalah badan Perserikatan Bangsa-Bangsa. Konstitusinya mulai berlaku pada 7 April 1948.",
+      "source": {
+        "title": "Wikipedia: World Health Organization",
+        "url": "https://en.wikipedia.org/wiki/World_Health_Organization"
+      }
+    },
+    {
+      "id": "id-health-005",
+      "difficulty": "hard",
+      "text": "Louis Pasteur, seorang ahli kimia Prancis, menunjukkan pada abad ke-19 bahwa mikroba menyebabkan banyak penyakit dan bahwa pasteurisasi mengurangi mikroba pada makanan.",
+      "explanation": "Pasteur dan Koch melakukan percobaan pada abad ke-19 yang menunjukkan bahwa mikroba tertentu menyebabkan penyakit tertentu, sehingga lahir kebersihan modern dan vaksin.",
+      "source": {
+        "title": "Wikipedia: Germ theory of disease",
+        "url": "https://en.wikipedia.org/wiki/Germ_theory_of_disease"
+      }
+    }
+  ]
+}

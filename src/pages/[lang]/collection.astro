@@ -1,0 +1,34 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { siteConfig } from '@/config/site';
+import CollectionPage from '@/features/favorites/CollectionPage.svelte';
+import { LANGUAGES } from '@/i18n/config';
+import type { Language } from '@/i18n/config';
+import { getDictionary } from '@/i18n';
+import { resolveContentLang } from '@/lib/content-langs';
+import { getContentLangs } from '@/lib/get-content-langs';
+
+export function getStaticPaths() {
+  return LANGUAGES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Language;
+const ui = getDictionary(lang);
+
+// Same rule as the home page: the sentence language starts as the interface language when it
+// has sentences, otherwise the default language (or the first one).
+const contentLangs = await getContentLangs();
+const contentLang = resolveContentLang(lang, contentLangs);
+---
+
+<BaseLayout lang={lang} path="collection" title={ui.collection.title} description={ui.collection.description}>
+  <h1 class="mb-6">{ui.collection.title}</h1>
+  <CollectionPage
+    client:load
+    lang={lang}
+    ui={ui}
+    contentLangs={contentLangs}
+    initialContentLang={contentLang}
+    repoUrl={siteConfig.repoUrl}
+  />
+</BaseLayout>

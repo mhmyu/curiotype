@@ -1,0 +1,68 @@
+/*
+ * Design tokens plus two typing-only tokens (typing-pending and
+ * typing-correct). Raw values only: Tailwind utilities
+ * are mapped to these variables in global.css.
+ *
+ * Mode selection:
+ *  - no data-theme: follows the system (prefers-color-scheme)
+ *  - data-theme="light" | "dark": explicit choice (set by the theme setting, T14)
+ * The dark values appear twice (system dark and explicit dark) because CSS has
+ * no way to share one block between a media query and an attribute selector;
+ * tokens.test.ts checks that both copies stay identical and that every pair
+ * keeps its contrast ratio.
+ */
+:root {
+  color-scheme: light dark;
+
+  --primary: #a5ed6e;
+  --on-primary: #111111;
+  --background: #ddf4ff;
+  --surface: #ffffff;
+  --text: #3c3c3c;
+  --text-muted: #5c5c5c;
+  --accent: #0b6fb3;
+  --error: #b3261e;
+  --border: #6b7f8c;
+  --typing-pending: #727272;
+  --typing-correct: #111111;
+  /* Cards: a soft shadow in light mode; in dark mode a 1px border instead, because shadows barely show. */
+  --card-shadow: 0 0 5px rgb(60 60 60 / 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --primary: #a5ed6e;
+    --on-primary: #111111;
+    --background: #0f1c26;
+    --surface: #192a37;
+    --text: #e8eef2;
+    --text-muted: #a3b4c0;
+    --accent: #5cc4ff;
+    --error: #ff9a94;
+    --border: #6f8798;
+    --typing-pending: #7f94a5;
+    --typing-correct: #f4f8fa;
+    --card-shadow: 0 0 0 1px var(--border);
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --primary: #a5ed6e;
+  --on-primary: #111111;
+  --background: #0f1c26;
+  --surface: #192a37;
+  --text: #e8eef2;
+  --text-muted: #a3b4c0;
+  --accent: #5cc4ff;
+  --error: #ff9a94;
+  --border: #6f8798;
+  --typing-pending: #7f94a5;
+  --typing-correct: #f4f8fa;
+  --card-shadow: 0 0 0 1px var(--border);
+}

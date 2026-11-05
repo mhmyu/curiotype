@@ -1,0 +1,78 @@
+name: Sentence suggestion
+description: Suggest a new sentence to type (no coding needed)
+title: "[Sentence] "
+labels: ["content"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you! Please read `CONTENT_GUIDE.md` in the repository first.
+        You can write in English or Indonesian.
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options:
+        - Indonesian (id)
+        - English (en)
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - science
+        - history
+        - technology
+        - health
+    validations:
+      required: true
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty
+      description: Your best guess (short and plain = easy; long, or with numbers, names and symbols = hard). The build measures it, and a maintainer will set it from the score.
+      options:
+        - easy
+        - hard
+    validations:
+      required: true
+  - type: textarea
+    id: sentence
+    attributes:
+      label: Sentence
+      description: One sentence, one fact, in your own words, keyboard characters only.
+    validations:
+      required: true
+  - type: textarea
+    id: explanation
+    attributes:
+      label: Explanation
+      description: One or two sentences of extra context shown after the test. Do not repeat the sentence.
+    validations:
+      required: true
+  - type: input
+    id: source-title
+    attributes:
+      label: Source title
+      placeholder: "Publisher: Page title"
+    validations:
+      required: true
+  - type: input
+    id: source-url
+    attributes:
+      label: Source URL
+      description: A public page that states this exact fact.
+      placeholder: https://
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: The wording is my own, and I checked that the source states this fact.
+          required: true
+        - label: If an AI tool helped, I verified the fact myself.
+          required: true

@@ -1,0 +1,56 @@
+{
+  "lang": "es",
+  "category": "technology",
+  "items": [
+    {
+      "id": "es-technology-001",
+      "difficulty": "easy",
+      "text": "Un teclado sirve para escribir letras y números en una computadora.",
+      "explanation": "Un teclado envía a la computadora una señal por cada tecla que se pulsa. La distribución más común se llama QWERTY.",
+      "source": {
+        "title": "Wikipedia: Teclado (informática)",
+        "url": "https://es.wikipedia.org/wiki/Teclado_(inform%C3%A1tica)"
+      }
+    },
+    {
+      "id": "es-technology-002",
+      "difficulty": "easy",
+      "text": "Un programa es una lista de pasos que sigue la computadora.",
+      "explanation": "Un programa es un conjunto de instrucciones escritas en un lenguaje de programación. La computadora las ejecuta una por una.",
+      "source": {
+        "title": "Wikipedia: Programa informático",
+        "url": "https://es.wikipedia.org/wiki/Programa_inform%C3%A1tico"
+      }
+    },
+    {
+      "id": "es-technology-003",
+      "difficulty": "easy",
+      "text": "Un robot es una máquina que puede hacer tareas por sí sola.",
+      "explanation": "Hay robots desde brazos de fábrica hasta aspiradoras domésticas. Muchos siguen programas y algunos usan sensores para reaccionar a su entorno.",
+      "source": {
+        "title": "Wikipedia: Robot",
+        "url": "https://es.wikipedia.org/wiki/Robot"
+      }
+    },
+    {
+      "id": "es-technology-004",
+      "difficulty": "hard",
+      "text": "La sonda Voyager 1, lanzada por la NASA en 1977, es el objeto humano más lejano de la Tierra, a más de 20.000 millones de kilómetros.",
+      "explanation": "Voyager 1 salió de la heliosfera del Sol en 2012 y entró en el espacio interestelar. Lleva un disco de oro con sonidos e imágenes de la Tierra.",
+      "source": {
+        "title": "Wikipedia: Voyager 1",
+        "url": "https://es.wikipedia.org/wiki/Voyager_1"
+      }
+    },
+    {
+      "id": "es-technology-005",
+      "difficulty": "hard",
+      "text": "Ada Lovelace escribió en 1843 lo que se considera el primer programa de computadora, pensado para la máquina analítica de Charles Babbage.",
+      "explanation": "Lovelace añadió notas a un artículo sobre la máquina de Babbage. Sus notas incluían un algoritmo para calcular números de Bernoulli.",
+      "source": {
+        "title": "Wikipedia: Ada Lovelace",
+        "url": "https://es.wikipedia.org/wiki/Ada_Lovelace"
+      }
+    }
+  ]
+}

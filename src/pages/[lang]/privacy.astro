@@ -1,0 +1,69 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { DATA_KEY_LABELS, DATA_KINDS } from '@/features/data-tools/data-schema';
+import { siteConfig } from '@/config/site';
+import { LANGUAGES } from '@/i18n/config';
+import type { Language } from '@/i18n/config';
+import { getDictionary, getLocalePath } from '@/i18n';
+
+export function getStaticPaths() {
+  return LANGUAGES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Language;
+const ui = getDictionary(lang);
+const text = ui.privacy;
+
+// The text is written from the dictionary, and the list of stored data comes from the same list
+// the export and import use (DATA_KINDS), so the page cannot forget a kind of data.
+const sections = [
+  { title: text.localTitle, body: text.localBody },
+  { title: text.noCookiesTitle, body: text.noCookiesBody },
+  { title: text.analyticsTitle, body: siteConfig.analyticsToken ? text.analyticsOn : text.analyticsOff },
+  { title: text.thirdPartyTitle, body: text.thirdPartyBody },
+];
+---
+
+<BaseLayout lang={lang} path="privacy" title={text.title} description={text.description}>
+  <h1 class="mb-6">{text.title}</h1>
+  <div class="flex flex-col gap-8">
+    <section class="flex flex-col gap-3" aria-labelledby="privacy-local">
+      <h2 id="privacy-local">{sections[0].title}</h2>
+      <p class="text-body-long">{sections[0].body}</p>
+    </section>
+
+    <section class="flex flex-col gap-3" aria-labelledby="privacy-stored">
+      <h2 id="privacy-stored">{text.storedTitle}</h2>
+      <p class="text-body-long">{text.storedIntro}</p>
+      <dl class="card flex flex-col gap-4 p-5">
+        {
+          DATA_KINDS.map((kind) => (
+            <div class="flex flex-col gap-1">
+              <dt class="break-all text-ui text-accent">{DATA_KEY_LABELS[kind]}</dt>
+              <dd class="text-body-long">{text.data[kind]}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    {
+      sections.slice(1).map((section, index) => (
+        <section class="flex flex-col gap-3" aria-labelledby={`privacy-section-${index}`}>
+          <h2 id={`privacy-section-${index}`}>{section.title}</h2>
+          <p class="text-body-long">{section.body}</p>
+        </section>
+      ))
+    }
+
+    <section class="flex flex-col gap-3" aria-labelledby="privacy-control">
+      <h2 id="privacy-control">{text.controlTitle}</h2>
+      <p class="text-body-long">{text.controlBody}</p>
+      <p>
+        <a href={getLocalePath(lang, 'settings')} class="inline-flex min-h-11 items-center text-accent underline">
+          {text.controlLink}
+        </a>
+      </p>
+    </section>
+  </div>
+</BaseLayout>

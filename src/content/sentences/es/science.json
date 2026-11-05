@@ -1,0 +1,56 @@
+{
+  "lang": "es",
+  "category": "science",
+  "items": [
+    {
+      "id": "es-science-001",
+      "difficulty": "easy",
+      "text": "La Luna tarda casi un mes en dar una vuelta alrededor de la Tierra.",
+      "explanation": "La Luna tarda unos 27 días en dar una vuelta a la Tierra y unos 29,5 días en pasar por todas sus fases.",
+      "source": {
+        "title": "Wikipedia: Luna",
+        "url": "https://es.wikipedia.org/wiki/Luna"
+      }
+    },
+    {
+      "id": "es-science-002",
+      "difficulty": "easy",
+      "text": "Las plantas usan la luz del sol para producir su propio alimento.",
+      "explanation": "Las plantas fabrican azúcar con dióxido de carbono, agua y energía de la luz, y liberan oxígeno. Este proceso se llama fotosíntesis.",
+      "source": {
+        "title": "Wikipedia: Fotosíntesis",
+        "url": "https://es.wikipedia.org/wiki/Fotos%C3%ADntesis"
+      }
+    },
+    {
+      "id": "es-science-003",
+      "difficulty": "easy",
+      "text": "El sonido se propaga más rápido en el agua que en el aire que respiramos.",
+      "explanation": "El sonido es una vibración y se propaga más rápido en el agua (unos 1.500 m/s) que en el aire (unos 343 m/s).",
+      "source": {
+        "title": "Wikipedia: Sonido",
+        "url": "https://es.wikipedia.org/wiki/Sonido"
+      }
+    },
+    {
+      "id": "es-science-004",
+      "difficulty": "hard",
+      "text": "La velocidad de la luz en el vacío es exactamente de 299.792.458 metros por segundo, y con ese valor se define el metro.",
+      "explanation": "Desde 1983 el metro se define como la distancia que recorre la luz en el vacío en 1/299.792.458 de segundo.",
+      "source": {
+        "title": "Wikipedia: Velocidad de la luz",
+        "url": "https://es.wikipedia.org/wiki/Velocidad_de_la_luz"
+      }
+    },
+    {
+      "id": "es-science-005",
+      "difficulty": "hard",
+      "text": "Dmitri Mendeléyev publicó su tabla periódica en 1869, y dejó huecos para elementos como el galio y el germanio, descubiertos después.",
+      "explanation": "Mendeléyev ordenó los elementos por su masa atómica y predijo que faltaban algunos. El galio (1875) y el germanio (1886) confirmaron sus predicciones.",
+      "source": {
+        "title": "Wikipedia: Tabla periódica de los elementos",
+        "url": "https://es.wikipedia.org/wiki/Tabla_peri%C3%B3dica_de_los_elementos"
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "lang": "en",
+  "category": "health",
+  "items": [
+    {
+      "id": "en-health-001",
+      "difficulty": "easy",
+      "text": "Soap and water remove many germs from the skin of your hands.",
+      "explanation": "Soap lifts dirt and oils off the skin, and the water washes them away together with many microbes.",
+      "source": {
+        "title": "Wikipedia: Hand washing",
+        "url": "https://en.wikipedia.org/wiki/Hand_washing"
+      }
+    },
+    {
+      "id": "en-health-002",
+      "difficulty": "easy",
+      "text": "Bones give the body its shape and protect soft organs inside.",
+      "explanation": "The human skeleton also stores minerals such as calcium and makes blood cells inside the bone marrow.",
+      "source": {
+        "title": "Wikipedia: Bone",
+        "url": "https://en.wikipedia.org/wiki/Bone"
+      }
+    },
+    {
+      "id": "en-health-003",
+      "difficulty": "hard",
+      "text": "Red blood cells carry oxygen with a protein called hemoglobin, and an adult body makes about 2 million new ones every second.",
+      "explanation": "Hemoglobin gives red blood cells their color and lets them carry oxygen from the lungs to the rest of the body.",
+      "source": {
+        "title": "Wikipedia: Red blood cell",
+        "url": "https://en.wikipedia.org/wiki/Red_blood_cell"
+      }
+    },
+    {
+      "id": "en-health-004",
+      "difficulty": "hard",
+      "text": "The World Health Organization was founded on 7 April 1948, and World Health Day is observed every year on that date.",
+      "explanation": "The World Health Organization is a United Nations agency. Its constitution came into force on 7 April 1948.",
+      "source": {
+        "title": "Wikipedia: World Health Organization",
+        "url": "https://en.wikipedia.org/wiki/World_Health_Organization"
+      }
+    },
+    {
+      "id": "en-health-005",
+      "difficulty": "hard",
+      "text": "Louis Pasteur and Robert Koch helped prove in the 1800s that many diseases are caused by microorganisms, not by bad air.",
+      "explanation": "Pasteur and Koch ran experiments in the 1800s that showed specific microbes cause specific diseases, which led to modern hygiene and vaccines.",
+      "source": {
+        "title": "Wikipedia: Germ theory of disease",
+        "url": "https://en.wikipedia.org/wiki/Germ_theory_of_disease"
+      }
+    }
+  ]
+}

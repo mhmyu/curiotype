@@ -1,0 +1,56 @@
+{
+  "lang": "en",
+  "category": "history",
+  "items": [
+    {
+      "id": "en-history-001",
+      "difficulty": "easy",
+      "text": "The wheel was invented thousands of years ago and changed how people travel.",
+      "explanation": "The oldest known wheels date from around 3500 BC. Wheeled carts soon made it easier to move people and heavy loads.",
+      "source": {
+        "title": "Wikipedia: Wheel",
+        "url": "https://en.wikipedia.org/wiki/Wheel"
+      }
+    },
+    {
+      "id": "en-history-002",
+      "difficulty": "easy",
+      "text": "Ancient Egyptians built huge stone pyramids as tombs for their kings.",
+      "explanation": "The pyramids served as royal tombs. The Great Pyramid of Giza, built around 2600 BC, was made for King Khufu.",
+      "source": {
+        "title": "Wikipedia: Egyptian pyramids",
+        "url": "https://en.wikipedia.org/wiki/Egyptian_pyramids"
+      }
+    },
+    {
+      "id": "en-history-003",
+      "difficulty": "hard",
+      "text": "The Berlin Wall divided East and West Berlin from 1961 until it was opened on 9 November 1989, and Germany reunified in 1990.",
+      "explanation": "The wall was built on 13 August 1961 by East Germany. After it opened in 1989, Germany was reunified on 3 October 1990.",
+      "source": {
+        "title": "Wikipedia: Berlin Wall",
+        "url": "https://en.wikipedia.org/wiki/Berlin_Wall"
+      }
+    },
+    {
+      "id": "en-history-004",
+      "difficulty": "hard",
+      "text": "Christopher Columbus crossed the Atlantic in 1492 with three ships, the Nina, the Pinta, and the Santa Maria, sailing for Spain.",
+      "explanation": "Columbus landed in the Bahamas in October 1492. His first voyage was funded by the Spanish crown and he sailed with three ships.",
+      "source": {
+        "title": "Wikipedia: Christopher Columbus",
+        "url": "https://en.wikipedia.org/wiki/Christopher_Columbus"
+      }
+    },
+    {
+      "id": "en-history-005",
+      "difficulty": "hard",
+      "text": "The Magna Carta, sealed by King John of England in 1215, limited the power of the king and is a landmark in the history of law.",
+      "explanation": "The charter said that even the king had to follow the law. It was first issued in June 1215 at Runnymede.",
+      "source": {
+        "title": "Wikipedia: Magna Carta",
+        "url": "https://en.wikipedia.org/wiki/Magna_Carta"
+      }
+    }
+  ]
+}
