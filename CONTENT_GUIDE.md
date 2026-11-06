@@ -137,6 +137,7 @@ Current categories: `science`, `history`, `technology`, `health` (see `src/lib/t
 
 - Pick the single best fit. If a sentence could be two categories, choose the one a reader would expect.
 - Spread topics inside a category: for science, mix astronomy, biology, physics, chemistry and earth science rather than five space facts.
+- **To add a category**, run `pnpm content:add-category <name> --id "<label>" --en "<label>"` (for example `pnpm content:add-category geography --id Geografi --en Geography`; `--langs id,en` limits the languages that get a file). It adds the name to `CATEGORIES` in `src/lib/taxonomy.ts`, the label to every interface dictionary in `src/i18n/ui/`, and a file `<lang>/<name>.json` with one placeholder sentence for each sentence language. Nothing is written if a check fails, and no existing file is overwritten. Then replace the placeholder with a real sentence (`pnpm build` fails while `REPLACE_ME` is left, on purpose, so a skeleton cannot be published), delete the file of a language that will not have the category yet, and run `pnpm content:stats --scores && pnpm check && pnpm build`. Fill each language with about 20 sentences before launching the category.
 - Indonesian and English files are **independent**. A sentence does not need a translation in the other language, and local topics (Indonesian history, geography, culture) are welcome in either.
 
 ## 7. Review checklist
@@ -174,6 +175,7 @@ Two more tools help the owner, outside the build: `pnpm content:stats` shows how
 | Text length for its language; `difficulty` equals the level of the score | The fact is true and timeless       |
 | Allowed characters of the language (ASCII unless it has a rule), Unicode NFC, single spaces, ends with a full stop | The source really states the fact          |
 | Explanation length (40-220)                                       | The explanation adds new information       |
+| No leftover `REPLACE_ME` placeholder (from `pnpm content:add-category`) | Whether a new category fits the site |
 | Id format and uniqueness, `lang`/`category` match the file path   | Topic variety, tone, wording               |
 | No duplicate text (case-insensitive)                              | Originality of the wording                 |
 | Source title format and `https://` URL (not that the link opens)  | Neutrality, no advice or sensitive topics  |

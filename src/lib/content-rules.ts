@@ -1,6 +1,7 @@
 import type { ContentLang } from '../i18n/config';
 import { DIFFICULTY_THRESHOLDS, getDifficultyThreshold, scoreSentence } from './difficulty';
 import type { DifficultyThresholds } from './difficulty';
+import { PLACEHOLDER_MARKER, hasPlaceholder } from './placeholder';
 import type { Category, Difficulty } from './taxonomy';
 
 /**
@@ -199,6 +200,13 @@ export function checkSentence(
   const problems: string[] = [];
   const label = `"${item.id}"`;
   const { text } = item;
+
+  // A skeleton from `pnpm content:add-category`: report only this, the other rules would be noise.
+  if (hasPlaceholder(item.id, text, item.explanation, item.source.title, item.source.url)) {
+    return [
+      `${label}: still contains the ${PLACEHOLDER_MARKER} placeholder. Write the sentence, its explanation and its source, or delete the file if this language will not have the category yet.`,
+    ];
+  }
 
   if (!new RegExp(`^${escapeRegExp(lang)}-${category}-\\d{3}$`).test(item.id)) {
     problems.push(`${label}: id must look like "${lang}-${category}-001".`);

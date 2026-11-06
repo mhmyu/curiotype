@@ -24,7 +24,8 @@
     "test:e2e": "playwright test",
     "assets:generate": "node scripts/generate-assets.mjs",
     "content:stats": "node scripts/content-stats.ts",
-    "content:check-sources": "node scripts/check-sources.ts"
+    "content:check-sources": "node scripts/check-sources.ts",
+    "content:add-category": "node scripts/add-category.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

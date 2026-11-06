@@ -508,3 +508,29 @@ describe('draft languages: character rules (spec 21.2)', () => {
     }
   });
 });
+
+describe('placeholder skeletons', () => {
+  it('rejects any sentence that still contains the placeholder, with one clear message', () => {
+    const problems = checkSentence(
+      'en',
+      'science',
+      validItem({ text: 'REPLACE_ME: write one sentence here.', difficulty: 'easy' }),
+    );
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain('"en-science-001"');
+    expect(problems[0]).toContain('REPLACE_ME');
+  });
+
+  it.each(['explanation', 'source title', 'source url'])('also finds it in the %s', (field) => {
+    const marker = 'REPLACE_ME';
+    const item = validItem();
+    if (field === 'explanation') item.explanation = marker + 'x'.repeat(60);
+    if (field === 'source title') item.source = { ...item.source, title: `${marker}: Publisher: Page` };
+    if (field === 'source url') item.source = { ...item.source, url: `https://example.org/${marker}` };
+    expect(checkSentence('en', 'science', item)).toHaveLength(1);
+  });
+
+  it('does not report a normal sentence', () => {
+    expect(checkSentence('en', 'science', validItem())).toEqual([]);
+  });
+});

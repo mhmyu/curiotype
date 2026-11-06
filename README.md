@@ -50,6 +50,7 @@ Before the browser tests run for the first time: `pnpm exec playwright install c
 | `pnpm test:run`| Run unit tests once (used by CI)        |
 | `pnpm test:e2e`| Run browser tests (build first)         |
 | `pnpm assets:generate` | Regenerate favicon, icons and Open Graph images |
+| `pnpm content:add-category <name> --id "<label>" --en "<label>"` | Add a sentence category: updates the category list and both labels and creates a placeholder file per language (see `CONTENT_GUIDE.md`) |
 | `pnpm content:stats` | Count sentences per language, category and difficulty; show the score spread (`--scores`: the score and level of every sentence); warn below 100 or off 50/50 |
 | `pnpm content:check-sources` | Request every source URL and report broken links (needs a network) |
 
@@ -102,7 +103,7 @@ src/
   styles/                                    # global.css (Tailwind mapping, type scale, base rules), tokens.css (colors)
 public/                                      # favicon.svg, apple-touch-icon.png, icons/, og/ (generated; see "Brand assets" in `ARCHITECTURE.md`), _headers (host headers; see "Deploy" in `ARCHITECTURE.md`)
 scripts/generate-assets.mjs                  # draws the brand assets from the design palette
-scripts/content-stats.ts, check-sources.ts   # content tools (`pnpm content:stats`, `pnpm content:check-sources`); read-corpus.ts is their shared file reader
+scripts/content-stats.ts, check-sources.ts, add-category.ts   # content tools (`pnpm content:stats`, `pnpm content:check-sources`, `pnpm content:add-category`); read-corpus.ts is their shared file reader
 tests/e2e/                                   # Playwright browser tests
 .github/                                     # CI workflow, issue and pull request templates, dependabot.yml
 ARCHITECTURE.md CONTENT_GUIDE.md CONTRIBUTING.md   # technical notes; sentence writing rules; how to contribute
