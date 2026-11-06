@@ -22,15 +22,15 @@ const items = [
 ];
 ---
 
-<nav aria-label={ui.nav.main}>
-  <ul class="flex flex-wrap gap-2">
+<nav aria-label={ui.nav.main} class="main-nav">
+  <ul class="menu-list">
     {
       items.map((item) => (
         <li>
           <a
             href={getLocalePath(lang, item.path)}
             aria-current={item.path === current ? 'page' : undefined}
-            class="btn"
+            class="menu-link"
           >
             {item.label}
           </a>

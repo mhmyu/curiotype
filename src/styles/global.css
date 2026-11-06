@@ -384,6 +384,231 @@
     gap: 0.25rem;
     padding-inline: 0.625rem;
   }
+
+  /*
+   * Site header and main menu. The menu items are plain navigation links, not buttons: no fill and
+   * no border, the current page is marked by `aria-current` with accent text and an underline bar
+   * (so it never depends on color alone), and hover only changes the text color. Mobile first:
+   * below `md` (48rem) the menu is a panel under the bar, opened by the hamburger button
+   * (`aria-expanded`, see SiteHeader.astro); from `md` it sits in the bar next to the logo, with the
+   * language links at the right end. All targets are at least 44px tall.
+   */
+  .site-header {
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--surface);
+  }
+
+  .site-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    border-radius: 12px;
+    color: var(--text);
+    font-family: var(--astro-font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 12px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 300ms ease;
+  }
+
+  .menu-toggle[aria-expanded='true'] {
+    background-color: color-mix(in srgb, var(--text) 10%, transparent);
+  }
+
+  .menu-toggle .icon-close,
+  .menu-toggle[aria-expanded='true'] .icon-open {
+    display: none;
+  }
+
+  .menu-toggle[aria-expanded='true'] .icon-close {
+    display: block;
+  }
+
+  .site-menu {
+    display: none;
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    z-index: 30;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--surface);
+    box-shadow: var(--card-shadow);
+  }
+
+  .site-menu[data-open='true'] {
+    display: block;
+  }
+
+  .site-menu-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-inline: auto;
+    max-width: 48rem;
+    padding: 0.5rem 1rem 1rem;
+  }
+
+  .menu-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .menu-link {
+    --menu-pad: 0.75rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 3rem;
+    padding-inline: var(--menu-pad);
+    color: var(--text);
+    font-family: var(--astro-font-ui);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    transition: color 300ms ease;
+  }
+
+  /* The current-page bar sits under the text, inside the padding. */
+  .menu-link::after {
+    content: '';
+    position: absolute;
+    inset-inline: var(--menu-pad);
+    bottom: 0.375rem;
+    height: 2px;
+    border-radius: 2px;
+    background-color: transparent;
+    transition: background-color 300ms ease;
+  }
+
+  .menu-link[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  .menu-link[aria-current='page']::after {
+    background-color: var(--accent);
+  }
+
+  @media (hover: hover) {
+    .menu-link:hover {
+      color: var(--accent);
+    }
+
+    .menu-link:not([aria-current='page']):hover::after {
+      background-color: var(--border);
+    }
+
+    .site-brand:hover {
+      color: var(--accent);
+    }
+
+    .menu-toggle:hover {
+      background-color: color-mix(in srgb, var(--text) 10%, transparent);
+    }
+  }
+
+  /* In the small-screen panel the main links line up with the logo (no side padding). */
+  .main-nav .menu-link {
+    --menu-pad: 0;
+  }
+
+  .language-nav {
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
+  }
+
+  .language-label {
+    display: block;
+    padding-block: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .language-nav .menu-list {
+    flex-direction: row;
+    gap: 0.25rem;
+  }
+
+  .language-nav .menu-link {
+    justify-content: center;
+    min-width: 2.75rem;
+  }
+
+  @media (min-width: 48rem) {
+    .menu-toggle {
+      display: none;
+    }
+
+    .site-menu {
+      position: static;
+      display: block;
+      flex: 1;
+      border: 0;
+      background: none;
+      box-shadow: none;
+    }
+
+    .site-menu-inner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 0;
+      max-width: none;
+      padding: 0;
+    }
+
+    .menu-list {
+      flex-direction: row;
+      gap: 0.125rem;
+    }
+
+    .menu-link {
+      min-height: 2.75rem;
+    }
+
+    .main-nav .menu-link {
+      --menu-pad: 0.5rem;
+    }
+
+    .language-nav {
+      margin: 0;
+      border: 0;
+      padding: 0;
+    }
+
+    /* The caption stays for screen readers only. */
+    .language-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
 }
 
 /*

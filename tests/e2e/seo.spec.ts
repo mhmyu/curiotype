@@ -15,7 +15,9 @@ for (const { code, ui, ogLocale, otherOgLocale } of LANGUAGES) {
     await page.goto(`/${code}/`);
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', ui.meta.description);
     await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
-    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', ui.meta.siteName);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', ui.meta.homeTitle);
+    await expect(page).toHaveTitle(ui.meta.homeTitle);
+    expect(ui.meta.homeTitle.length).toBeLessThanOrEqual(60);
     await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', ui.meta.description);
     await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute('content', ogLocale);
     await expect(page.locator('meta[property="og:locale:alternate"]')).toHaveAttribute('content', otherOgLocale);

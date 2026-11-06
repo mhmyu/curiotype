@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { en } from '../../src/i18n/ui/en';
+import { openMainNav } from './helpers';
 
 const HISTORY_KEY = 'typing:history:v1';
 const BESTS_KEY = 'typing:personal-bests:v1';
@@ -91,10 +92,11 @@ async function expectNoHorizontalScroll(page: Page) {
 
 test('the statistics page is in the navigation and explains an empty history', async ({ page }) => {
   await page.goto('/en/');
-  const nav = page.getByRole('navigation', { name: en.nav.main });
+  let nav = await openMainNav(page);
   await nav.getByRole('link', { name: en.nav.stats }).click();
 
   await expect(page).toHaveURL(/\/en\/stats\/$/);
+  nav = await openMainNav(page);
   await expect(nav.getByRole('link', { name: en.nav.stats })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('heading', { level: 1, name: en.stats.title })).toBeVisible();
   await expect(page.getByTestId('stats-empty')).toHaveText(en.stats.emptyHistory);

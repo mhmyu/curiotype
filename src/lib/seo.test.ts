@@ -45,13 +45,13 @@ describe('buildWebApplicationJsonLd', () => {
     const data = buildWebApplicationJsonLd({
       site: SITE,
       lang: 'en',
-      name: 'Typing Knowledge',
+      name: 'curiotype',
       description: 'A typing test.',
     });
     expect(data).toMatchObject({
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'Typing Knowledge',
+      name: 'curiotype',
       url: 'https://typing.example.com/en/',
       inLanguage: 'en-US',
       isAccessibleForFree: true,

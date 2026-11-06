@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { en } from '../../src/i18n/ui/en';
-import { chooseMode, contentLangSelect } from './helpers';
+import { chooseMode, contentLangSelect, openMainNav } from './helpers';
 
 const FAVORITES_KEY_EN = 'typing:favorites:v1:en';
 const FAVORITES_KEY_ID = 'typing:favorites:v1:id';
@@ -52,9 +52,10 @@ test('a sentence saved with the star shows in the collection and can be removed'
   expect(stored[0].id).toMatch(/^en-[a-z]+-\d{3}$/);
 
   // The collection lists it; the navigation marks the page as current.
-  const nav = page.getByRole('navigation', { name: en.nav.main });
+  let nav = await openMainNav(page);
   await nav.getByRole('link', { name: en.nav.collection }).click();
   await expect(page).toHaveURL(/\/en\/collection\/$/);
+  nav = await openMainNav(page);
   await expect(nav.getByRole('link', { name: en.nav.collection })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('heading', { level: 1, name: en.collection.title })).toBeVisible();
   await expect(page.getByText(target, { exact: true })).toBeVisible();

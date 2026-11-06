@@ -1,0 +1,103 @@
+---
+import type { Language } from '@/i18n/config';
+import { getLocalePath } from '@/i18n';
+import type { Dictionary } from '@/i18n/types';
+import LanguageSwitcher from '@/components/LanguageSwitcher.astro';
+import MainNav from '@/components/MainNav.astro';
+
+interface Props {
+  lang: Language;
+  ui: Dictionary;
+  /** Path of the current page inside its language ('' = home), as passed to BaseLayout. */
+  current: string;
+  showLanguageSwitcher: boolean;
+  showNav: boolean;
+}
+
+const { lang, ui, current, showLanguageSwitcher, showNav } = Astro.props;
+const hasMenu = showNav || showLanguageSwitcher;
+---
+
+<header class="site-header" data-site-header>
+  <div class="mx-auto flex w-full max-w-3xl items-center gap-x-6 px-4 py-2">
+    <a href={getLocalePath(lang)} class="site-brand">
+      <!-- The logo is decorative: the site name is the link text (visually hidden on small screens). -->
+      <img src="/favicon.svg" alt="" width="36" height="36" class="size-9 shrink-0" />
+      <span class="sr-only whitespace-nowrap sm:not-sr-only">{ui.meta.siteName}</span>
+    </a>
+
+    {
+      hasMenu && (
+        <>
+          <button
+            type="button"
+            class="menu-toggle ml-auto"
+            aria-expanded="false"
+            aria-controls="site-menu"
+            aria-label={ui.nav.menu}
+            data-menu-toggle
+          >
+            <svg class="icon-open" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+              <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <svg class="icon-close" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+              <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+
+          <div id="site-menu" class="site-menu" data-site-menu>
+            <div class="site-menu-inner">
+              {showNav && <MainNav lang={lang} ui={ui} current={current} />}
+              {showLanguageSwitcher && <LanguageSwitcher lang={lang} label={ui.nav.language} />}
+            </div>
+          </div>
+        </>
+      )
+    }
+  </div>
+</header>
+
+<script>
+  // Disclosure pattern for the small-screen menu: a button with `aria-expanded` shows and hides
+  // the panel. Escape and a click outside close it, Escape returns focus to the button, and the
+  // state resets when the window grows to the width where the menu is always visible. Without
+  // this script the site still works through the footer links.
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+  const toggle = header?.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = header?.querySelector<HTMLElement>('[data-site-menu]');
+
+  if (header && toggle && menu) {
+    // Same width as Tailwind's `md` breakpoint, where the CSS shows the menu inline.
+    const wide = window.matchMedia('(min-width: 48rem)');
+    const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.dataset.open = String(open);
+    };
+
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
+
+    // Capture phase: with the menu open, Escape closes only the menu and never reaches the
+    // listeners of the typing test (Escape restarts a test).
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key !== 'Escape' || !isOpen() || wide.matches) return;
+        if (!header.contains(document.activeElement)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        setOpen(false);
+        toggle.focus();
+      },
+      true,
+    );
+
+    document.addEventListener('click', (event) => {
+      if (isOpen() && event.target instanceof Node && !header.contains(event.target)) setOpen(false);
+    });
+
+    wide.addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+</script>

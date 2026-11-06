@@ -2,7 +2,8 @@ import type { Dictionary } from '../types';
 
 export const id: Dictionary = {
   meta: {
-    siteName: 'Mengetik Sambil Belajar',
+    siteName: 'curiotype',
+    homeTitle: 'curiotype: Tes Mengetik dengan Kalimat Edukatif',
     tagline: 'Latihan mengetik dengan kalimat yang menambah pengetahuan.',
     description:
       'Tes mengetik dengan kalimat bermakna dari sains, sejarah, teknologi, dan kesehatan, bukan kata acak.',
@@ -10,6 +11,7 @@ export const id: Dictionary = {
   nav: {
     language: 'Bahasa',
     main: 'Navigasi utama',
+    menu: 'Menu',
     home: 'Beranda',
     stats: 'Statistik',
     collection: 'Koleksi',

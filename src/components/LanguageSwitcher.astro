@@ -11,8 +11,10 @@ interface Props {
 const { lang, label } = Astro.props;
 ---
 
-<nav aria-label={label}>
-  <ul class="flex gap-2">
+<nav aria-labelledby="language-label" class="language-nav">
+  <!-- Visible caption inside the small-screen menu; screen readers get it as the nav name. -->
+  <span id="language-label" class="language-label">{label}</span>
+  <ul class="menu-list">
     {
       LANGUAGES.map((code) => (
         <li>
@@ -22,7 +24,7 @@ const { lang, label } = Astro.props;
             lang={code}
             aria-current={code === lang ? 'page' : undefined}
             title={LANGUAGE_NAMES[code]}
-            class="btn uppercase"
+            class="menu-link uppercase"
           >
             {code}
           </a>

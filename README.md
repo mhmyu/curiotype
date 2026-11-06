@@ -1,6 +1,6 @@
 # curiotype
 
-**Typing Knowledge** is a typing-test website that shows **meaningful sentences with real knowledge** (science, history, technology, health) instead of random words, in **Indonesian (default) and English**. Every sentence has a short explanation and a source.
+**curiotype** is a typing-test website that shows **meaningful sentences with real knowledge** (science, history, technology, health) instead of random words, in **Indonesian (default) and English**. Every sentence has a short explanation and a source.
 
 [![CI](https://github.com/mhmyu/curiotype/actions/workflows/ci.yml/badge.svg)](https://github.com/mhmyu/curiotype/actions/workflows/ci.yml) ![License: MIT](https://img.shields.io/badge/code-MIT-blue) ![Content: CC BY-SA 4.0](https://img.shields.io/badge/sentences-CC%20BY--SA%204.0-lightgrey) ![Astro 7](https://img.shields.io/badge/Astro-7-ff5d01) ![Svelte 5](https://img.shields.io/badge/Svelte-5-ff3e00)
 

@@ -99,7 +99,7 @@ describe('getShareFileName', () => {
 describe('getShareText', () => {
   it('summarizes speed and accuracy', () => {
     expect(
-      getShareText({ siteName: 'Typing Knowledge', wpm: 51.4, wpmLabel: 'WPM', accuracy: 97, accuracyLabel: 'Accuracy' }),
-    ).toBe('Typing Knowledge: 51 WPM, Accuracy 97%');
+      getShareText({ siteName: 'curiotype', wpm: 51.4, wpmLabel: 'WPM', accuracy: 97, accuracyLabel: 'Accuracy' }),
+    ).toBe('curiotype: 51 WPM, Accuracy 97%');
   });
 });

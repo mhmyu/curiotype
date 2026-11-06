@@ -2,7 +2,8 @@ import type { Dictionary } from '../types';
 
 export const en: Dictionary = {
   meta: {
-    siteName: 'Typing Knowledge',
+    siteName: 'curiotype',
+    homeTitle: 'curiotype: Typing Test with Sentences That Teach',
     tagline: 'Practice typing with sentences that teach you something.',
     description:
       'A typing test that shows meaningful sentences from science, history, technology and health instead of random words.',
@@ -10,6 +11,7 @@ export const en: Dictionary = {
   nav: {
     language: 'Language',
     main: 'Main navigation',
+    menu: 'Menu',
     home: 'Home',
     stats: 'Statistics',
     collection: 'Collection',

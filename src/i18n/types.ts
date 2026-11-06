@@ -11,6 +11,8 @@ import type { ModeId } from '@/lib/types';
 export interface Dictionary {
   meta: {
     siteName: string;
+    /** Title of the home page (and fallback when a page has none): name plus a short keyword phrase, under 60 characters. */
+    homeTitle: string;
     tagline: string;
     description: string;
   };
@@ -18,6 +20,8 @@ export interface Dictionary {
     language: string;
     /** Accessible name of the main navigation. */
     main: string;
+    /** Accessible name of the button that opens the menu on small screens. */
+    menu: string;
     home: string;
     stats: string;
     collection: string;

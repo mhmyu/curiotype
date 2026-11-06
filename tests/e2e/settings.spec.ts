@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { en } from '../../src/i18n/ui/en';
 import { id } from '../../src/i18n/ui/id';
-import { contentLangSelect } from './helpers';
+import { contentLangSelect, openMainNav } from './helpers';
 
 const SETTINGS_KEY = 'typing:settings:v1';
 
@@ -19,12 +19,13 @@ async function expectNoHorizontalScroll(page: Page) {
 
 test('the navigation links the home page and the settings page', async ({ page }) => {
   await page.goto('/id/');
-  const nav = page.getByRole('navigation', { name: id.nav.main });
+  let nav = await openMainNav(page, id);
   await expect(nav.getByRole('link', { name: id.nav.home })).toHaveAttribute('aria-current', 'page');
 
   await nav.getByRole('link', { name: id.nav.settings }).click();
   await expect(page).toHaveURL(/\/id\/settings\/$/);
   await expect(page.getByRole('heading', { level: 1, name: id.settings.title })).toBeVisible();
+  nav = await openMainNav(page, id);
   await expect(nav.getByRole('link', { name: id.nav.settings })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('group', { name: id.settings.themeLabel })).toBeVisible();
   await expectNoHorizontalScroll(page);

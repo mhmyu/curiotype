@@ -61,3 +61,18 @@ export async function openFilters(page: Page, ui: Dictionary = en) {
 export function contentLangSelect(page: Page, ui: Dictionary = en) {
   return page.getByRole('combobox', { name: ui.test.contentLangLabel });
 }
+
+/**
+ * Returns the main navigation, opening the menu first when it is collapsed behind the hamburger
+ * button (below the `md` breakpoint, which includes the 390 px test viewport). Call it again after
+ * a page load: every page starts with the menu closed.
+ */
+export async function openMainNav(page: Page, ui: Dictionary = en) {
+  const toggle = page.getByRole('button', { name: ui.nav.menu, exact: true });
+  if ((await toggle.isVisible()) && (await toggle.getAttribute('aria-expanded')) !== 'true') {
+    await toggle.click();
+  }
+  const nav = page.getByRole('navigation', { name: ui.nav.main });
+  await expect(nav).toBeVisible();
+  return nav;
+}
