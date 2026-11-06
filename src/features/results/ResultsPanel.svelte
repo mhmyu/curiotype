@@ -15,6 +15,8 @@
     result: TestResult;
     sentences: readonly Sentence[];
     ui: Dictionary;
+    /** Label of a category in the interface language. */
+    categoryLabel: (id: string) => string;
     isPersonalBest: boolean;
     /** Mode with its option for the shared image, e.g. "Time 30s" (from `getModeLabel`). */
     modeLabel: string;
@@ -34,6 +36,7 @@
     result,
     sentences,
     ui,
+    categoryLabel,
     isPersonalBest,
     modeLabel,
     shareFact,
@@ -157,7 +160,7 @@
       <h3 class="text-h3">{ui.results.learnedTitle}</h3>
       <ul class="flex flex-col gap-3">
         {#each sentences as sentence (sentence.id)}
-          <SentenceCard {sentence} {ui} {repoUrl}>
+          <SentenceCard {sentence} {ui} {categoryLabel} {repoUrl}>
             {#snippet actions()}
               <FavoriteButton
                 saved={favoriteIds.has(sentence.id)}

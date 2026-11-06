@@ -20,6 +20,8 @@
 
   interface Props {
     ui: Dictionary;
+    /** Label of a category in the interface language. */
+    categoryLabel: (id: string) => string;
     /** Language of the sentences (the typing area marks its text with it). */
     contentLang: string;
     /** The first sentence of the session. */
@@ -44,6 +46,7 @@
 
   let {
     ui,
+    categoryLabel,
     contentLang,
     first,
     next,
@@ -165,7 +168,7 @@
         <h3 class="text-h3">{ui.results.learnedTitle}</h3>
         <ul class="flex flex-col gap-3">
           {#each learned as sentence (sentence.id)}
-            <SentenceCard {sentence} {ui} {repoUrl}>
+            <SentenceCard {sentence} {ui} {categoryLabel} {repoUrl}>
               {#snippet actions()}
                 <FavoriteButton
                   saved={favoriteIds.has(sentence.id)}
@@ -218,7 +221,7 @@
     <p class="text-caption text-text-muted">{ui.relaxed.hint}</p>
   {:else}
     <ul class="flex flex-col gap-3" data-testid="relaxed-card">
-      <SentenceCard sentence={session.current} {ui} {repoUrl}>
+      <SentenceCard sentence={session.current} {ui} {categoryLabel} {repoUrl}>
         {#snippet actions()}
           <FavoriteButton
             saved={favoriteIds.has(session.current.id)}

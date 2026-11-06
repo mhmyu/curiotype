@@ -10,6 +10,8 @@
   import type { ContentLang, Language } from '@/i18n/config';
   import type { Dictionary } from '@/i18n/types';
   import { resolveContentLang } from '@/lib/content-langs';
+  import { getCategoryLabel } from '@/lib/categories';
+  import type { CategoryDefinition } from '@/lib/categories';
   import { listSelectableContentLangs } from '@/config/languages';
   import { getStorage } from '@/lib/storage';
   import type { Sentence } from '@/lib/types';
@@ -45,11 +47,13 @@
     ui: Dictionary;
     /** Sentence languages found under src/content/sentences/. */
     contentLangs: readonly ContentLang[];
+    /** Categories per sentence language (labels and order from src/content/categories.json). */
+    categories: Record<string, CategoryDefinition[]>;
     /** Sentence language used until the user chooses one (decided at build time). */
     initialContentLang: ContentLang;
   }
 
-  let { lang, ui, contentLangs, initialContentLang }: Props = $props();
+  let { lang, ui, contentLangs, categories, initialContentLang }: Props = $props();
 
   type Status = 'loading' | 'ready';
   type CorpusStatus = 'loading' | 'error' | 'ready';
@@ -87,14 +91,18 @@
   );
   const trend = $derived(activeBucket ? getTrend(entries, activeBucket) : []);
   const trendSummary = $derived(summarizeTrend(trend));
-  const categoryAccuracy = $derived(computeCategoryAccuracy(entries));
+  // Rows follow the categories of the active sentence language, in the order of the list.
+  const categoryDefs = $derived(categories[contentLang] ?? []);
+  const categoryLabel = (id: string) => getCategoryLabel(categoryDefs, id, lang);
+  const categoryIds = $derived(categoryDefs.map((definition) => definition.id));
+  const categoryAccuracy = $derived(computeCategoryAccuracy(entries, categoryIds));
   const heatmap = $derived(buildHeatmap(keyStats, getKeyboardRows(contentLang)));
   const weakKeys = $derived(listWeakKeys(keyStats));
   // Key counts are kept apart from the history, so they can exist without tests in it.
   const showKeys = $derived(entries.length > 0 || hasKeyData(keyStats));
   const bests = $derived(listPersonalBests(personalBests, contentLang));
   const coverage = $derived(
-    corpusStatus === 'ready' ? computeCoverage(sentences, seenIds) : null,
+    corpusStatus === 'ready' ? computeCoverage(sentences, seenIds, categoryIds) : null,
   );
 
   const numberFormat = $derived(new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }));
@@ -336,7 +344,7 @@
           {#each categoryAccuracy as row (row.category)}
             <li class="card flex flex-col gap-2 px-4 py-3" data-testid="accuracy-{row.category}">
               <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                <span class="text-ui">{ui.categories[row.category]}</span>
+                <span class="text-ui">{categoryLabel(row.category)}</span>
                 {#if row.accuracy === null}
                   <span class="text-caption text-text-muted">{ui.stats.noData}</span>
                 {:else}
@@ -448,7 +456,7 @@
           {#each coverage.byCategory as row (row.category)}
             <li class="card flex flex-col gap-2 px-4 py-3" data-testid="coverage-{row.category}">
               <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                <span class="text-ui">{ui.categories[row.category]}</span>
+                <span class="text-ui">{categoryLabel(row.category)}</span>
                 {#if row.total === 0}
                   <span class="text-caption text-text-muted">{ui.stats.noSentences}</span>
                 {:else}

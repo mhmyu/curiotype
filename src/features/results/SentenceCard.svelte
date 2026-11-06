@@ -7,13 +7,15 @@
   interface Props {
     sentence: Sentence;
     ui: Dictionary;
+    /** Label of the sentence's category in the interface language. */
+    categoryLabel: (id: string) => string;
     /** Repository root (`PUBLIC_REPO_URL`); without it the "report" link is hidden. */
     repoUrl?: string;
     /** Buttons shown next to the report link (the star in the results, "remove" in the collection). */
     actions?: Snippet;
   }
 
-  let { sentence, ui, repoUrl, actions }: Props = $props();
+  let { sentence, ui, categoryLabel, repoUrl, actions }: Props = $props();
 
   const reportUrl = $derived(buildFactReportUrl(repoUrl, sentence.id));
 </script>
@@ -23,7 +25,7 @@
   <p class="text-body-long font-semibold">{sentence.text}</p>
   <p class="text-body-long text-text-muted">{sentence.explanation}</p>
   <p class="text-caption text-text-muted">
-    {ui.categories[sentence.category]} ·
+    {categoryLabel(sentence.category)} ·
     <!-- The level is spelled out (never colour alone): badge with a 2px radius. -->
     <span
       class="inline-block rounded-xs border-2 px-1.5 font-semibold leading-snug {sentence.difficulty === 'hard'

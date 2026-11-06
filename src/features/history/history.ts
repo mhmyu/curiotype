@@ -1,7 +1,8 @@
 import { RECORD_MODE_IDS, SCORED_MODE_IDS } from '@/features/test-modes';
 import type { ContentLang } from '@/i18n/config';
 import type { StorageAdapter } from '@/lib/storage/types';
-import { CATEGORIES, DIFFICULTIES } from '@/lib/taxonomy';
+import { isCategoryId } from '@/lib/categories';
+import { DIFFICULTIES } from '@/lib/taxonomy';
 import type { Category, Difficulty } from '@/lib/taxonomy';
 import type { CategoryChars, RecordModeId, ScoredModeId } from '@/lib/types';
 
@@ -180,7 +181,7 @@ export function parseHistoryEntry(raw: unknown): HistoryEntry | null {
     return null;
   }
   if (e.stopOnError !== undefined && typeof e.stopOnError !== 'boolean') return null;
-  if (e.category !== 'all' && !CATEGORIES.includes(e.category as Category)) return null;
+  if (e.category !== 'all' && !isCategoryId(e.category)) return null;
   if (e.difficulty !== 'all' && !DIFFICULTIES.includes(e.difficulty as Difficulty)) return null;
   for (const field of ['wpm', 'rawWpm', 'accuracy', 'consistency', 'errors'] as const) {
     if (!isFiniteNumber(e[field]) || (e[field] as number) < 0) return null;
@@ -217,9 +218,10 @@ export function parseHistoryEntry(raw: unknown): HistoryEntry | null {
     }
     const chars: CategoryChars = {};
     for (const [category, count] of Object.entries(e.categoryChars)) {
-      if (!CATEGORIES.includes(category as Category)) return null;
+      // Any well-formed id is kept, also one that was removed from the category list later.
+      if (!isCategoryId(category)) return null;
       if (!isFiniteNumber(count) || count < 0) return null;
-      chars[category as Category] = count;
+      chars[category] = count;
     }
     entry.categoryChars = chars;
   }

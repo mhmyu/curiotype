@@ -256,12 +256,6 @@ export const en: Dictionary = {
     changeText: 'Change text',
     hint: 'Your result goes to the history but never counts as a personal best.',
   },
-  categories: {
-    science: 'Science',
-    history: 'History',
-    technology: 'Technology',
-    health: 'Health',
-  },
   difficulties: {
     easy: 'Easy',
     hard: 'Hard',

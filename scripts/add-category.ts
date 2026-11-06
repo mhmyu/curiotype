@@ -1,81 +1,109 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import {
-  addCategoryLabel,
-  addCategoryToTaxonomy,
-  buildCategorySkeleton,
-  readCategories,
-  validateCategoryName,
-} from '../src/lib/add-category.ts';
-import { DEFAULT_CORPUS_DIR, argValue } from './read-corpus.ts';
+import { planAddCategory } from '../src/lib/add-category.ts';
+import type { AddCategoryPlan } from '../src/lib/add-category.ts';
+import { DEFAULT_CORPUS_DIR, DEFAULT_REGISTRY_PATH, DEFAULT_UI_DIR, readInterfaceLangs } from './read-corpus.ts';
 
 /**
- * `pnpm content:add-category <name> --<ui-lang> "<label>" ... [--langs id,en]`
+ * `pnpm content:add-category <name> --<ui-lang> "<label>" ... [--order N] [--langs id,en] [--dry-run]`
  *
- * Adds a sentence category: appends it to `CATEGORIES` in `src/lib/taxonomy.ts`, adds its label to
- * every interface dictionary in `src/i18n/ui/` (one `--<code> "<label>"` option per dictionary,
- * all required), and creates `src/content/sentences/<lang>/<name>.json` with one placeholder
- * sentence for each sentence language (`--langs` limits them; default: all). The build rejects the
- * placeholder until it is replaced. Nothing is written unless every check passes, and existing
- * files are never overwritten. `--dir`, `--taxonomy` and `--ui` point at other locations (tests).
+ * Adds a sentence category the recommended way: one command writes the entry of
+ * `src/content/categories.json` (a label per interface language, all required, and an `order`) and a
+ * skeleton `src/content/sentences/<lang>/<name>.json` with one placeholder sentence for each
+ * sentence language (`--langs` limits them; default: all). For a category that is already listed
+ * (for example to add its English file), the entry is left alone and only the missing language files
+ * are created; labels, when given, must match the entry. The build rejects the placeholder until it is
+ * replaced. Every check runs before anything is written, and an existing file is never overwritten.
+ * `--dry-run` only prints what would happen. `--dir`, `--ui` and `--registry` point at other
+ * locations (tests).
  */
 const argv = process.argv.slice(2);
-const name = argv[0] && !argv[0].startsWith('--') ? argv[0] : undefined;
-const corpusDir = argValue(argv, '--dir') ?? DEFAULT_CORPUS_DIR;
-const taxonomyPath = argValue(argv, '--taxonomy') ?? 'src/lib/taxonomy.ts';
-const uiDir = argValue(argv, '--ui') ?? 'src/i18n/ui';
+const uiDir = optionValue('--ui') ?? DEFAULT_UI_DIR;
+const corpusDir = optionValue('--dir') ?? DEFAULT_CORPUS_DIR;
+const registryPath = optionValue('--registry') ?? DEFAULT_REGISTRY_PATH;
 
 function fail(message: string): never {
   console.error(`Error: ${message}`);
   process.exit(1);
 }
 
-const uiCodes = readdirSync(uiDir)
-  .filter((file) => file.endsWith('.ts'))
-  .map((file) => file.slice(0, -'.ts'.length))
-  .sort();
-const usage = `Usage: pnpm content:add-category <name> ${uiCodes.map((code) => `--${code} "<label>"`).join(' ')} [--langs id,en]`;
-if (!name) fail(`Missing category name.\n${usage}`);
+/** Value of `--name <value>`; a missing value is an error, not a silent default. */
+function optionValue(flag: string): string | undefined {
+  const index = argv.indexOf(flag);
+  if (index === -1) return undefined;
+  const value = argv[index + 1];
+  if (value === undefined || value.startsWith('--')) fail(`The option ${flag} needs a value.`);
+  return value;
+}
 
-const taxonomy = readFileSync(taxonomyPath, 'utf8');
-const existing = readCategories(taxonomy);
-if (!existing) fail(`Cannot find CATEGORIES in ${taxonomyPath}.`);
-const nameProblem = validateCategoryName(name, existing);
-if (nameProblem) fail(nameProblem);
+const uiCodes = readInterfaceLangs(uiDir);
+const usage = `Usage: pnpm content:add-category <name> ${uiCodes.map((code) => `--${code} "<label>"`).join(' ')} [--order N] [--langs id,en] [--dry-run]`;
+const known = new Set(['--order', '--langs', '--dry-run', '--dir', '--ui', '--registry', ...uiCodes.map((code) => `--${code}`)]);
+const unknownOption = argv.find((arg) => arg.startsWith('--') && !known.has(arg));
+if (unknownOption) fail(`Unknown option "${unknownOption}".\n${usage}`);
+
+const name = argv[0] && !argv[0].startsWith('--') ? argv[0] : undefined;
+if (!name) fail(`Missing category name.\n${usage}`);
 
 const labels: Record<string, string> = {};
 for (const code of uiCodes) {
-  const label = argValue(argv, `--${code}`)?.trim();
-  if (!label) fail(`Missing the label for the "${code}" interface language.\n${usage}`);
-  labels[code] = label;
+  const label = optionValue(`--${code}`)?.trim();
+  if (label) labels[code] = label;
 }
 
-const allLangs = readdirSync(corpusDir, { withFileTypes: true })
+const orderText = optionValue('--order');
+if (orderText !== undefined && !/^\d{1,4}$/.test(orderText)) fail('--order must be a whole number from 0 to 9999.');
+const langsText = optionValue('--langs');
+
+const sentenceLangs = readdirSync(corpusDir, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
   .sort();
-const requested = argValue(argv, '--langs');
-const langs = requested ? requested.split(',').map((lang) => lang.trim()) : allLangs;
-const unknown = langs.filter((lang) => !allLangs.includes(lang));
-if (unknown.length > 0) fail(`Unknown sentence language(s): ${unknown.join(', ')}. Available: ${allLangs.join(', ')}.`);
 
-// Compute everything first, write only when nothing failed.
-const writes: { path: string; content: string }[] = [{ path: taxonomyPath, content: addCategoryToTaxonomy(taxonomy, name) }];
-for (const code of uiCodes) {
-  const path = join(uiDir, `${code}.ts`);
-  writes.push({ path, content: addCategoryLabel(readFileSync(path, 'utf8'), name, labels[code]) });
+let registrySource: string;
+try {
+  registrySource = readFileSync(registryPath, 'utf8');
+} catch (error) {
+  fail(`Cannot read ${registryPath}: ${(error as Error).message}`);
 }
-for (const lang of langs) {
-  const path = join(corpusDir, lang, `${name}.json`);
-  if (existsSync(path)) fail(`${path} already exists; nothing was changed.`);
-  writes.push({ path, content: buildCategorySkeleton(lang, name) });
-}
-for (const { path, content } of writes) writeFileSync(path, content);
 
-console.log(`Added the category "${name}":`);
-for (const { path } of writes) console.log(`  ${path}`);
-console.log(`
+let plan: AddCategoryPlan;
+try {
+  plan = planAddCategory({
+    name,
+    labels,
+    order: orderText === undefined ? undefined : Number(orderText),
+    requestedLangs: langsText === undefined ? undefined : langsText.split(',').map((lang) => lang.trim()).filter(Boolean),
+    registrySource,
+    uiLangs: uiCodes,
+    sentenceLangs,
+    langsWithFile: sentenceLangs.filter((lang) => existsSync(join(corpusDir, lang, `${name}.json`))),
+  });
+} catch (error) {
+  fail(`${(error as Error).message}`);
+}
+
+const filePaths = plan.files.map((file) => join(corpusDir, file.lang, `${name}.json`));
+const dryRun = argv.includes('--dry-run');
+
+if (dryRun) {
+  console.log('Dry run: nothing was written.');
+  if (plan.entry) console.log(`Would add this entry to ${registryPath}:\n  ${plan.entry}`);
+  else console.log(`${registryPath} would stay as it is ("${name}" is already listed).`);
+  console.log('Would create:');
+  for (const path of filePaths) console.log(`  ${path}`);
+} else {
+  if (plan.registrySource !== null) writeFileSync(registryPath, plan.registrySource);
+  plan.files.forEach((file, index) => writeFileSync(filePaths[index], file.content));
+  console.log(plan.isNew ? `Added the category "${name}":` : `Added language files for the category "${name}":`);
+  if (plan.registrySource !== null) console.log(`  ${registryPath} (new entry)`);
+  for (const path of filePaths) console.log(`  ${path}`);
+}
+for (const note of plan.notes) console.log(`Note: ${note}`);
+if (!dryRun) {
+  console.log(`
 Next:
   1. Replace the placeholder sentence in each new file (see CONTENT_GUIDE.md). The build fails while a REPLACE_ME placeholder is left.
   2. For a language that will not have this category yet, delete its new file.
   3. pnpm content:stats --scores && pnpm check && pnpm build`);
+}

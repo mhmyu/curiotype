@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   TARGET_PER_CATEGORY,
   computeContentStats,
+  findCategoryNotes,
   findWarnings,
   formatScores,
   formatStats,
@@ -9,6 +10,13 @@ import {
   summarizeScores,
 } from './content-stats.ts';
 import type { StatsFile } from './content-stats.ts';
+
+/** The categories listed in `categories.json` for most tests (the same four the site ships with). */
+const FOUR = ['science', 'history', 'technology', 'health'];
+const compute = (files: readonly StatsFile[], registered: readonly string[] = FOUR) =>
+  computeContentStats(files, registered);
+const warn = (stats: ReturnType<typeof compute>, registered: readonly string[] = FOUR) =>
+  findWarnings(stats, registered);
 
 function file(lang: string, category: string, easy: number, hard: number): StatsFile {
   const items = [
@@ -25,27 +33,42 @@ function textOfLength(length: number): string {
 
 describe('computeContentStats', () => {
   it('counts per language, category, and difficulty', () => {
-    const [en] = computeContentStats([file('en', 'science', 1, 3), file('en', 'history', 0, 1)]);
+    const [en] = compute([file('en', 'science', 1, 3), file('en', 'history', 0, 1)]);
     expect(en.lang).toBe('en');
     expect(en.total).toBe(5);
     expect(en.byDifficulty).toEqual({ easy: 1, hard: 4 });
     expect(en.categories.find((c) => c.category === 'science')?.byDifficulty).toEqual({ easy: 1, hard: 3 });
   });
 
-  it('lists every known category, with zero for a missing file', () => {
-    const [en] = computeContentStats([file('en', 'science', 1, 0)]);
-    expect(en.categories.map((c) => c.category)).toEqual(['science', 'history', 'technology', 'health']);
-    expect(en.categories.find((c) => c.category === 'health')?.total).toBe(0);
+  it('lists only the categories a language has a file for, in the order of the registry', () => {
+    const [en] = compute([file('en', 'health', 1, 0), file('en', 'science', 1, 0)]);
+    expect(en.categories.map((c) => c.category)).toEqual(['science', 'health']);
+    expect(en.categories.every((c) => c.registered)).toBe(true);
   });
 
-  it('lists unknown categories after the known ones and sorts languages', () => {
-    const stats = computeContentStats([file('id', 'cooking', 1, 0), file('en', 'science', 1, 0)]);
+  it('follows the order of the given registry, also for a new category', () => {
+    const registry = ['geography', 'science'];
+    const [id] = compute([file('id', 'science', 1, 0), file('id', 'geography', 1, 0)], registry);
+    expect(id.categories.map((c) => c.category)).toEqual(['geography', 'science']);
+  });
+
+  it('lists unregistered categories after the registered ones, by name, and sorts languages', () => {
+    const stats = compute([
+      file('id', 'zebra', 1, 0),
+      file('id', 'cooking', 1, 0),
+      file('id', 'science', 1, 0),
+      file('en', 'science', 1, 0),
+    ]);
     expect(stats.map((s) => s.lang)).toEqual(['en', 'id']);
-    expect(stats[1].categories.at(-1)?.category).toBe('cooking');
+    expect(stats[1].categories.map((c) => [c.category, c.registered])).toEqual([
+      ['science', true],
+      ['cooking', false],
+      ['zebra', false],
+    ]);
   });
 
   it('counts an unknown difficulty separately', () => {
-    const [en] = computeContentStats([{ lang: 'en', category: 'science', items: [{ difficulty: 'extreme' }] }]);
+    const [en] = compute([{ lang: 'en', category: 'science', items: [{ difficulty: 'extreme' }] }]);
     const science = en.categories[0];
     expect(science.total).toBe(1);
     expect(science.unknownDifficulty).toBe(1);
@@ -65,18 +88,18 @@ describe('findWarnings', () => {
     ['science', 'history', 'technology', 'health'].map((c) => file(lang, c, 50, 50));
 
   it('has no warnings when targets are met', () => {
-    expect(findWarnings(computeContentStats(full('en')))).toEqual([]);
+    expect(warn(compute(full('en')))).toEqual([]);
   });
 
   it('warns about a category below the target and names it', () => {
     const files = [...full('en').slice(1), file('en', 'science', 5, 5)];
-    const warnings = findWarnings(computeContentStats(files));
+    const warnings = warn(compute(files));
     expect(warnings).toEqual([`en/science: 10 sentences, target is ${TARGET_PER_CATEGORY}.`]);
   });
 
   it('warns when the difficulty mix drifts more than the tolerance', () => {
     const files = [...full('id').slice(1), file('id', 'science', 70, 30)];
-    const warnings = findWarnings(computeContentStats(files));
+    const warnings = warn(compute(files));
     expect(warnings).toHaveLength(2);
     expect(warnings[0]).toContain('id/science: easy is 70%');
     expect(warnings[1]).toContain('hard is 30%');
@@ -84,25 +107,88 @@ describe('findWarnings', () => {
 
   it('allows a drift of exactly the tolerance', () => {
     const files = [...full('en').slice(1), file('en', 'science', 60, 40)];
-    expect(findWarnings(computeContentStats(files))).toEqual([]);
+    expect(warn(compute(files))).toEqual([]);
   });
 
   it('skips the share check for very small categories', () => {
-    const warnings = findWarnings(computeContentStats([file('en', 'science', 5, 0)]));
+    const warnings = warn(compute([file('en', 'science', 5, 0)]));
     expect(warnings.some((w) => w.includes('% of the sentences'))).toBe(false);
   });
 
   it('warns about an unknown difficulty and about an empty corpus', () => {
-    const stats = computeContentStats([{ lang: 'en', category: 'science', items: [{ difficulty: 'x' }] }]);
-    expect(findWarnings(stats).some((w) => w.includes('unknown difficulty'))).toBe(true);
-    expect(findWarnings([])).toEqual(['No sentence files found.']);
+    const stats = compute([{ lang: 'en', category: 'science', items: [{ difficulty: 'x' }] }]);
+    expect(warn(stats).some((w) => w.includes('unknown difficulty'))).toBe(true);
+    expect(warn([], [])).toEqual(['No sentence files found.']);
+  });
+});
+
+describe('category warnings and notes', () => {
+  it('warns about a file whose category is not registered, naming the file', () => {
+    const registry = ['science'];
+    const stats = compute([file('id', 'science', 1, 0), file('id', 'geograpy', 1, 0)], registry);
+    const warnings = warn(stats, registry).filter((w) => w.includes('has no entry'));
+    expect(warnings).toEqual([
+      'Category "geograpy" (id/geograpy.json) has no entry in src/content/categories.json (the build rejects this). Add one, or fix the file name if it is a typo.',
+    ]);
+  });
+
+  it('warns about a registered category that has no sentence file in any language', () => {
+    const registry = ['science', 'geography'];
+    const stats = compute([file('id', 'science', 1, 0), file('en', 'science', 1, 0)], registry);
+    const warnings = warn(stats, registry).filter((w) => w.includes('geography'));
+    expect(warnings).toEqual([
+      'Category "geography" is listed in src/content/categories.json but has no sentence file, so the site does not show it.',
+    ]);
+  });
+
+  it('does not warn about a registered category when one language has its file', () => {
+    const registry = ['science', 'geography'];
+    const stats = compute([file('id', 'geography', 1, 0), file('id', 'science', 1, 0), file('en', 'science', 1, 0)], registry);
+    expect(warn(stats, registry).some((w) => w.includes('has no sentence file'))).toBe(false);
+  });
+
+  it('notes a category that exists in only some languages, and is not a warning', () => {
+    const registry = ['science', 'geography'];
+    const files = [
+      file('id', 'geography', 1, 0),
+      file('id', 'science', 1, 0),
+      file('en', 'science', 1, 0),
+      file('es', 'science', 1, 0),
+    ];
+    const stats = compute(files, registry);
+    expect(findCategoryNotes(stats)).toEqual(['Category geography: only in id (missing in en, es)']);
+    expect(warn(stats, registry).some((w) => w.includes('geography') && w.includes('only in'))).toBe(false);
+  });
+
+  it('lists every language that has the category when it is in two of three', () => {
+    const stats = compute(
+      [file('en', 'geography', 1, 0), file('id', 'geography', 1, 0), file('es', 'science', 1, 0)],
+      ['science', 'geography'],
+    );
+    expect(findCategoryNotes(stats)).toContain('Category geography: only in en, id (missing in es)');
+  });
+
+  it('has no notes when every language has every category, or when there is one language', () => {
+    const both = compute([file('en', 'science', 1, 0), file('id', 'science', 1, 0)]);
+    expect(findCategoryNotes(both)).toEqual([]);
+    expect(findCategoryNotes(compute([file('en', 'science', 1, 0)]))).toEqual([]);
+  });
+
+  it('prints the notes in the report without counting them as warnings', () => {
+    const stats = compute(
+      [file('id', 'geography', 1, 0), file('id', 'science', 1, 0), file('en', 'science', 1, 0)],
+      ['science', 'geography'],
+    );
+    const text = formatStats(stats, [], findCategoryNotes(stats));
+    expect(text).toContain('Notes:\n  - Category geography: only in id (missing in en)');
+    expect(text).toContain('No warnings.');
   });
 });
 
 describe('formatStats', () => {
   it('prints a table per language and the warnings', () => {
-    const stats = computeContentStats([file('en', 'science', 3, 2)]);
-    const text = formatStats(stats, findWarnings(stats));
+    const stats = compute([file('en', 'science', 3, 2)]);
+    const text = formatStats(stats, warn(stats));
     expect(text).toContain('en: 5 sentences');
     expect(text).toContain('50/50');
     expect(text).not.toContain('medium');
@@ -116,7 +202,7 @@ describe('formatStats', () => {
   });
 
   it('marks a draft language and lists the drafts once', () => {
-    const stats = computeContentStats([file('es', 'science', 3, 2), file('en', 'science', 3, 2)]);
+    const stats = compute([file('es', 'science', 3, 2), file('en', 'science', 3, 2)]);
     expect(stats.map((s) => [s.lang, s.draft])).toEqual([
       ['en', false],
       ['es', true],
@@ -128,7 +214,7 @@ describe('formatStats', () => {
   });
 
   it('prints no draft line when no language is a draft', () => {
-    const text = formatStats(computeContentStats([file('en', 'science', 3, 2)]), []);
+    const text = formatStats(compute([file('en', 'science', 3, 2)]), []);
     expect(text).not.toContain('draft');
   });
 });
@@ -156,21 +242,21 @@ describe('scores', () => {
   });
 
   it('computeContentStats adds the summary when the sentences carry their text', () => {
-    const [en] = computeContentStats([withText]);
+    const [en] = compute([withText]);
     expect(en.scores).toMatchObject({ count: 4, min: 55, max: 130, threshold: 100 });
     expect(en.categories[0].mislabeled).toBe(0);
-    expect(computeContentStats([file('en', 'science', 1, 1)])[0].scores).toBeNull();
+    expect(compute([file('en', 'science', 1, 1)])[0].scores).toBeNull();
   });
 
   it('counts a label that differs from its score and warns about it', () => {
     const wrong: StatsFile = { ...withText, items: withText.items.map((item) => ({ ...item, difficulty: 'hard' })) };
-    const stats = computeContentStats([wrong]);
+    const stats = compute([wrong]);
     expect(stats[0].categories[0].mislabeled).toBe(2);
-    expect(findWarnings(stats).some((w) => w.includes('en/science: 2 sentence(s) labelled differently'))).toBe(true);
+    expect(warn(stats).some((w) => w.includes('en/science: 2 sentence(s) labelled differently'))).toBe(true);
   });
 
   it('formatStats prints the score line', () => {
-    const stats = computeContentStats([withText]);
+    const stats = compute([withText]);
     expect(formatStats(stats, [])).toContain('scores: min 55, median 99.5, max 130; threshold 100');
   });
 

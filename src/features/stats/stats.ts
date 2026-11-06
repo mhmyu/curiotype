@@ -2,7 +2,6 @@ import { SCORED_MODE_IDS } from '@/features/test-modes';
 import { getBucketOption, parseBucketKey } from '@/features/history/history';
 import type { HistoryEntry, PersonalBests } from '@/features/history/history';
 import type { ContentLang } from '@/i18n/config';
-import { CATEGORIES } from '@/lib/taxonomy';
 import type { Category } from '@/lib/taxonomy';
 import type { CategoryChars, ScoredModeId, Sentence } from '@/lib/types';
 
@@ -207,9 +206,14 @@ export interface CategoryAccuracy {
  * proportion to its characters: the result is the character-weighted mean of the accuracies of
  * the tests that touched the category. It is exact for a test of a single category and an
  * estimate for a mixed one ("All categories"). Entries without `categoryChars` are skipped.
+ * There is one row per given category, in the given order; characters of any other category
+ * (one removed from the list, or of another sentence language) make no row.
  */
-export function computeCategoryAccuracy(entries: readonly HistoryEntry[]): CategoryAccuracy[] {
-  return CATEGORIES.map((category) => {
+export function computeCategoryAccuracy(
+  entries: readonly HistoryEntry[],
+  categories: readonly Category[],
+): CategoryAccuracy[] {
+  return categories.map((category) => {
     let chars = 0;
     let weighted = 0;
     for (const entry of entries) {
@@ -239,13 +243,15 @@ export interface Coverage {
 /**
  * How much of the corpus was typed to the end. Ids in `seenIds` that are not in the corpus
  * (a sentence removed from the content files) are ignored, so the numbers never exceed the total.
+ * Rows are the given categories, in order; sentences of other categories are not counted.
  */
 export function computeCoverage(
   sentences: readonly Pick<Sentence, 'id' | 'category'>[],
   seenIds: readonly string[],
+  categories: readonly Category[],
 ): Coverage {
   const seenSet = new Set(seenIds);
-  const byCategory: CategoryCoverage[] = CATEGORIES.map((category) => ({
+  const byCategory: CategoryCoverage[] = categories.map((category) => ({
     category,
     seen: 0,
     total: 0,

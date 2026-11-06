@@ -65,6 +65,11 @@ describe('validateValue: history', () => {
     expect(validateValue('history', [{ ...clean, extra: 'x' }])).toEqual({ valid: true, value: [clean] });
   });
 
+  it('accepts a well-formed category that is not in the category list (it may be added or removed later)', () => {
+    const clean = entry({ category: 'sports', categoryChars: { sports: 3, science: 9 } });
+    expect(validateValue('history', [clean])).toEqual({ valid: true, value: [clean] });
+  });
+
   it('accepts null duration (quote mode) and the "all" filters', () => {
     expect(validateValue('history', [entry({ mode: 'quote', durationSec: null })]).valid).toBe(true);
   });
@@ -81,7 +86,6 @@ describe('validateValue: history', () => {
     ['missing id', entry({ id: undefined })],
     ['empty contentLang', entry({ contentLang: '' })],
     ['unknown mode', entry({ mode: 'zen' })],
-    ['unknown category', entry({ category: 'sports' })],
     ['unknown difficulty', entry({ difficulty: 'insane' })],
     ['retired difficulty "medium" (no migration)', entry({ difficulty: 'medium' })],
     ['wpm as string', entry({ wpm: '40' })],
@@ -89,7 +93,8 @@ describe('validateValue: history', () => {
     ['NaN accuracy', entry({ accuracy: Number.NaN })],
     ['zero duration', entry({ durationSec: 0 })],
     ['sentenceIds not strings', entry({ sentenceIds: [1] })],
-    ['categoryChars with unknown category', entry({ categoryChars: { sports: 3 } })],
+    ['categoryChars with a malformed category id', entry({ categoryChars: { 'Bad Name': 3 } })],
+    ['malformed category id', entry({ category: 'Sports' })],
     ['categoryChars negative', entry({ categoryChars: { science: -3 } })],
   ])('rejects one bad entry: %s', (_label, bad) => {
     expect(validateValue('history', [entry(), bad]).valid).toBe(false);

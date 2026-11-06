@@ -15,8 +15,8 @@
   import { resolveContentLang } from '@/lib/content-langs';
   import { listSelectableContentLangs } from '@/config/languages';
   import { getStorage } from '@/lib/storage';
-  import { CATEGORIES } from '@/lib/taxonomy';
-  import type { Category } from '@/lib/taxonomy';
+  import { getCategoryLabel } from '@/lib/categories';
+  import type { CategoryDefinition } from '@/lib/categories';
   import type { Sentence } from '@/lib/types';
 
   interface Props {
@@ -24,13 +24,15 @@
     ui: Dictionary;
     /** Sentence languages found under src/content/sentences/. */
     contentLangs: readonly ContentLang[];
+    /** Categories per sentence language (labels and order from src/content/categories.json). */
+    categories: Record<string, CategoryDefinition[]>;
     /** Sentence language used until the user chooses one (decided at build time). */
     initialContentLang: ContentLang;
     /** Repository root (`PUBLIC_REPO_URL`); without it the "report" links are hidden. */
     repoUrl?: string;
   }
 
-  let { lang, ui, contentLangs, initialContentLang, repoUrl }: Props = $props();
+  let { lang, ui, contentLangs, categories, initialContentLang, repoUrl }: Props = $props();
 
   type Status = 'loading' | 'error' | 'ready';
 
@@ -47,7 +49,10 @@
   let status = $state<Status>('loading');
   let favorites = $state.raw<Favorite[]>([]);
   let sentencesById = $state.raw<ReadonlyMap<string, Sentence>>(new Map());
-  let category = $state<Category | 'all'>('all');
+  // Only the categories that have a file in the active sentence language are listed.
+  const categoryDefs = $derived(categories[contentLang] ?? []);
+  const categoryLabel = (id: string) => getCategoryLabel(categoryDefs, id, lang);
+  let category = $state<string>('all');
   // The last removed entry, kept (without a timer) until the next removal, "Undo", a language
   // change or leaving the page (K16). Only this one can be undone.
   let lastRemoved = $state.raw<Favorite | null>(null);
@@ -103,6 +108,8 @@
 
   function selectContentLang(code: ContentLang) {
     if (code === contentLang) return;
+    // A category the new language does not have goes back to "All".
+    if (category !== 'all' && !(categories[code] ?? []).some((c) => c.id === category)) category = 'all';
     void settingsStore.update({ contentLang: code });
     void load(code);
   }
@@ -191,8 +198,8 @@
         <span>{ui.test.categoryLabel}</span>
         <select class="field" bind:value={category}>
           <option value="all">{ui.test.all}</option>
-          {#each CATEGORIES as value}
-            <option {value}>{ui.categories[value]}</option>
+          {#each categoryDefs as definition (definition.id)}
+            <option value={definition.id}>{categoryLabel(definition.id)}</option>
           {/each}
         </select>
       </label>
@@ -203,7 +210,7 @@
     {:else}
       <ul bind:this={list} class="flex flex-col gap-3">
         {#each items as sentence (sentence.id)}
-          <SentenceCard {sentence} {ui} {repoUrl}>
+          <SentenceCard {sentence} {ui} {categoryLabel} {repoUrl}>
             {#snippet actions()}
               <button
                 type="button"

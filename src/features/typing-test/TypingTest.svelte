@@ -72,8 +72,10 @@
   import { resolveContentLang } from '@/lib/content-langs';
   import { listSelectableContentLangs } from '@/config/languages';
   import { getStorage } from '@/lib/storage';
-  import { CATEGORIES, DIFFICULTIES } from '@/lib/taxonomy';
+  import { DIFFICULTIES } from '@/lib/taxonomy';
   import type { Category, Difficulty } from '@/lib/taxonomy';
+  import { getCategoryLabel } from '@/lib/categories';
+  import type { CategoryDefinition } from '@/lib/categories';
   import type { ModeId, Sentence, TestSettings } from '@/lib/types';
 
   interface Props {
@@ -81,6 +83,8 @@
     ui: Dictionary;
     /** Sentence languages found under src/content/sentences/ (the language switch lists them). */
     contentLangs: readonly ContentLang[];
+    /** Categories per sentence language (labels and order from src/content/categories.json). */
+    categories: Record<string, CategoryDefinition[]>;
     initialContentLang: ContentLang;
     /** Repository root (`PUBLIC_REPO_URL`), for the "report a wrong fact" links; empty hides them. */
     repoUrl?: string;
@@ -91,13 +95,16 @@
     initialSentenceId?: string;
   }
 
-  let { lang, ui, contentLangs, initialContentLang, repoUrl, initialSentenceId }: Props = $props();
+  let { lang, ui, contentLangs, categories, initialContentLang, repoUrl, initialSentenceId }: Props = $props();
 
   // Language of the sentences: the saved choice (when that folder still exists), otherwise the
   // language the page picked at build time. Separate from the interface language (`lang`).
   const contentLang = $derived<ContentLang>(
     resolveContentLang(settingsStore.current.contentLang ?? initialContentLang, contentLangs),
   );
+  // The category filter lists only the categories that have a file in the active sentence language.
+  const categoryDefs = $derived(categories[contentLang] ?? []);
+  const categoryLabel = (id: string) => getCategoryLabel(categoryDefs, id, lang);
   // The select lists the launched languages (and every language in `pnpm dev`); a draft language
   // that is in use stays listed. `contentLangs` stays complete: it is what resolution accepts.
   const selectableContentLangs = $derived(
@@ -566,6 +573,10 @@
       if (token !== loadToken) return;
       corpus = { lang: code, sentences };
       favoriteIds = new Set();
+      // A category the new language does not have goes back to "All".
+      if (settings.category !== 'all' && !(categories[code] ?? []).some((c) => c.id === settings.category)) {
+        settings = { ...settings, category: 'all' };
+      }
       void settingsStore.update({ contentLang: code });
       void refreshFavorites(code);
       await startNewTest();
@@ -803,8 +814,8 @@
                   updateSettings({ category: event.currentTarget.value as Category | 'all' })}
               >
                 <option value="all">{ui.test.all}</option>
-                {#each CATEGORIES as category}
-                  <option value={category}>{ui.categories[category]}</option>
+                {#each categoryDefs as category (category.id)}
+                  <option value={category.id}>{categoryLabel(category.id)}</option>
                 {/each}
               </select>
             </label>
@@ -875,6 +886,7 @@
     {#key sessionKey}
       <RelaxedSession
         {ui}
+        {categoryLabel}
         contentLang={contentLang}
         first={relaxedFirst}
         next={() => nextSentence()}
@@ -891,6 +903,7 @@
     <ResultsPanel
       {result}
       {ui}
+      {categoryLabel}
       {isPersonalBest}
       modeLabel={getModeLabel(ui, {
         mode: settings.mode,
@@ -969,7 +982,7 @@
   {/if}
 
   {#if loaded && dailyFact}
-    <DailyFact {ui} sentence={dailyFact} onType={(sentence) => void startWithSentence(sentence)} />
+    <DailyFact {ui} {categoryLabel} sentence={dailyFact} onType={(sentence) => void startWithSentence(sentence)} />
   {/if}
 
   <HistoryList {history} {personalBests} {ui} {lang} />

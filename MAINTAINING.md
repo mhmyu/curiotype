@@ -262,7 +262,7 @@ In Chrome open the live page, DevTools > **Lighthouse**, choose **Mobile**, and 
 
 From idea to live site. `CONTENT_GUIDE.md` has the writing rules and a worked example; this is the workflow.
 
-1. **Pick the file:** `src/content/sentences/<lang>/<category>.json` (for example `id/science.json`).
+1. **Pick the file:** `src/content/sentences/<lang>/<category>.json` (for example `id/science.json`). For a **new category**, run `pnpm content:add-category <name> --id "<label>" --en "<label>"` first (for example `pnpm content:add-category geography --id Geografi --en Geography`): it adds the category to `src/content/categories.json` and creates a placeholder file for each language, which you then fill in (the build fails while a `REPLACE_ME` is left). Add `--langs id` to create the file for one language only; `--dry-run` shows what it would do without writing.
 2. **Find the next id:** it continues from the highest number in the file (`id-science-006` follows `id-science-005`).
 3. **Write the item** (copy an existing one as a template): one fact, your own words, a public source that states it, and the difficulty its score gives (`pnpm content:stats --scores` shows it; the build rejects a label that does not match).
 4. **Test it on your computer:**

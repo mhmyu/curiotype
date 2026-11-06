@@ -4,8 +4,6 @@ import { isDraftLanguage } from '../config/languages';
 import { checkSentence } from './content-rules';
 import type { ItemToCheck } from './content-rules';
 import { classifyDifficulty } from './difficulty';
-import { CATEGORIES } from './taxonomy';
-import type { Category } from './taxonomy';
 
 /**
  * The Spanish sample sentences (T37b, spec 21.5) are checked here with the same rules as the build,
@@ -14,17 +12,20 @@ import type { Category } from './taxonomy';
  */
 const files = readCorpus('src/content/sentences').filter((file) => file.lang === 'es');
 
+/** The four categories the Spanish sample ships with (new categories are not required to exist in `es`). */
+const SAMPLE_CATEGORIES = ['health', 'history', 'science', 'technology'];
+
 describe('es sample sentences', () => {
   it('is a draft language with five sentences in each category', () => {
     expect(isDraftLanguage('es')).toBe(true);
-    expect(files.map((file) => file.category).sort()).toEqual([...CATEGORIES].sort());
+    expect(files.map((file) => file.category).sort()).toEqual(SAMPLE_CATEGORIES);
     for (const file of files) expect(file.items).toHaveLength(5);
   });
 
   it('passes every content rule of the build', () => {
     for (const file of files) {
       for (const item of file.items) {
-        const problems = checkSentence('es', file.category as Category, item as unknown as ItemToCheck);
+        const problems = checkSentence('es', file.category, item as unknown as ItemToCheck);
         expect(problems, item.id).toEqual([]);
       }
     }

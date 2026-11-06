@@ -6,6 +6,7 @@ import { LANGUAGES } from '@/i18n/config';
 import type { Language } from '@/i18n/config';
 import { getDictionary } from '@/i18n';
 import { resolveContentLang } from '@/lib/content-langs';
+import { getCategories } from '@/lib/get-categories';
 import { getContentLangs } from '@/lib/get-content-langs';
 
 export function getStaticPaths() {
@@ -19,6 +20,9 @@ const ui = getDictionary(lang);
 // interface language when it has sentences, otherwise in the default language (or the first one).
 const contentLangs = await getContentLangs();
 const contentLang = resolveContentLang(lang, contentLangs);
+// Categories come from src/content/categories.json and the sentence files: per sentence language,
+// only the categories that have a file there.
+const categories = await getCategories();
 ---
 
 <BaseLayout lang={lang} preloadTypingFont jsonLd>
@@ -28,6 +32,7 @@ const contentLang = resolveContentLang(lang, contentLangs);
     lang={lang}
     ui={ui}
     contentLangs={contentLangs}
+    categories={categories.byLang}
     initialContentLang={contentLang}
     repoUrl={siteConfig.repoUrl}
   />

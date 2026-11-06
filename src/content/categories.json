@@ -1,0 +1,6 @@
+{
+  "science": { "labels": { "id": "Sains", "en": "Science" }, "order": 10 },
+  "history": { "labels": { "id": "Sejarah", "en": "History" }, "order": 20 },
+  "technology": { "labels": { "id": "Teknologi", "en": "Technology" }, "order": 30 },
+  "health": { "labels": { "id": "Kesehatan", "en": "Health" }, "order": 40 }
+}

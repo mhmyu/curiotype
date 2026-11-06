@@ -375,6 +375,22 @@ describe('parseHistoryEntry', () => {
     expect(parseHistoryEntry({ ...valid, mode: 'zen' })).toBeNull();
   });
 
+  it('accepts any well-formed category id, also one that is not in the category list', () => {
+    expect(parseHistoryEntry({ ...valid, category: 'geography' })?.category).toBe('geography');
+    expect(parseHistoryEntry({ ...valid, category: 'earth-science' })?.category).toBe('earth-science');
+    expect(
+      parseHistoryEntry({ ...valid, categoryChars: { geography: 40, science: 20 } })?.categoryChars,
+    ).toEqual({ geography: 40, science: 20 });
+  });
+
+  it('rejects a category id or a categoryChars key that is not well formed', () => {
+    for (const category of ['Science', '1x', 'a_b', '', 'a'.repeat(31), 5]) {
+      expect(parseHistoryEntry({ ...valid, category }), String(category)).toBeNull();
+    }
+    expect(parseHistoryEntry({ ...valid, categoryChars: { 'Bad Name': 10 } })).toBeNull();
+    expect(parseHistoryEntry({ ...valid, categoryChars: { science: -1 } })).toBeNull();
+  });
+
   it('accepts the two difficulty levels and "all", and rejects the retired "medium" (no migration)', () => {
     for (const difficulty of ['easy', 'hard', 'all']) {
       expect(parseHistoryEntry({ ...valid, difficulty }), difficulty).toEqual({ ...valid, difficulty });

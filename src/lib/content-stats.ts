@@ -1,6 +1,6 @@
 import { isDraftLanguage } from '../config/languages.ts';
 import { classifyDifficulty, getDifficultyThreshold, scoreSentence } from './difficulty.ts';
-import { CATEGORIES, DIFFICULTIES } from './taxonomy.ts';
+import { DIFFICULTIES } from './taxonomy.ts';
 import type { Difficulty } from './taxonomy.ts';
 
 /**
@@ -8,6 +8,8 @@ import type { Difficulty } from './taxonomy.ts';
  * with explicit `.ts` extensions because Node runs the script directly (type
  * stripping), without Vite's alias resolution.
  */
+
+const REGISTRY_FILE = 'src/content/categories.json';
 
 /** Minimum sentences per category per language before a public release. */
 export const TARGET_PER_CATEGORY = 100;
@@ -33,6 +35,8 @@ export type DifficultyCounts = Record<Difficulty, number>;
 
 export interface CategoryStats {
   category: string;
+  /** False when `src/content/categories.json` has no entry for it (the build rejects such a file). */
+  registered: boolean;
   total: number;
   byDifficulty: DifficultyCounts;
   /** Sentences whose difficulty is not in DIFFICULTIES (the build rejects them; reported anyway). */
@@ -69,8 +73,8 @@ function emptyCounts(): DifficultyCounts {
   return { easy: 0, hard: 0 };
 }
 
-function emptyCategory(category: string): CategoryStats {
-  return { category, total: 0, byDifficulty: emptyCounts(), unknownDifficulty: 0, mislabeled: 0 };
+function emptyCategory(category: string, registered: boolean): CategoryStats {
+  return { category, registered, total: 0, byDifficulty: emptyCounts(), unknownDifficulty: 0, mislabeled: 0 };
 }
 
 /** Summary of a list of scores (any order); null for an empty list. */
@@ -89,11 +93,15 @@ export function summarizeScores(scores: readonly number[], threshold: number): S
 }
 
 /**
- * Counts sentences per language, category, and difficulty. Every known category
- * is listed for every language (zero when its file is missing); categories found
- * in files but unknown to the taxonomy are listed after them.
+ * Counts sentences per language, category, and difficulty. A language lists the categories it has a
+ * file for: first the ones registered in `categories.json` (in the order of `registeredIds`), then
+ * the unregistered ones by name. A category a language has no file for gets no row (a category may
+ * exist in only some languages; `findCategoryNotes` reports it).
  */
-export function computeContentStats(files: readonly StatsFile[]): LangStats[] {
+export function computeContentStats(
+  files: readonly StatsFile[],
+  registeredIds: readonly string[],
+): LangStats[] {
   const byLang = new Map<string, Map<string, CategoryStats>>();
   const scoresByLang = new Map<string, number[]>();
 
@@ -105,7 +113,7 @@ export function computeContentStats(files: readonly StatsFile[]): LangStats[] {
     }
     let stats = categories.get(file.category);
     if (!stats) {
-      stats = emptyCategory(file.category);
+      stats = emptyCategory(file.category, registeredIds.includes(file.category));
       categories.set(file.category, stats);
     }
     for (const item of file.items) {
@@ -126,11 +134,9 @@ export function computeContentStats(files: readonly StatsFile[]): LangStats[] {
 
   return [...byLang.keys()].sort().map((lang) => {
     const found = byLang.get(lang)!;
-    const known = CATEGORIES.map(
-      (category) => found.get(category) ?? emptyCategory(category as string),
-    );
+    const known = registeredIds.filter((category) => found.has(category)).map((category) => found.get(category)!);
     const extra = [...found.keys()]
-      .filter((category) => !(CATEGORIES as readonly string[]).includes(category))
+      .filter((category) => !registeredIds.includes(category))
       .sort()
       .map((category) => found.get(category)!);
     const categories = [...known, ...extra];
@@ -155,13 +161,18 @@ export function percentOf(count: number, total: number): number {
 }
 
 /** Human-readable warnings; an empty list means the corpus meets the targets. */
-export function findWarnings(stats: readonly LangStats[]): string[] {
+export function findWarnings(stats: readonly LangStats[], registeredIds: readonly string[]): string[] {
   const warnings: string[] = [];
   if (stats.length === 0) warnings.push('No sentence files found.');
 
   for (const lang of stats) {
     for (const category of lang.categories) {
       const label = `${lang.lang}/${category.category}`;
+      if (!category.registered) {
+        warnings.push(
+          `Category "${category.category}" (${label}.json) has no entry in ${REGISTRY_FILE} (the build rejects this). Add one, or fix the file name if it is a typo.`,
+        );
+      }
       if (category.total < TARGET_PER_CATEGORY) {
         warnings.push(`${label}: ${category.total} sentences, target is ${TARGET_PER_CATEGORY}.`);
       }
@@ -185,7 +196,36 @@ export function findWarnings(stats: readonly LangStats[]): string[] {
       }
     }
   }
+  const used = new Set(stats.flatMap((lang) => lang.categories.map((category) => category.category)));
+  for (const id of registeredIds) {
+    if (!used.has(id)) {
+      warnings.push(`Category "${id}" is listed in ${REGISTRY_FILE} but has no sentence file, so the site does not show it.`);
+    }
+  }
   return warnings;
+}
+
+/**
+ * Informative lines (not warnings) for categories that exist in some sentence languages only, such as
+ * `Category geography: only in id (missing in en, es)`. Nothing when there is a single language.
+ */
+export function findCategoryNotes(stats: readonly LangStats[]): string[] {
+  if (stats.length < 2) return [];
+  const langsByCategory = new Map<string, string[]>();
+  for (const lang of stats) {
+    for (const category of lang.categories) {
+      const langs = langsByCategory.get(category.category) ?? [];
+      langs.push(lang.lang);
+      langsByCategory.set(category.category, langs);
+    }
+  }
+  const notes: string[] = [];
+  for (const [category, present] of langsByCategory) {
+    if (present.length === stats.length) continue;
+    const missing = stats.map((lang) => lang.lang).filter((lang) => !present.includes(lang));
+    notes.push(`Category ${category}: only in ${present.join(', ')} (missing in ${missing.join(', ')})`);
+  }
+  return notes;
 }
 
 function pad(value: string | number, width: number): string {
@@ -193,7 +233,11 @@ function pad(value: string | number, width: number): string {
 }
 
 /** Plain-text report: one table per language, then the warnings. */
-export function formatStats(stats: readonly LangStats[], warnings: readonly string[]): string {
+export function formatStats(
+  stats: readonly LangStats[],
+  warnings: readonly string[],
+  notes: readonly string[] = [],
+): string {
   const lines: string[] = [];
   for (const lang of stats) {
     const draftNote = lang.draft ? ' (draft: not offered in the production language select)' : '';
@@ -220,6 +264,10 @@ export function formatStats(stats: readonly LangStats[], warnings: readonly stri
     lines.push(
       `Draft languages: ${drafts.join(', ')}. Their thresholds are starting points; calibrate them before launch (see "Adding a sentence language" in README.md).`,
     );
+  }
+  if (notes.length > 0) {
+    lines.push('Notes:');
+    for (const note of notes) lines.push(`  - ${note}`);
   }
   if (warnings.length === 0) {
     lines.push('No warnings.');

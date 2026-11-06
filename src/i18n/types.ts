@@ -1,4 +1,4 @@
-import type { Category, Difficulty } from '@/lib/taxonomy';
+import type { Difficulty } from '@/lib/taxonomy';
 import type { DataKind } from '@/features/data-tools/data-schema';
 import type { ImportErrorCode } from '@/features/data-tools/data-transfer';
 import type { CaretStyle, FontSize, Theme } from '@/features/settings/settings';
@@ -302,7 +302,6 @@ export interface Dictionary {
     changeText: string;
     hint: string;
   };
-  categories: Record<Category, string>;
   difficulties: Record<Difficulty, string>;
   results: {
     title: string;

@@ -1,5 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseCategoryRegistry } from '../src/lib/categories.ts';
+import type { CategoryDefinition } from '../src/lib/categories.ts';
 
 /** A sentence file as it is on disk, with the language and category taken from its path. */
 export interface CorpusFile {
@@ -44,3 +46,24 @@ export function argValue(argv: readonly string[], name: string): string | undefi
 }
 
 export const DEFAULT_CORPUS_DIR = 'src/content/sentences';
+export const DEFAULT_REGISTRY_PATH = 'src/content/categories.json';
+export const DEFAULT_UI_DIR = 'src/i18n/ui';
+
+/** Interface languages = the dictionary file names in `uiDir` (`en.ts`, `id.ts`), sorted. */
+export function readInterfaceLangs(uiDir: string): string[] {
+  return readdirSync(uiDir)
+    .filter((file) => file.endsWith('.ts'))
+    .map((file) => file.slice(0, -'.ts'.length))
+    .sort();
+}
+
+/** Reads and validates `categories.json`; the error message names the file and the entry. */
+export function readCategoryRegistry(path: string, interfaceLangs: readonly string[]): CategoryDefinition[] {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (error) {
+    throw new Error(`Cannot read ${path}: ${(error as Error).message}`);
+  }
+  return parseCategoryRegistry(raw, interfaceLangs);
+}

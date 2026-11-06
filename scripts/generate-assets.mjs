@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { id as idDictionary } from '../src/i18n/ui/id.ts';
 import { en as enDictionary } from '../src/i18n/ui/en.ts';
+import { parseCategoryRegistry } from '../src/lib/categories.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = path.join(ROOT, 'public');
@@ -115,10 +116,10 @@ function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function ogHtml({ lang, fonts, dictionary }) {
+function ogHtml({ lang, fonts, dictionary, categories }) {
   const { siteName, tagline } = dictionary.meta;
-  const chips = Object.values(dictionary.categories)
-    .map((label) => `<li>${escapeHtml(label)}</li>`)
+  const chips = categories
+    .map((category) => `<li>${escapeHtml(category.labels[lang])}</li>`)
     .join('');
   return `<!doctype html>
 <html lang="${lang}">
@@ -235,11 +236,15 @@ async function main() {
       await write(path.join(PUBLIC, name), png);
     }
 
-    // Open Graph images, one per language.
+    // Open Graph images, one per language. The chips are the registered categories, in their order.
+    const categories = parseCategoryRegistry(
+      JSON.parse(await readFile(path.join(ROOT, 'src/content/categories.json'), 'utf8')),
+      Object.keys(DICTIONARIES),
+    );
     for (const [lang, dictionary] of Object.entries(DICTIONARIES)) {
       const png = await renderPng(browser, {
         ...OG_SIZE,
-        html: ogHtml({ lang, fonts, dictionary }),
+        html: ogHtml({ lang, fonts, dictionary, categories }),
         transparent: false,
         label: `og/${lang}.png`,
         check: true,

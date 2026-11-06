@@ -50,7 +50,7 @@ Before the browser tests run for the first time: `pnpm exec playwright install c
 | `pnpm test:run`| Run unit tests once (used by CI)        |
 | `pnpm test:e2e`| Run browser tests (build first)         |
 | `pnpm assets:generate` | Regenerate favicon, icons and Open Graph images |
-| `pnpm content:add-category <name> --id "<label>" --en "<label>"` | Add a sentence category: updates the category list and both labels and creates a placeholder file per language (see `CONTENT_GUIDE.md`) |
+| `pnpm content:add-category <name> --id "<label>" --en "<label>"` | Add a sentence category: appends it to `src/content/categories.json` and creates a placeholder file per sentence language (`--langs`, `--order`, `--dry-run`; see `CONTENT_GUIDE.md`) |
 | `pnpm content:stats` | Count sentences per language, category and difficulty; show the score spread (`--scores`: the score and level of every sentence); warn below 100 or off 50/50 |
 | `pnpm content:check-sources` | Request every source URL and report broken links (needs a network) |
 
@@ -58,6 +58,7 @@ Before the browser tests run for the first time: `pnpm exec playwright install c
 
 ```
 src/
+  content/categories.json                    # category ids, labels and order (see "Content format")
   content/sentences/<lang>/<category>.json   # sentence corpus (see "Content format")
   content.config.ts                          # Zod schema for the corpus
   config/                                    # public configuration from env vars (parse.ts pure parsers, site.ts) and the Lora font subsets (font-subsets.ts)
@@ -73,7 +74,8 @@ src/
   layouts/ components/                       # Astro shell (header, main navigation, language switcher, footer)
   i18n/                                      # languages, Dictionary type, id/en UI strings
   lib/
-    taxonomy.ts                              # categories + difficulties (single source of truth)
+    taxonomy.ts                              # difficulties (the category list lives in content/categories.json)
+    categories.ts, get-categories.ts         # category list: validation, per-language lists, labels
     difficulty.ts                            # sentence score, per-language thresholds, classifyDifficulty (pure, tested; imported by the build rules and by content:stats)
     content-langs.ts                         # sentence languages found from the folders under content/sentences (pure, tested)
     language-names.ts                        # language names for the sentence language switch via Intl.DisplayNames (pure, tested)
@@ -112,7 +114,7 @@ MAINTAINING.md SECURITY.md                   # owner's handbook; how to report a
 
 ## Content format
 
-One file per language and category: `src/content/sentences/<lang>/<category>.json`.
+One file per language and category: `src/content/sentences/<lang>/<category>.json`. The categories themselves (id, label in each interface language, order) are listed in `src/content/categories.json`; a file named after an unlisted category fails the build, and a category shows in the filter only for the sentence languages that have a file. Add one with `pnpm content:add-category`.
 
 ```json
 {

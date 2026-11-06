@@ -4,13 +4,15 @@
 
   interface Props {
     ui: Dictionary;
+    /** Label of the sentence's category in the interface language. */
+    categoryLabel: (id: string) => string;
     /** The fact of the day (chosen by `pickDailyFact`). */
     sentence: Sentence;
     /** Starts a Sentence test with this sentence. */
     onType: (sentence: Sentence) => void;
   }
 
-  let { ui, sentence, onType }: Props = $props();
+  let { ui, categoryLabel, sentence, onType }: Props = $props();
 </script>
 
 <!-- Fact of the day on the home page: the sentence, its explanation and source, and a button to type it. -->
@@ -24,7 +26,7 @@
   <p class="text-body-long font-semibold" lang={sentence.lang}>{sentence.text}</p>
   <p class="text-body-long text-text-muted">{sentence.explanation}</p>
   <p class="text-caption text-text-muted">
-    {ui.categories[sentence.category]} · {ui.difficulties[sentence.difficulty]} ·
+    {categoryLabel(sentence.category)} · {ui.difficulties[sentence.difficulty]} ·
     {ui.results.sourceLabel}:
     <a
       href={sentence.source.url}

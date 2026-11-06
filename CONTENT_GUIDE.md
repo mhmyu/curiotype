@@ -133,11 +133,24 @@ Shown after the test, so it is where the learning happens.
 
 ## 6. Categories
 
-Current categories: `science`, `history`, `technology`, `health` (see `src/lib/taxonomy.ts`).
+A category is the name of a sentence file: `src/content/sentences/<lang>/<category>.json`. The list of categories, their labels and their order live in **one file, `src/content/categories.json`**, which is not part of the sentence folders:
+
+```json
+{
+  "science": { "labels": { "id": "Sains", "en": "Science" }, "order": 10 },
+  "geography": { "labels": { "id": "Geografi", "en": "Geography" }, "order": 50 }
+}
+```
+
+- The key is the category id: lowercase letters and `-`, starting with a letter, 1 to 30 characters.
+- `labels` is required and must have exactly one entry per interface language (`id` and `en`), 1 to 30 characters each. The label is what visitors see in the filter, the statistics and the sentence cards.
+- `order` is optional (a whole number from 0 to 9999, default 1000). Categories are shown by `order`, then by name.
+- The filter on the home page and in the collection lists only the categories that have a file in the **sentence language in use**, so a category may exist in only some languages (`pnpm content:stats` prints a note for that). If a visitor switches to a language that does not have the selected category, the filter goes back to "All".
+- The build fails if `categories.json` is broken, or if a sentence file is named after a category that is not listed there (`Category "geograpy" (id/geograpy.json) has no entry in src/content/categories.json`), which catches a typo in a file name. A listed category with no sentence file is only a warning and does not show on the site.
 
 - Pick the single best fit. If a sentence could be two categories, choose the one a reader would expect.
 - Spread topics inside a category: for science, mix astronomy, biology, physics, chemistry and earth science rather than five space facts.
-- **To add a category**, run `pnpm content:add-category <name> --id "<label>" --en "<label>"` (for example `pnpm content:add-category geography --id Geografi --en Geography`; `--langs id,en` limits the languages that get a file). It adds the name to `CATEGORIES` in `src/lib/taxonomy.ts`, the label to every interface dictionary in `src/i18n/ui/`, and a file `<lang>/<name>.json` with one placeholder sentence for each sentence language. Nothing is written if a check fails, and no existing file is overwritten. Then replace the placeholder with a real sentence (`pnpm build` fails while `REPLACE_ME` is left, on purpose, so a skeleton cannot be published), delete the file of a language that will not have the category yet, and run `pnpm content:stats --scores && pnpm check && pnpm build`. Fill each language with about 20 sentences before launching the category.
+- **To add a category**, run `pnpm content:add-category <name> --id "<label>" --en "<label>"` (for example `pnpm content:add-category geography --id Geografi --en Geography`). It appends the entry to `src/content/categories.json` (`--order N` sets the position; by default it goes last) and creates `<lang>/<name>.json` with one placeholder sentence for each sentence language (`--langs id,en` limits them; `--dry-run` only prints what it would do). Nothing is written if a check fails, and no existing file is overwritten. To add a language to a category that is already listed, run it again with that name and `--langs`: the list is left alone and only the missing files are created. Then replace the placeholder with a real sentence (`pnpm build` fails while `REPLACE_ME` is left, on purpose, so a skeleton cannot be published), delete the file of a language that will not have the category yet, and run `pnpm content:stats --scores && pnpm check && pnpm build`. Fill each language with about 20 sentences before launching the category. You can also do it by hand: add the entry to `categories.json` and create the file.
 - Indonesian and English files are **independent**. A sentence does not need a translation in the other language, and local topics (Indonesian history, geography, culture) are welcome in either.
 
 ## 7. Review checklist

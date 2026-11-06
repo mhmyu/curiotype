@@ -80,7 +80,7 @@ describe('getCategoryChars', () => {
   });
 
   it('adds up to the typed length minus the separators', () => {
-    const total = Object.values(getCategoryChars(sentences, 11)).reduce((a, b) => a + b, 0);
+    const total = Object.values(getCategoryChars(sentences, 11)).reduce((a, b) => (a ?? 0) + (b ?? 0), 0);
     expect(total).toBe(11 - 2);
   });
 });

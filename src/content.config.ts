@@ -1,9 +1,10 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { CATEGORY_PATTERN } from './lib/categories';
 import { CONTENT_LANG_PATTERN } from './lib/content-langs';
 import { checkSentence } from './lib/content-rules';
-import { CATEGORIES, DIFFICULTIES } from './lib/taxonomy';
+import { DIFFICULTIES } from './lib/taxonomy';
 
 const sentenceItem = z.object({
   /** Globally unique across all files, e.g. "en-science-001". */
@@ -31,7 +32,9 @@ const sentences = defineCollection({
   schema: z.object({
     // Must equal the folder name; the code format is checked here, the match in buildSentences.
     lang: z.string().regex(CONTENT_LANG_PATTERN),
-    category: z.enum(CATEGORIES),
+    // Any well-formed name; whether it is listed in src/content/categories.json is checked when
+    // the sentences are built (lib/categories.ts), which also catches a typo in the file name.
+    category: z.string().regex(CATEGORY_PATTERN),
     items: z.array(sentenceItem).min(1),
   })
   // Mechanical rules from CONTENT_GUIDE.md (lengths, characters, id and source format).

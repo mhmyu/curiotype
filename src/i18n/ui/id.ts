@@ -256,12 +256,6 @@ export const id: Dictionary = {
     changeText: 'Ganti teks',
     hint: 'Hasilmu masuk riwayat tetapi tidak pernah menjadi rekor pribadi.',
   },
-  categories: {
-    science: 'Sains',
-    history: 'Sejarah',
-    technology: 'Teknologi',
-    health: 'Kesehatan',
-  },
   difficulties: {
     easy: 'Mudah',
     hard: 'Sulit',

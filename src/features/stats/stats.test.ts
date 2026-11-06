@@ -304,6 +304,8 @@ describe('summarizeTrend and getTrendMax', () => {
   });
 });
 
+const FOUR = ['science', 'history', 'technology', 'health'];
+
 describe('computeCategoryAccuracy', () => {
   it('weights the accuracy of each test by its characters in the category', () => {
     const entries = [
@@ -311,7 +313,7 @@ describe('computeCategoryAccuracy', () => {
       entry({ accuracy: 96, categoryChars: { science: 100, history: 100 } }),
       entry({ accuracy: 100, categoryChars: { history: 200 } }),
     ];
-    const result = computeCategoryAccuracy(entries);
+    const result = computeCategoryAccuracy(entries, FOUR);
     expect(result.find((row) => row.category === 'science')).toEqual({
       category: 'science',
       accuracy: 93,
@@ -326,7 +328,7 @@ describe('computeCategoryAccuracy', () => {
   });
 
   it('has a row for every category, with null accuracy where nothing was typed', () => {
-    const result = computeCategoryAccuracy([entry({ categoryChars: { health: 50 } })]);
+    const result = computeCategoryAccuracy([entry({ categoryChars: { health: 50 } })], FOUR);
     expect(result.map((row) => row.category)).toEqual([
       'science',
       'history',
@@ -340,22 +342,34 @@ describe('computeCategoryAccuracy', () => {
     });
   });
 
+  it('follows the given categories: their order, a new one, and no row for any other', () => {
+    const entries = [entry({ accuracy: 80, categoryChars: { geography: 40, science: 60, retired: 500 } })];
+    const result = computeCategoryAccuracy(entries, ['geography', 'science']);
+    expect(result).toEqual([
+      { category: 'geography', accuracy: 80, chars: 40 },
+      { category: 'science', accuracy: 80, chars: 60 },
+    ]);
+    expect(computeCategoryAccuracy(entries, [])).toEqual([]);
+    // The test still counts in the totals even though its characters of "retired" make no row.
+    expect(computeTotals(entries).tests).toBe(1);
+  });
+
   it('skips entries without categoryChars', () => {
-    const result = computeCategoryAccuracy([entry({ accuracy: 50 })]);
+    const result = computeCategoryAccuracy([entry({ accuracy: 50 })], FOUR);
     expect(result.every((row) => row.accuracy === null && row.chars === 0)).toBe(true);
   });
 });
 
 describe('computeCoverage', () => {
   const sentences = [
-    { id: 'en-science-001', category: 'science' as const },
-    { id: 'en-science-002', category: 'science' as const },
-    { id: 'en-history-001', category: 'history' as const },
-    { id: 'en-health-001', category: 'health' as const },
+    { id: 'en-science-001', category: 'science' },
+    { id: 'en-science-002', category: 'science' },
+    { id: 'en-history-001', category: 'history' },
+    { id: 'en-health-001', category: 'health' },
   ];
 
   it('counts typed sentences per category and in total', () => {
-    const coverage = computeCoverage(sentences, ['en-science-001', 'en-health-001']);
+    const coverage = computeCoverage(sentences, ['en-science-001', 'en-health-001'], FOUR);
     expect(coverage.seen).toBe(2);
     expect(coverage.total).toBe(4);
     expect(coverage.byCategory).toEqual([
@@ -366,17 +380,27 @@ describe('computeCoverage', () => {
     ]);
   });
 
+  it('follows the given categories, including a new one, and ignores sentences of other categories', () => {
+    const extra = [...sentences, { id: 'en-geography-001', category: 'geography' }];
+    const coverage = computeCoverage(extra, ['en-geography-001'], ['geography', 'science']);
+    expect(coverage.byCategory).toEqual([
+      { category: 'geography', seen: 1, total: 1 },
+      { category: 'science', seen: 0, total: 2 },
+    ]);
+    expect(coverage.total).toBe(3);
+  });
+
   it('ignores ids that are not in the corpus and repeated ids', () => {
     const coverage = computeCoverage(sentences, [
       'en-science-001',
       'en-science-001',
       'en-science-999',
-    ]);
+    ], FOUR);
     expect(coverage.seen).toBe(1);
   });
 
   it('handles an empty corpus', () => {
-    const coverage = computeCoverage([], ['en-science-001']);
+    const coverage = computeCoverage([], ['en-science-001'], FOUR);
     expect(coverage.seen).toBe(0);
     expect(coverage.total).toBe(0);
   });
