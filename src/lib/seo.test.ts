@@ -9,6 +9,7 @@ import {
   buildWebSiteJsonLd,
   localeUrl,
   ogImageUrl,
+  rootUrl,
   serializeJsonLd,
 } from './seo';
 
@@ -25,13 +26,25 @@ describe('localeUrl and ogImageUrl', () => {
   });
 });
 
+describe('rootUrl', () => {
+  it('is the origin with a trailing slash', () => {
+    expect(rootUrl(SITE)).toBe('https://typing.example.com/');
+    expect(rootUrl(new URL('https://typing.example.com/some/path'))).toBe('https://typing.example.com/');
+  });
+});
+
 describe('buildAlternates', () => {
-  it('lists every language with its locale tag, then x-default for the default language', () => {
+  it('lists every language with its locale tag, then x-default pointing to the root page for the home page', () => {
     expect(buildAlternates(SITE)).toEqual([
       { hreflang: 'id-ID', href: 'https://typing.example.com/id/' },
       { hreflang: 'en-US', href: 'https://typing.example.com/en/' },
-      { hreflang: 'x-default', href: 'https://typing.example.com/id/' },
+      { hreflang: 'x-default', href: 'https://typing.example.com/' },
     ]);
+  });
+
+  it('points x-default of the other pages to the default language, which is the only one they have', () => {
+    const links = buildAlternates(SITE, 'privacy');
+    expect(links.at(-1)).toEqual({ hreflang: 'x-default', href: 'https://typing.example.com/id/privacy/' });
   });
 
   it('keeps the page path in every alternate', () => {

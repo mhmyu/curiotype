@@ -32,11 +32,6 @@ async function expectNoHorizontalScroll(page: Page) {
   expect(overflow, 'page is wider than the viewport').toBeLessThanOrEqual(0);
 }
 
-test('the root URL redirects to the default language', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveURL(/\/id\/$/);
-});
-
 for (const { code, ui } of LANGUAGES) {
   test.describe(`/${code}/`, () => {
     test('loads and hydrates without problems', async ({ page }) => {

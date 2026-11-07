@@ -6,8 +6,14 @@
  */
 export const NOINDEX_PAGES = ['stats', 'collection', 'settings'] as const;
 
-/** `sitemap({ filter })`: true keeps the page in the sitemap. Receives the absolute page URL. */
+/**
+ * `sitemap({ filter })`: true keeps the page in the sitemap. Receives the absolute page URL.
+ * The root page (`/`, the language chooser that `x-default` points to) is not listed: the sitemap
+ * lists the pages of each language, and the root is only a way in.
+ */
 export function isSitemapPage(pageUrl: string): boolean {
-  const [, , page] = new URL(pageUrl).pathname.split('/');
+  const { pathname } = new URL(pageUrl);
+  if (pathname === '/') return false;
+  const [, , page] = pathname.split('/');
   return !(NOINDEX_PAGES as readonly string[]).includes(page ?? '');
 }

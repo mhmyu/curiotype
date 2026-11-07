@@ -1,0 +1,89 @@
+---
+import { Font } from 'astro:assets';
+import '@/styles/global.css';
+import { THEME_COLOR_DARK, THEME_COLOR_LIGHT } from '@/config/pwa';
+import { THEME_INIT_SCRIPT } from '@/features/settings/theme';
+import { DEFAULT_LANGUAGE, LANGUAGES, LANGUAGE_NAMES, getOgLocale } from '@/i18n/config';
+import { getDictionary, getLocalePath } from '@/i18n';
+import { hashInlineScript } from '@/lib/csp';
+import { ROOT_REDIRECT_SCRIPT } from '@/lib/language-redirect';
+import { OG_IMAGE_SIZE, buildAlternates, ogImageUrl, rootUrl } from '@/lib/seo';
+
+// The root URL: a visitor with JavaScript is sent to the language of their browser by the inline
+// script below (lib/language-redirect.ts); a visitor without it is sent to the default language by
+// the <noscript> refresh; a crawler and anyone who is slow see two plain links. The page is a real,
+// indexable page because `x-default` in the hreflang set of the home pages points here.
+const ui = getDictionary(DEFAULT_LANGUAGE);
+const blocks = LANGUAGES.map((code) => ({ code, ui: getDictionary(code) }));
+// Inline scripts are not bundled by Astro, so their hashes are added to the CSP by hand, computed
+// from the same constants that are rendered below (`Astro.csp` only exists in a build).
+Astro.csp?.insertScriptHash(hashInlineScript(THEME_INIT_SCRIPT));
+Astro.csp?.insertScriptHash(hashInlineScript(ROOT_REDIRECT_SCRIPT));
+const site = Astro.site;
+const canonicalUrl = site ? rootUrl(site) : undefined;
+const alternates = site ? buildAlternates(site) : [];
+---
+
+<!doctype html>
+<html lang={DEFAULT_LANGUAGE}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline set:html={THEME_INIT_SCRIPT} />
+    <script is:inline set:html={ROOT_REDIRECT_SCRIPT} />
+    <noscript>
+      <meta http-equiv="refresh" content={`0;url=${getLocalePath(DEFAULT_LANGUAGE)}`} />
+    </noscript>
+    <title>{ui.meta.homeTitle}</title>
+    <meta name="description" content={ui.meta.description} />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={ui.meta.siteName} />
+    <meta property="og:title" content={ui.meta.homeTitle} />
+    <meta property="og:description" content={ui.meta.description} />
+    <meta property="og:locale" content={getOgLocale(DEFAULT_LANGUAGE)} />
+    {
+      LANGUAGES.filter((code) => code !== DEFAULT_LANGUAGE).map((code) => (
+        <meta property="og:locale:alternate" content={getOgLocale(code)} />
+      ))
+    }
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+    {
+      site && (
+        <>
+          <meta property="og:image" content={ogImageUrl(site, DEFAULT_LANGUAGE)} />
+          <meta property="og:image:width" content={String(OG_IMAGE_SIZE.width)} />
+          <meta property="og:image:height" content={String(OG_IMAGE_SIZE.height)} />
+          <meta property="og:image:alt" content={ui.meta.ogImageAlt} />
+          <meta name="twitter:card" content="summary_large_image" />
+        </>
+      )
+    }
+    <Font cssVariable="--astro-font-heading" preload />
+    <Font cssVariable="--astro-font-ui" preload />
+  </head>
+  <body class="flex min-h-dvh flex-col items-center justify-center bg-background px-4 text-text antialiased">
+    <main id="main" class="flex w-full max-w-md flex-col items-center gap-6 py-10 text-center" data-testid="language-chooser">
+      <img src="/favicon.svg" alt="" width="64" height="64" />
+      <h1>{ui.meta.siteName}</h1>
+      <ul class="flex w-full flex-col gap-4">
+        {
+          blocks.map(({ code, ui: block }) => (
+            <li lang={code} class="card flex flex-col items-center gap-3 p-5">
+              <p class="font-ui text-body-long text-text-muted">{block.meta.tagline}</p>
+              <a href={getLocalePath(code)} hreflang={code} class="btn btn-primary">
+                {LANGUAGE_NAMES[code]}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+  </body>
+</html>

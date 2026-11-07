@@ -134,7 +134,6 @@ export default defineConfig({
       },
     },
   ],
-  // The root URL redirects to the default language. This static meta-refresh page is the fallback;
-  // on Cloudflare Pages and Netlify public/_redirects answers first with a real 301.
-  redirects: { '/': `/${DEFAULT_LANGUAGE}/` },
+  // `/` is a page of its own (src/pages/index.astro) that picks the language from the browser, so
+  // there is no `redirects` entry and no `public/_redirects` rule for it.
 });

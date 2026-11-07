@@ -10,6 +10,11 @@ export function localeUrl(site: URL | string, lang: Language, path = ''): string
   return new URL(getLocalePath(lang, path), site).href;
 }
 
+/** Absolute URL of the root page, the language chooser that `x-default` points to. */
+export function rootUrl(site: URL | string): string {
+  return new URL('/', site).href;
+}
+
 /** Absolute URL of the Open Graph image of a language. */
 export function ogImageUrl(site: URL | string, lang: Language): string {
   return new URL(`/og/${lang}.png`, site).href;
@@ -22,15 +27,20 @@ export interface AlternateLink {
 }
 
 /**
- * `hreflang` alternates for one page in every language, plus `x-default` (the default
- * language), so search engines can pick the right version.
+ * `hreflang` alternates for one page in every language, plus `x-default`, so search engines can
+ * pick the right version. For the home page `x-default` is the root page (`/`), which sends each
+ * visitor to the language of their browser; the other pages have no root counterpart, so their
+ * `x-default` is the page in the default language.
  */
 export function buildAlternates(site: URL | string, path = ''): AlternateLink[] {
   const links = LANGUAGES.map((lang) => ({
     hreflang: LOCALE_TAGS[lang],
     href: localeUrl(site, lang, path),
   }));
-  links.push({ hreflang: 'x-default', href: localeUrl(site, DEFAULT_LANGUAGE, path) });
+  links.push({
+    hreflang: 'x-default',
+    href: path === '' ? rootUrl(site) : localeUrl(site, DEFAULT_LANGUAGE, path),
+  });
   return links;
 }
 

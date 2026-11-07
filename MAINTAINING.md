@@ -160,7 +160,7 @@ The site is static: `pnpm build` writes it to the `dist` folder. The recommended
 | `NODE_VERSION` | `24` | The build image's default Node is older. |
 | `PNPM_VERSION` | `12.15.0` | The build image does not read `packageManager`, and its default pnpm is older. |
 
-6. Click **Save and Deploy**. The first build takes a few minutes. When it finishes, Cloudflare shows the address `https://<name>.pages.dev`. Open it: `/` must redirect to `/id/`.
+6. Click **Save and Deploy**. The first build takes a few minutes. When it finishes, Cloudflare shows the address `https://<name>.pages.dev`. Open it: `/` must open `/id/` or `/en/`, depending on the language of your browser (a browser that lists no language the site has gets `/en/`). If it always lands on `/id/` after an earlier deploy, your browser cached the old permanent redirect: clear the site data or try a private window.
 
 > If the dashboard only offers "Workers" with static assets and no "Pages", use that flow with the same build command and output folder `dist`; the `_headers` file works there too. Cloudflare's own documentation is the reference if the screens differ.
 

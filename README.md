@@ -65,7 +65,8 @@ src/
   content.config.ts                          # Zod schema for the corpus
   config/                                    # public configuration from env vars (parse.ts pure parsers, site.ts) and the Lora font subsets (font-subsets.ts)
   pages/
-    [lang]/index.astro                       # home page: /id/ and /en/ (/ redirects to /id/)
+    index.astro                              # root /: opens the language of the browser
+    [lang]/index.astro                       # home page: /id/ and /en/
     [lang]/stats.astro                       # statistics page: /id/stats/ and /en/stats/
     [lang]/collection.astro                  # collection page: /id/collection/ and /en/collection/ (saved sentences)
     [lang]/settings.astro                    # settings page: /id/settings/ and /en/settings/ (settings + data tools)

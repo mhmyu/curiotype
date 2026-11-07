@@ -19,6 +19,10 @@ describe('isSitemapPage', () => {
     }
   });
 
+  it('leaves the root page out: it is only a way in', () => {
+    expect(isSitemapPage('https://example.org/')).toBe(false);
+  });
+
   it('does not drop a page that only starts with the same letters', () => {
     expect(isSitemapPage('https://example.org/id/statistics-guide/')).toBe(true);
   });

@@ -132,10 +132,10 @@ test('the settings page, the data tools and the privacy page run without a viola
   expect(await violations()).toEqual([]);
 });
 
-test('the 404 page and the root redirect load without a violation', async ({ page }) => {
+test('the 404 page and the root page load without a violation', async ({ page }) => {
   const violations = await trackViolations(page);
   await page.goto('/');
-  await expect(page).toHaveURL(/\/id\/$/);
+  await expect(page).toHaveURL(/\/(id|en)\/$/);
   const response = await page.goto('/no-such-page/');
   expect(response?.status()).toBe(404);
   expect(await violations()).toEqual([]);
