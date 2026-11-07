@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import FingerTable from '@/components/FingerTable.astro';
+import HandsFigure from '@/components/HandsFigure.astro';
 import KeyboardFigure from '@/components/KeyboardFigure.astro';
 import { LANGUAGES } from '@/i18n/config';
 import type { Language } from '@/i18n/config';
@@ -46,6 +47,8 @@ const text = ui.guide.page;
       {text.homeRowBody.map((paragraph) => <p class="text-body-long">{paragraph}</p>)}
       <h3 class="mt-2">{text.diagramTitle}</h3>
       <KeyboardFigure ui={ui} />
+      <h3 class="mt-2">{text.handsTitle}</h3>
+      <HandsFigure ui={ui} />
     </section>
 
     <section class="flex flex-col gap-3" aria-labelledby="guide-fingers">

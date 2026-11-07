@@ -1,5 +1,6 @@
 ---
 import { Font } from 'astro:assets';
+import Logo from '@/components/Logo.astro';
 import '@/styles/global.css';
 import { THEME_COLOR_DARK, THEME_COLOR_LIGHT } from '@/config/pwa';
 import { THEME_INIT_SCRIPT } from '@/features/settings/theme';
@@ -70,7 +71,7 @@ const alternates = site ? buildAlternates(site) : [];
   </head>
   <body class="flex min-h-dvh flex-col items-center justify-center bg-background px-4 text-text antialiased">
     <main id="main" class="flex w-full max-w-md flex-col items-center gap-6 py-10 text-center" data-testid="language-chooser">
-      <img src="/favicon.svg" alt="" width="64" height="64" />
+      <Logo size={64} />
       <h1>{ui.meta.siteName}</h1>
       <ul class="flex w-full flex-col gap-4">
         {

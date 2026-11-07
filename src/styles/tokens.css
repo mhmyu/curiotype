@@ -29,6 +29,20 @@
   --card-shadow: 0 0 5px rgb(60 60 60 / 0.3);
 }
 
+/*
+ * Finger colors of the typing guide (keys of the keyboard picture and the fingers of the hands):
+ * 1 pinky, 2 ring finger, 3 middle finger, 4 index finger, 5 thumb. Pastel fills with dark ink
+ * (`on-primary`, 9.7:1 or better), so like `primary` they are the same in light and dark mode.
+ * Color is never the only cue: every key and finger also carries its number.
+ */
+:root {
+  --finger-1: #f4a3c4;
+  --finger-2: #ffbd7a;
+  --finger-3: #f5e56b;
+  --finger-4: #8dd4f2;
+  --finger-5: #c3b0f4;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --primary: #a5ed6e;

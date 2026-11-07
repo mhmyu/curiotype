@@ -124,3 +124,30 @@ describe('card shadow', () => {
     expect(css.match(/--card-shadow: 0 0 0 1px var\(--border\);/g)).toHaveLength(2);
   });
 });
+
+describe('finger colors (typing guide)', () => {
+  const fingerBlock = /\/\*[\s\S]*?Finger colors[\s\S]*?\*\/\s*:root \{([\s\S]*?)\n\}/.exec(css);
+  const fingers: Tokens = {};
+  for (const [, name, value] of (fingerBlock?.[1] ?? '').matchAll(/--(finger-\d):\s*(#[0-9a-f]{6});/gi)) {
+    fingers[name] = value.toLowerCase();
+  }
+  const names = ['finger-1', 'finger-2', 'finger-3', 'finger-4', 'finger-5'];
+  const globalCss = readFileSync(new URL('./global.css', import.meta.url), 'utf8');
+
+  it('defines five different colors, in one block that is not repeated for dark mode', () => {
+    expect(Object.keys(fingers).sort()).toEqual(names);
+    expect(new Set(Object.values(fingers)).size).toBe(5);
+    expect(css.match(/--finger-1:/g)).toHaveLength(1);
+  });
+
+  it('keeps the dark ink readable on every finger color (AA) in both modes', () => {
+    for (const name of names) {
+      expect(contrast(light['on-primary'], fingers[name]), name).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(explicitDark['on-primary'], fingers[name]), name).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('is mapped to Tailwind colors (fill-finger-1 and so on)', () => {
+    for (const name of names) expect(globalCss).toContain(`--color-${name}: var(--${name});`);
+  });
+});

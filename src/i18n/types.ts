@@ -29,6 +29,7 @@ export interface Dictionary {
     menu: string;
     /** Text of the skip link (first focusable element of every page). */
     skipToContent: string;
+    backToTop: string;
     /** Shown only when JavaScript is off: the typing test needs it. */
     noscript: string;
     home: string;
@@ -382,6 +383,9 @@ export interface Dictionary {
       legend: string;
       /** Full finger names, index 0 = pinky to index 4 = thumb. */
       fingerNames: { left: string[]; right: string[] };
+      /** Accessible name of the hands picture, and the caption that explains the colors. */
+      handsLabel: string;
+      handsCaption: string;
       tableCaption: string;
       tableFinger: string;
       tableKeys: string;
@@ -405,6 +409,7 @@ export interface Dictionary {
       homeRowBody: string[];
       /** Heading above the keyboard diagram and above the table with the same information. */
       diagramTitle: string;
+      handsTitle: string;
       tableTitle: string;
       fingersTitle: string;
       fingersIntro: string;

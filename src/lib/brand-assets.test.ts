@@ -53,7 +53,8 @@ describe('favicon.svg', () => {
 
   it('uses the design primary and on-primary colors, not the old amber', () => {
     expect(svg).toContain('#a5ed6e');
-    expect(svg).toContain('#111111');
+    // The optimized logo writes the dark color in its short form.
+    expect(svg).toMatch(/#111(111)?\b/);
     expect(svg.toLowerCase()).not.toContain('#f59e0b');
   });
 
@@ -81,5 +82,12 @@ describe('favicon.ico', () => {
 
   it('is a small file', () => {
     expect(ico.length).toBeLessThan(8 * 1024);
+  });
+});
+
+describe('logo source', () => {
+  it('favicon.svg is exactly the shared logo (src/lib/logo.ts), so the two cannot drift apart', async () => {
+    const { logoSvg } = await import('./logo');
+    expect(readFileSync(path.join(PUBLIC_DIR, 'favicon.svg'), 'utf8').trim()).toBe(logoSvg());
   });
 });

@@ -1,4 +1,4 @@
-// Writes public/favicon.ico (16, 32 and 48 px) from the existing public/favicon.svg.
+// Writes public/favicon.ico (16, 32 and 48 px) from the existing public/favicon.svg (the logo in src/lib/logo.ts).
 // Run it with `pnpm assets:favicon-ico`; it only touches that one file, so brand assets you
 // replaced with your own artwork stay as they are. Browsers that cannot use the SVG favicon,
 // and crawlers that request /favicon.ico directly, use this file.

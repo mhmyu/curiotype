@@ -1,0 +1,29 @@
+---
+import { LOGO_BODY_PATH, LOGO_FILL, LOGO_GLYPH_PATH, LOGO_INK, LOGO_RING_PATH, LOGO_VIEWBOX } from '@/lib/logo';
+
+interface Props {
+  /** Width and height in px (also set as attributes, so the size is known before the CSS loads). */
+  size: number;
+  class?: string;
+}
+
+const { size, class: className } = Astro.props;
+---
+
+<!--
+  The logo as inline SVG: no extra request and no flash. It is decorative (the site name is the
+  text next to it), so it is hidden from assistive technology. The colors are the same in light
+  and dark mode, as in the favicon. The paths live in src/lib/logo.ts, shared with the icon scripts.
+-->
+<svg
+  viewBox={LOGO_VIEWBOX}
+  width={size}
+  height={size}
+  class={className}
+  aria-hidden="true"
+  focusable="false"
+  data-logo
+>
+  <path fill={LOGO_FILL} d={LOGO_BODY_PATH}></path>
+  <path fill={LOGO_INK} d={`${LOGO_RING_PATH}${LOGO_GLYPH_PATH}`}></path>
+</svg>

@@ -20,6 +20,11 @@
   --color-border: var(--border);
   --color-typing-pending: var(--typing-pending);
   --color-typing-correct: var(--typing-correct);
+  --color-finger-1: var(--finger-1);
+  --color-finger-2: var(--finger-2);
+  --color-finger-3: var(--finger-3);
+  --color-finger-4: var(--finger-4);
+  --color-finger-5: var(--finger-5);
 }
 
 @theme {
@@ -408,6 +413,55 @@
    * (`aria-expanded`, see SiteHeader.astro); from `md` it sits in the bar next to the logo, with the
    * language links at the right end. All targets are at least 44px tall.
    */
+  /* Round back-to-top button: the ring around it is the scroll progress (set from a script). */
+  .back-to-top {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border-radius: 9999px;
+    background-color: var(--surface);
+    color: var(--text);
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    /* Hidden until the page is scrolled: invisible, not clickable and not in the Tab order. */
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 300ms ease,
+      visibility 300ms ease;
+  }
+
+  .back-to-top[data-visible='true'] {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .back-to-top-track {
+    stroke: var(--border);
+  }
+
+  .back-to-top-ring {
+    stroke: var(--accent);
+    /* Full offset = nothing drawn; the script moves it as the page scrolls. */
+    stroke-dashoffset: 125.66;
+  }
+
+  .back-to-top-arrow {
+    stroke: currentColor;
+  }
+
+  @media print {
+    .back-to-top {
+      display: none;
+    }
+  }
+
   .site-header {
     position: relative;
     border-bottom: 1px solid var(--border);

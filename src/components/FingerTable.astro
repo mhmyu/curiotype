@@ -1,5 +1,6 @@
 ---
 import type { Dictionary } from '@/i18n/types';
+import { getFingerBgClass } from '@/features/guide/finger-colors';
 import { FINGER_NUMBERS, HANDS, keysForFinger } from '@/features/guide/keyboard-fingers';
 
 interface Props {
@@ -26,8 +27,17 @@ const text = ui.guide.diagram;
           FINGER_NUMBERS.map((finger) => (
             <tr class="border-b border-border" data-finger={`${hand}-${finger}`}>
               <th scope="row" class="py-2 pr-4 align-top font-ui text-ui">
-                {text.handLetter[hand]}
-                {finger} · {text.fingerNames[hand][finger - 1]}
+                <span class="inline-flex items-center gap-2">
+                  <span
+                    class={`inline-block size-4 shrink-0 rounded-xs border-2 border-on-primary ${getFingerBgClass(hand, finger)}`}
+                    aria-hidden="true"
+                    data-swatch={finger}
+                  />
+                  <span>
+                    {text.handLetter[hand]}
+                    {finger} · {text.fingerNames[hand][finger - 1]}
+                  </span>
+                </span>
               </th>
               <td class="py-2">
                 <ul class="flex flex-wrap gap-1">

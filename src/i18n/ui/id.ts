@@ -9,13 +9,14 @@ export const id: Dictionary = {
     description:
       'Latihan mengetik 10 jari dengan kalimat bermakna dari sains, sejarah, teknologi, dan kesehatan. Ukur WPM dan akurasi, lalu pelajari faktanya.',
     ogImageAlt:
-      'Logo curiotype, huruf T hitam pada kotak hijau, dengan nama situs, slogan Latihan mengetik dengan kalimat yang menambah pengetahuan, dan empat kategori kalimat.',
+      'Logo curiotype, huruf c hitam pada kotak hijau, dengan nama situs, slogan Latihan mengetik dengan kalimat yang menambah pengetahuan, dan empat kategori kalimat.',
   },
   nav: {
     language: 'Bahasa',
     main: 'Navigasi utama',
     menu: 'Menu',
     skipToContent: 'Lewati ke konten',
+    backToTop: 'Kembali ke atas',
     noscript:
       'Situs ini membutuhkan JavaScript untuk menjalankan tes mengetik. Aktifkan JavaScript di peramban Anda, lalu muat ulang halaman.',
     home: 'Beranda',
@@ -391,11 +392,15 @@ export const id: Dictionary = {
       rightHand: 'Tangan kanan',
       handLetter: { left: 'Ki', right: 'Ka' },
       legend:
-        'Tiap tombol menunjukkan jarinya: Ki adalah tangan kiri dan Ka tangan kanan; 1 kelingking, 2 jari manis, 3 jari tengah, 4 telunjuk, dan 5 jempol. Tombol hijau adalah baris dasar, tempat jarimu beristirahat. Garis di bawah F dan J menandai tonjolan yang bisa dirasakan telunjukmu.',
+        'Tiap tombol menunjukkan jarinya: Ki adalah tangan kiri dan Ka tangan kanan; 1 kelingking, 2 jari manis, 3 jari tengah, 4 telunjuk, dan 5 jempol. Warna tombol sama dengan warna jari yang menekannya (tangan kanan memakai urutan warna lain dari tangan kiri). Tombol berbingkai tebal adalah baris dasar, tempat jarimu beristirahat. Garis di bawah F dan J menandai tonjolan yang bisa dirasakan telunjukmu.',
       fingerNames: {
         left: ['Kelingking kiri', 'Jari manis kiri', 'Jari tengah kiri', 'Telunjuk kiri', 'Jempol kiri'],
         right: ['Kelingking kanan', 'Jari manis kanan', 'Jari tengah kanan', 'Telunjuk kanan', 'Jempol kanan'],
       },
+      handsLabel:
+        'Gambar tangan kiri dan kanan dilihat dari atas. Setiap jari punya warna dan nomor yang sama dengan tombol yang ditekannya.',
+      handsCaption:
+        'Warna jari sama dengan warna tombol yang ditekannya. Tangan kiri: 1 merah muda, 2 oranye, 3 kuning, 4 biru, 5 ungu. Tangan kanan memakai warna yang sama dengan urutan lain: 1 kuning, 2 biru, 3 ungu, 4 merah muda, 5 oranye, supaya dua jari yang bertemu di tengah keyboard tidak berwarna sama. Angkanya tetap ada, jadi gambar ini tetap terbaca tanpa warna.',
       tableCaption: 'Jari mana menekan tombol mana',
       tableFinger: 'Jari',
       tableKeys: 'Tombol',
@@ -432,6 +437,7 @@ export const id: Dictionary = {
         'Setelah menekan satu tombol, kembalikan jari ke tombol dasarnya. Baris dasar adalah titik awal setiap gerakan.',
       ],
       diagramTitle: 'Jari mana menekan tombol mana',
+      handsTitle: 'Warna jari di tangan dan di keyboard',
       tableTitle: 'Informasi yang sama dalam bentuk tabel',
       fingersTitle: 'Jari mana untuk tombol mana',
       fingersIntro:

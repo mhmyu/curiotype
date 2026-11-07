@@ -138,3 +138,93 @@ test('the language links keep the page: the guide and the other pages open in th
   await expect(page).toHaveURL(/\/id\/guide\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(id.guide.page.heading);
 });
+
+// Finger colors: the keys, the hands and the table swatches share five colors, one per finger.
+const fillOf = (locator: ReturnType<Page['locator']>) =>
+  locator.first().evaluate((el) => getComputedStyle(el).fill);
+const backgroundOf = (locator: ReturnType<Page['locator']>) =>
+  locator.first().evaluate((el) => getComputedStyle(el).backgroundColor);
+
+test('the hands picture sits under the keyboard picture, with ten numbered fingers', async ({ page }) => {
+  await page.goto('/en/guide/');
+  const keyboard = await page.getByTestId('keyboard-figure').boundingBox();
+  const hands = page.getByTestId('hands-figure');
+  await expect(hands).toBeVisible();
+  const box = await hands.boundingBox();
+  expect(box!.y).toBeGreaterThan(keyboard!.y + keyboard!.height - 1);
+  await expect(page.getByRole('img', { name: en.guide.diagram.handsLabel })).toBeVisible();
+  await expect(hands.locator('rect[data-finger]')).toHaveCount(10);
+  await expect(hands.getByRole('heading')).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 3, name: en.guide.page.handsTitle })).toBeVisible();
+  await expect(hands).toContainText(en.guide.diagram.handsCaption);
+});
+
+for (const viewport of [{ width: 390, height: 844 }, { width: 1024, height: 800 }]) {
+  test(`a finger has the same color on the keys, on the hands and in the table, and no finger shares a color across the hands, at ${viewport.width}px`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/id/guide/');
+    const fills = new Set<string>();
+    for (const hand of ['left', 'right'] as const) {
+      for (const finger of [1, 2, 3, 4, 5]) {
+        const id = `${hand}-${finger}`;
+        const onHands = await fillOf(page.locator(`[data-hand="${hand}"] rect[data-finger="${id}"]`));
+        const onKeys = await fillOf(
+          page.locator(`[data-testid="keyboard-figure"] g[data-finger="${id}"] rect`).locator('visible=true'),
+        );
+        const inTable = await backgroundOf(page.locator(`[data-testid="finger-table"] tr[data-finger="${id}"] [data-swatch]`));
+        expect(onKeys, `keys of ${id}`).toBe(onHands);
+        expect(inTable, `table of ${id}`).toBe(onHands);
+        fills.add(onHands);
+        // The same finger on the other hand has another color, so equal colors never meet in the middle.
+        if (hand === 'right') {
+          const left = await fillOf(page.locator(`[data-hand="left"] rect[data-finger="left-${finger}"]`));
+          expect(onHands, `finger ${finger} on both hands`).not.toBe(left);
+        }
+      }
+    }
+    expect(fills.size).toBe(5);
+  });
+}
+
+test('the finger colors do not change in dark mode and the page has no horizontal scroll at 320px', async ({ page }) => {
+  await page.goto('/en/guide/');
+  const light = await fillOf(page.locator('[data-hand="left"] rect[data-finger="left-3"]'));
+  await page.emulateMedia({ colorScheme: 'dark' });
+  expect(await fillOf(page.locator('[data-hand="left"] rect[data-finger="left-3"]'))).toBe(light);
+
+  await page.setViewportSize({ width: 320, height: 640 });
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+  const hands = await page.getByTestId('hands-figure').locator('svg').boundingBox();
+  expect(hands!.width).toBeLessThanOrEqual(320);
+  expect(hands!.height).toBeGreaterThan(100);
+});
+
+test('the home row keys have a thick outline instead of a color of their own', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 800 });
+  await page.goto('/en/guide/');
+  const widthOf = (key: string) =>
+    page
+      .locator(`[data-testid="keyboard-diagram-both"] g[data-key="${key}"] rect`)
+      .first()
+      .evaluate((el) => parseFloat(el.getAttribute('stroke-width') ?? '0'));
+  expect(await widthOf('F')).toBeGreaterThan(await widthOf('R'));
+  expect(await widthOf('A')).toBeGreaterThan(await widthOf('Q'));
+});
+
+test('the two index fingers and the two thumbs have different colors where they meet in the middle', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 800 });
+  await page.goto('/id/guide/');
+  const fill = (key: string, finger: string) =>
+    fillOf(page.locator(`[data-testid="keyboard-diagram-both"] g[data-key="${key}"][data-finger="${finger}"] rect`));
+  // G (left index) next to H (right index), T next to Y, B next to N.
+  for (const [left, right] of [['G', 'H'], ['T', 'Y'], ['B', 'N']] as const) {
+    expect(await fill(left, 'left-4'), `${left} and ${right}`).not.toBe(await fill(right, 'right-4'));
+  }
+  // The space bar: one half per thumb, two colors.
+  const halves = page.locator('[data-testid="keyboard-diagram-both"] g[data-key="Space"]');
+  await expect(halves).toHaveCount(2);
+  expect(await fillOf(halves.nth(0).locator('rect'))).not.toBe(await fillOf(halves.nth(1).locator('rect')));
+});

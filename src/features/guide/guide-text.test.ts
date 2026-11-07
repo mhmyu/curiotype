@@ -95,3 +95,20 @@ describe.each(LANGUAGES)('home page links to the guide (%s)', (lang) => {
     expect(guideCard.link.trim()).not.toBe('');
   });
 });
+
+describe.each(LANGUAGES)('hands picture text (%s)', (lang) => {
+  const ui = getDictionary(lang);
+
+  it('has a heading, a label and a caption that names the five colors in finger order', () => {
+    expect(ui.guide.page.handsTitle.trim()).not.toBe('');
+    expect(ui.guide.diagram.handsLabel.trim()).not.toBe('');
+    // The caption lists "1 ..., 2 ..., 3 ..., 4 ..., 5 ..." so the colors can be told apart in words.
+    expect(ui.guide.diagram.handsCaption).toMatch(/1 .*2 .*3 .*4 .*5 /);
+    // Both hands are listed: the caption has two sequences of the numbers 1 to 5.
+    expect(ui.guide.diagram.handsCaption.match(/1 [^,]*, 2 /g)).toHaveLength(2);
+  });
+
+  it('the legend no longer calls the home row "green" (the keys now have finger colors)', () => {
+    expect(ui.guide.diagram.legend.toLowerCase()).not.toMatch(/hijau|green/);
+  });
+});

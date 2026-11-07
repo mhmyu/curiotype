@@ -5,10 +5,10 @@ import {
   KEYBOARD_ROWS,
   KEYBOARD_WIDTH,
   getHandExtent,
-  getZoneShade,
   type Hand,
   type KeyboardKey,
 } from '@/features/guide/keyboard-fingers';
+import { getFingerFillClass } from '@/features/guide/finger-colors';
 
 interface Props {
   ui: Dictionary;
@@ -26,30 +26,12 @@ const PAD = 2;
 
 const keys: KeyboardKey[] = KEYBOARD_KEYS.filter((key) => hand === 'both' || key.hand === hand);
 
-// The whole space bar is one shape with both thumbs; a single hand shows its half.
-const halves = keys.filter((key) => key.id.startsWith('space-'));
-const drawn: (KeyboardKey & { badges: { hand: Hand; finger: number; side: 'start' | 'end' | 'cell' }[] })[] =
-  keys
-    .filter((key) => !key.id.startsWith('space-'))
-    .map((key) => ({ ...key, badges: [{ hand: key.hand, finger: key.finger, side: 'cell' as const }] }));
-if (halves.length === 2) {
-  const [left, right] = halves as [KeyboardKey, KeyboardKey];
-  drawn.push({
-    ...left,
-    id: 'space',
-    width: left.width + right.width,
-    badges: [
-      { hand: 'left', finger: 5, side: 'start' },
-      { hand: 'right', finger: 5, side: 'end' },
-    ],
-  });
-} else if (halves.length === 1) {
-  const only = halves[0]!;
-  drawn.push({
-    ...only,
-    badges: [{ hand: only.hand, finger: 5, side: only.hand === 'left' ? 'start' : 'end' }],
-  });
-}
+// The two halves of the space bar are drawn as two keys, one per thumb: the thumbs have different
+// colors, and the line between the halves shows that two fingers share the bar.
+const drawn: (KeyboardKey & { badges: { hand: Hand; finger: number }[] })[] = keys.map((key) => ({
+  ...key,
+  badges: [{ hand: key.hand, finger: key.finger }],
+}));
 
 // Crop the view to the keys that are drawn.
 const extent =
@@ -74,10 +56,11 @@ const label = hand === 'both' ? text.labelBoth : hand === 'left' ? text.labelLef
       const y = key.row * UNIT + GAP / 2;
       const width = key.width * UNIT - GAP;
       const height = UNIT - GAP;
-      const shade = getZoneShade(key.finger);
-      const fill = key.home ? 'fill-primary' : shade === 'a' ? 'fill-surface' : 'fill-background';
-      const stroke = key.home ? 'stroke-on-primary' : 'stroke-border';
-      const ink = key.home ? 'fill-on-primary' : 'fill-text';
+      // Every key has the color of its finger and dark ink (readable on all five colors). The home
+      // row is marked by a thick outline instead of a color of its own.
+      const fill = getFingerFillClass(key.hand, key.finger);
+      const stroke = 'stroke-on-primary';
+      const ink = 'fill-on-primary';
       return (
         <g data-key={key.label} data-finger={`${key.hand}-${key.finger}`}>
           <rect
@@ -87,7 +70,7 @@ const label = hand === 'both' ? text.labelBoth : hand === 'left' ? text.labelLef
             height={height}
             rx="6"
             class={`${fill} ${stroke}`}
-            stroke-width={key.home ? 2.5 : 1.5}
+            stroke-width={key.home ? 4 : 1.5}
           />
           <text
             x={x + width / 2}
@@ -110,23 +93,19 @@ const label = hand === 'both' ? text.labelBoth : hand === 'left' ? text.labelLef
               data-testid="keyboard-bump"
             />
           )}
-          {key.badges.map((badge) => {
-            const anchor = badge.side === 'start' ? 'start' : 'end';
-            const badgeX = badge.side === 'start' ? x + 8 : x + width - 6;
-            return (
-              <text
-                x={badgeX}
-                y={y + 17}
-                text-anchor={anchor}
-                class={`${ink} font-ui`}
-                font-size="16"
-                font-weight="700"
-              >
-                {text.handLetter[badge.hand]}
-                {badge.finger}
-              </text>
-            );
-          })}
+          {key.badges.map((badge) => (
+            <text
+              x={x + width - 6}
+              y={y + 17}
+              text-anchor="end"
+              class={`${ink} font-ui`}
+              font-size="16"
+              font-weight="700"
+            >
+              {text.handLetter[badge.hand]}
+              {badge.finger}
+            </text>
+          ))}
         </g>
       );
     })

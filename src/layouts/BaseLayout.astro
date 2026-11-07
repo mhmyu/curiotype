@@ -1,6 +1,8 @@
 ---
 import { Font, fontData } from 'astro:assets';
 import '@/styles/global.css';
+import BackToTop from '@/components/BackToTop.astro';
+import Logo from '@/components/Logo.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
 import PwaUpdater from '@/features/pwa/PwaUpdater.svelte';
 import { THEME_COLOR_DARK, THEME_COLOR_LIGHT } from '@/config/pwa';
@@ -169,48 +171,55 @@ const structuredData =
     </a>
     <SiteHeader lang={lang} ui={ui} current={path} showLanguageSwitcher={showLanguageSwitcher} showNav={showNav} />
     <!-- tabindex="-1": the skip link moves the focus here; the box itself is not a control. -->
-    <main id="main" tabindex="-1" class="mx-auto w-full max-w-3xl flex-1 px-4 pb-10 focus:outline-none">
+    <main id="main" tabindex="-1" class="mx-auto w-full max-w-3xl flex-1 px-4 pb-10 pt-6 focus:outline-none sm:pt-10">
       <noscript>
         <p class="card mt-4 p-5 text-body-long" data-testid="noscript-message">{ui.nav.noscript}</p>
       </noscript>
       <slot />
     </main>
     <footer class="mx-auto w-full max-w-3xl px-4 pb-8 text-caption text-text-muted">
-      {
-        showNav && (
-          <nav aria-label={ui.footer.label} class="mb-3">
-            <ul class="flex flex-wrap gap-x-5 gap-y-1">
-              <li>
-                <a href={getLocalePath(lang, 'privacy')} class="inline-flex min-h-11 items-center text-accent underline">
-                  {ui.footer.privacy}
-                </a>
-              </li>
-              <li>
-                <a href={getLocalePath(lang, 'settings')} class="inline-flex min-h-11 items-center text-accent underline">
-                  {ui.nav.settings}
-                </a>
-              </li>
-              {repoUrl && (
-                <li>
-                  <a
-                    href={repoUrl}
-                    rel="noopener noreferrer"
-                    class="inline-flex min-h-11 items-center text-accent underline"
-                  >
-                    GitHub
-                  </a>
-                </li>
-              )}
-            </ul>
-          </nav>
-        )
-      }
-      <p>
-        {ui.footer.sentences}:
-        <a href={licenseUrl} rel="noopener noreferrer" class="text-accent underline">CC BY-SA 4.0</a>, typing
-        contributors
-      </p>
+      <!-- Links and license on the left, the logo (decorative) at the bottom right. -->
+      <div class="flex items-end justify-between gap-4" data-testid="footer-row">
+        <div class="min-w-0">
+          {
+            showNav && (
+              <nav aria-label={ui.footer.label} class="mb-3">
+                <ul class="flex flex-wrap gap-x-5 gap-y-1">
+                  <li>
+                    <a href={getLocalePath(lang, 'privacy')} class="inline-flex min-h-11 items-center text-accent underline">
+                      {ui.footer.privacy}
+                    </a>
+                  </li>
+                  <li>
+                    <a href={getLocalePath(lang, 'settings')} class="inline-flex min-h-11 items-center text-accent underline">
+                      {ui.nav.settings}
+                    </a>
+                  </li>
+                  {repoUrl && (
+                    <li>
+                      <a
+                        href={repoUrl}
+                        rel="noopener noreferrer"
+                        class="inline-flex min-h-11 items-center text-accent underline"
+                      >
+                        GitHub
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </nav>
+            )
+          }
+          <p>
+            {ui.footer.sentences}:
+            <a href={licenseUrl} rel="noopener noreferrer" class="text-accent underline">CC BY-SA 4.0</a>, typing
+            contributors
+          </p>
+        </div>
+        <Logo size={32} class="size-8 shrink-0" />
+      </div>
     </footer>
+    <BackToTop ui={ui} />
     <!-- Registers the service worker (production build only) and shows the update toast. -->
     <PwaUpdater client:only="svelte" text={ui.pwa} />
     <script>

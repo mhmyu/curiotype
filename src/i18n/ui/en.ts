@@ -9,13 +9,14 @@ export const en: Dictionary = {
     description:
       'Practice touch typing with meaningful sentences from science, history, technology and health. Measure your WPM and accuracy, then learn the fact in each.',
     ogImageAlt:
-      'The curiotype logo, a black letter T on a green square, with the site name, the tagline Practice typing with sentences that teach you something, and the four sentence categories.',
+      'The curiotype logo, a black letter c on a green square, with the site name, the tagline Practice typing with sentences that teach you something, and the four sentence categories.',
   },
   nav: {
     language: 'Language',
     main: 'Main navigation',
     menu: 'Menu',
     skipToContent: 'Skip to content',
+    backToTop: 'Back to top',
     noscript:
       'This site needs JavaScript to run the typing test. Turn on JavaScript in your browser and reload the page.',
     home: 'Home',
@@ -391,11 +392,15 @@ export const en: Dictionary = {
       rightHand: 'Right hand',
       handLetter: { left: 'L', right: 'R' },
       legend:
-        'Each key shows its finger: L is the left hand and R the right hand; 1 is the pinky, 2 the ring finger, 3 the middle finger, 4 the index finger and 5 the thumb. The green keys are the home row, where your fingers rest. The bar under F and J marks the bumps you can feel with your index fingers.',
+        'Each key shows its finger: L is the left hand and R the right hand; 1 is the pinky, 2 the ring finger, 3 the middle finger, 4 the index finger and 5 the thumb. A key has the color of the finger that presses it (the right hand uses the colors in another order than the left hand). The keys with a thick outline are the home row, where your fingers rest. The bar under F and J marks the bumps you can feel with your index fingers.',
       fingerNames: {
         left: ['Left pinky', 'Left ring finger', 'Left middle finger', 'Left index finger', 'Left thumb'],
         right: ['Right pinky', 'Right ring finger', 'Right middle finger', 'Right index finger', 'Right thumb'],
       },
+      handsLabel:
+        'The left and the right hand seen from above. Each finger has the same color and number as the keys it presses.',
+      handsCaption:
+        'A finger has the same color as the keys it presses. Left hand: 1 pink, 2 orange, 3 yellow, 4 blue, 5 purple. The right hand uses the same colors in another order: 1 yellow, 2 blue, 3 purple, 4 pink, 5 orange, so two fingers that meet in the middle of the keyboard never share a color. The numbers stay, so the picture can be read without the colors.',
       tableCaption: 'Which finger presses which key',
       tableFinger: 'Finger',
       tableKeys: 'Keys',
@@ -432,6 +437,7 @@ export const en: Dictionary = {
         'After every key you press, bring the finger back to its home key. The home row is the starting point of every movement.',
       ],
       diagramTitle: 'Which finger presses which key',
+      handsTitle: 'Finger colors on the hands and on the keyboard',
       tableTitle: 'The same information as a table',
       fingersTitle: 'Which finger for which key',
       fingersIntro:

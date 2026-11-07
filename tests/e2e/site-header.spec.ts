@@ -24,7 +24,9 @@ test.describe('phone (menu behind the hamburger button)', () => {
     // The logo is decorative; the link is still named after the site (visually hidden text).
     await expect(brand(page)).toBeVisible();
     await expect(page.getByRole('link', { name: en.meta.siteName })).toHaveAttribute('href', '/en/');
-    await expect(brand(page).locator('img')).toHaveAttribute('alt', '');
+    // The logo is inline SVG and decorative: hidden from assistive technology, the name is the link text.
+    await expect(brand(page).locator('svg[data-logo]')).toHaveAttribute('aria-hidden', 'true');
+    await expect(brand(page).locator('img')).toHaveCount(0);
     // Visually hidden (a 1 px clipped box), still read by screen readers.
     expect((await brand(page).locator('span').boundingBox())!.width).toBeLessThanOrEqual(1);
     await expectNoHorizontalScroll(page);
@@ -119,7 +121,7 @@ test.describe('desktop (menu in the bar)', () => {
     const nav = mainNav(page);
     await expect(nav).toBeVisible();
 
-    const logo = await brand(page).locator('img').boundingBox();
+    const logo = await brand(page).locator('svg[data-logo]').boundingBox();
     const home = await nav.getByRole('link', { name: en.nav.home }).boundingBox();
     const settings = await nav.getByRole('link', { name: en.nav.settings }).boundingBox();
     const languageEn = await page

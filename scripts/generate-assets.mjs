@@ -20,6 +20,8 @@ import { id as idDictionary } from '../src/i18n/ui/id.ts';
 import { en as enDictionary } from '../src/i18n/ui/en.ts';
 import { parseCategoryRegistry } from '../src/lib/categories.ts';
 
+import { fullBleedSvg, logoSvg } from '../src/lib/logo.ts';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = path.join(ROOT, 'public');
 
@@ -67,36 +69,10 @@ function assertContrast(label, foreground, background, minimum = 4.5) {
 }
 
 // ---------------------------------------------------------------------------
-// Logo: a rounded lime square with a "T". The 2px (of 64) border in `on-primary` follows the
-// design rule that a primary fill never stands alone on a light background.
+// Logo: one optimized source in src/lib/logo.ts (also used by the inline logo in the page).
+// `logoSvg()` is the rounded logo (favicon and the "any" icons); `fullBleedSvg()` has no rounded
+// corners and no border, for the icons that the platform masks (apple-touch, maskable).
 // ---------------------------------------------------------------------------
-
-/** The letter T, centered in a 64 x 64 box. */
-const T_PATH = 'M18 18h28v7h-10.5v21h-7V25H18z';
-
-/** Rounded logo, used by the favicon and the "any" icons. */
-function logoSvg() {
-  return (
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
-    `<rect x="1" y="1" width="62" height="62" rx="13" fill="${COLOR.primary}" stroke="${COLOR.onPrimary}" stroke-width="2"/>` +
-    `<path d="${T_PATH}" fill="${COLOR.onPrimary}"/>` +
-    '</svg>'
-  );
-}
-
-/**
- * Full-bleed logo: no rounded corners and no border, because the platform masks it (iOS rounds
- * the apple-touch-icon, Android applies its own shape to maskable icons). The T is scaled up
- * but stays far inside the central 80% safe zone.
- */
-function fullBleedSvg() {
-  return (
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
-    `<rect width="64" height="64" fill="${COLOR.primary}"/>` +
-    `<path d="${T_PATH}" fill="${COLOR.onPrimary}" transform="translate(32 32) scale(1.2) translate(-32 -32)"/>` +
-    '</svg>'
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Open Graph image (HTML rendered at 1200 x 630).

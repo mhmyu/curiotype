@@ -1,0 +1,86 @@
+---
+import type { Dictionary } from '@/i18n/types';
+import { getFingerFillClass } from '@/features/guide/finger-colors';
+import {
+  HANDS_GAP,
+  HANDS_TOTAL_WIDTH,
+  HAND_HEIGHT,
+  HAND_SHAPES,
+  HAND_WIDTH,
+} from '@/features/guide/hand-shapes';
+import type { Hand } from '@/features/guide/keyboard-fingers';
+
+interface Props {
+  ui: Dictionary;
+}
+
+const { ui } = Astro.props;
+const text = ui.guide.diagram;
+
+// Left hand first, then the right hand to its right (as seen from above).
+const hands: { hand: Hand; offset: number }[] = [
+  { hand: 'left', offset: 0 },
+  { hand: 'right', offset: HAND_WIDTH + HANDS_GAP },
+];
+---
+
+<!--
+  The two hands seen from above, fingers up, each finger in the color of the keys it presses (the
+  same colors as the keyboard picture). Plain SVG, no script. Numbers are printed on the fingers, so
+  the picture does not depend on color. The picture is one image for assistive technology.
+-->
+<figure class="flex flex-col gap-3" data-testid="hands-figure">
+  <svg
+    viewBox={`0 0 ${HANDS_TOTAL_WIDTH} ${HAND_HEIGHT}`}
+    role="img"
+    aria-label={text.handsLabel}
+    class="mx-auto block h-auto w-full max-w-2xl"
+  >
+    {
+      hands.map(({ hand, offset }) => {
+        const shape = HAND_SHAPES[hand];
+        return (
+          <g transform={`translate(${offset} 0)`} data-hand={hand}>
+            {shape.fingers.map((finger) => (
+              <rect
+                x={finger.x}
+                y={finger.y}
+                width={finger.width}
+                height={finger.height}
+                rx="14"
+                class={`${getFingerFillClass(hand, finger.finger)} stroke-on-primary`}
+                stroke-width="2.5"
+                transform={finger.rotate ? `rotate(${finger.rotate} ${finger.pivotX} ${finger.pivotY})` : undefined}
+                data-finger={`${hand}-${finger.finger}`}
+              />
+            ))}
+            <path d={shape.palmPath} class="fill-surface stroke-border" stroke-width="2.5" stroke-linejoin="round" />
+            {shape.fingers.map((finger) => (
+              <text
+                x={finger.labelX}
+                y={finger.labelY}
+                text-anchor="middle"
+                class="fill-on-primary font-ui"
+                font-size="26"
+                font-weight="700"
+              >
+                {finger.finger}
+              </text>
+            ))}
+            <text
+              x={shape.letterX}
+              y={shape.letterY}
+              text-anchor="middle"
+              class="fill-text font-ui"
+              font-size="30"
+              font-weight="700"
+            >
+              {text.handLetter[hand]}
+            </text>
+          </g>
+        );
+      })
+    }
+  </svg>
+  <figcaption class="text-caption text-text-muted">{text.handsCaption}</figcaption>
+</figure>
