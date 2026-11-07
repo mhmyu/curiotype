@@ -1,0 +1,117 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import FingerTable from '@/components/FingerTable.astro';
+import KeyboardFigure from '@/components/KeyboardFigure.astro';
+import { LANGUAGES } from '@/i18n/config';
+import type { Language } from '@/i18n/config';
+import { getDictionary, getLocalePath } from '@/i18n';
+
+export function getStaticPaths() {
+  return LANGUAGES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Language;
+const ui = getDictionary(lang);
+const text = ui.guide.page;
+---
+
+<!--
+  The ten-finger typing guide: plain static text and an inline SVG keyboard, no script. The page is
+  indexable (unlike statistics, collection and settings), so it has one h1 and its own description.
+-->
+<BaseLayout lang={lang} path="guide" title={text.title} description={text.description}>
+  <h1 class="mb-6">{text.heading}</h1>
+
+  <div class="flex flex-col gap-10">
+    <div class="flex flex-col gap-3" data-testid="guide-intro">
+      {text.intro.map((paragraph) => <p class="text-body-long">{paragraph}</p>)}
+    </div>
+
+    <section class="flex flex-col gap-3" aria-labelledby="guide-why">
+      <h2 id="guide-why">{text.whyTitle}</h2>
+      {text.whyBody.map((paragraph) => <p class="text-body-long">{paragraph}</p>)}
+    </section>
+
+    <section class="flex flex-col gap-3" aria-labelledby="guide-posture">
+      <h2 id="guide-posture">{text.postureTitle}</h2>
+      <p class="text-body-long">{text.postureIntro}</p>
+      <ul class="flex list-disc flex-col gap-2 ps-5 text-body-long" data-testid="guide-posture">
+        {text.posture.map((item) => <li>{item}</li>)}
+      </ul>
+      <p class="text-body-long">{text.postureNote}</p>
+    </section>
+
+    <section class="flex flex-col gap-3" aria-labelledby="guide-home-row">
+      <h2 id="guide-home-row">{text.homeRowTitle}</h2>
+      {text.homeRowBody.map((paragraph) => <p class="text-body-long">{paragraph}</p>)}
+      <h3 class="mt-2">{text.diagramTitle}</h3>
+      <KeyboardFigure ui={ui} />
+    </section>
+
+    <section class="flex flex-col gap-3" aria-labelledby="guide-fingers">
+      <h2 id="guide-fingers">{text.fingersTitle}</h2>
+      <p class="text-body-long">{text.fingersIntro}</p>
+      <dl class="card flex flex-col gap-4 p-5" data-testid="guide-finger-groups">
+        {
+          text.fingerGroups.map((group) => (
+            <div class="flex flex-col gap-1">
+              <dt class="font-ui text-ui text-accent">{group.title}</dt>
+              <dd class="text-body-long">{group.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <h3 class="mt-2">{text.tableTitle}</h3>
+      <FingerTable ui={ui} />
+    </section>
+
+    <section class="flex flex-col gap-3" aria-labelledby="guide-plan">
+      <h2 id="guide-plan">{text.planTitle}</h2>
+      <p class="text-body-long">{text.planIntro}</p>
+      <ol class="flex flex-col gap-3" data-testid="guide-plan">
+        {
+          text.plan.map((step) => (
+            <li class="card flex flex-col gap-1 p-5">
+              <h3>{step.title}</h3>
+              <p class="text-body-long">{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="flex flex-col gap-3" aria-labelledby="guide-tips">
+      <h2 id="guide-tips">{text.tipsTitle}</h2>
+      <ul class="grid gap-3 sm:grid-cols-2" data-testid="guide-tips">
+        {
+          text.tips.map((tip) => (
+            <li class="card flex flex-col gap-1 p-5">
+              <p class="font-ui text-ui">{tip.title}</p>
+              <p class="text-body-long">{tip.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="flex flex-col gap-3" aria-labelledby="guide-faq">
+      <h2 id="guide-faq">{text.faqTitle}</h2>
+      <div class="flex flex-col gap-3" data-testid="guide-faq">
+        {
+          text.faq.map((item) => (
+            <div class="card flex flex-col gap-1 p-5">
+              <h3>{item.question}</h3>
+              <p class="text-body-long">{item.answer}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="card flex flex-col items-start gap-3 p-5" aria-labelledby="guide-start">
+      <h2 id="guide-start">{text.ctaTitle}</h2>
+      <p class="text-body-long">{text.ctaBody}</p>
+      <a href={getLocalePath(lang)} class="btn btn-primary" data-testid="guide-start-link">{text.ctaLabel}</a>
+    </section>
+  </div>
+</BaseLayout>

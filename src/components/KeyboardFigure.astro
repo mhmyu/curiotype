@@ -1,0 +1,33 @@
+---
+import type { Dictionary } from '@/i18n/types';
+import KeyboardDiagram from '@/components/KeyboardDiagram.astro';
+
+interface Props {
+  ui: Dictionary;
+}
+
+const { ui } = Astro.props;
+const text = ui.guide.diagram;
+---
+
+<!--
+  The keyboard diagram with its legend. From 768px the whole keyboard is shown; below that, one
+  hand at a time, so the labels stay readable on a phone. The hidden version is not in the
+  accessibility tree (display: none), so a screen reader hears one diagram, not two.
+-->
+<figure class="flex flex-col gap-3" data-testid="keyboard-figure">
+  <div class="hidden md:block">
+    <KeyboardDiagram ui={ui} hand="both" />
+  </div>
+  <div class="flex flex-col gap-4 md:hidden">
+    <div class="mx-auto flex w-full max-w-md flex-col gap-1">
+      <p class="font-ui text-ui">{text.leftHand}</p>
+      <KeyboardDiagram ui={ui} hand="left" />
+    </div>
+    <div class="mx-auto flex w-full max-w-md flex-col gap-1">
+      <p class="font-ui text-ui">{text.rightHand}</p>
+      <KeyboardDiagram ui={ui} hand="right" />
+    </div>
+  </div>
+  <figcaption class="text-caption text-text-muted">{text.legend}</figcaption>
+</figure>

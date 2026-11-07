@@ -35,7 +35,7 @@ test.describe('phone (menu behind the hamburger button)', () => {
     await menuButton(page).click();
     await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'true');
     const nav = mainNav(page);
-    for (const label of [en.nav.home, en.nav.stats, en.nav.collection, en.nav.settings]) {
+    for (const label of [en.nav.home, en.nav.guide, en.nav.stats, en.nav.collection, en.nav.settings]) {
       await expect(nav.getByRole('link', { name: label })).toBeVisible();
     }
     await expect(nav.getByRole('link', { name: en.nav.home })).toHaveAttribute('aria-current', 'page');
@@ -57,8 +57,8 @@ test.describe('phone (menu behind the hamburger button)', () => {
     await page.goto('/en/');
     await menuButton(page).click();
     const links = mainNav(page).getByRole('link');
-    await expect(links).toHaveCount(4);
-    for (let i = 0; i < 4; i += 1) {
+    await expect(links).toHaveCount(5);
+    for (let i = 0; i < 5; i += 1) {
       const box = await links.nth(i).boundingBox();
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
     }

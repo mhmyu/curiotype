@@ -1,18 +1,14 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { siteConfig } from '@/config/site';
-import { getCollection } from 'astro:content';
 import HomeContent from '@/components/HomeContent.astro';
 import TypingTest from '@/features/typing-test/TypingTest.svelte';
 import { LANGUAGES } from '@/i18n/config';
 import type { Language } from '@/i18n/config';
-import { getDictionary } from '@/i18n';
+import { getDictionary, getLocalePath } from '@/i18n';
 import { resolveContentLang } from '@/lib/content-langs';
-import { getCategoryLabel } from '@/lib/categories';
 import { getCategories } from '@/lib/get-categories';
 import { getContentLangs } from '@/lib/get-content-langs';
-import { pickHomeExamples } from '@/lib/home-examples';
-import { buildSentences } from '@/lib/sentence-corpus';
 
 export function getStaticPaths() {
   return LANGUAGES.map((lang) => ({ params: { lang } }));
@@ -28,21 +24,17 @@ const contentLang = resolveContentLang(lang, contentLangs);
 // Categories come from src/content/categories.json and the sentence files: per sentence language,
 // only the categories that have a file there.
 const categories = await getCategories();
-
-// Static block under the test: the categories and three fixed example sentences of the starting
-// sentence language (chosen by id, so the page is the same on every build of the same content).
-const startCategories = categories.byLang[contentLang] ?? [];
-const corpus = buildSentences(await getCollection('sentences', ({ data }) => data.lang === contentLang));
-const examples = pickHomeExamples(
-  corpus,
-  startCategories.map((category) => category.id),
-);
-const categoryLabels = startCategories.map((category) => getCategoryLabel(startCategories, category.id, lang));
+// The guide hint is one sentence with a `{link}` placeholder; split it so the link is a real anchor.
+const [hintBefore = '', hintAfter = ''] = ui.home.guideHint.text.split('{link}');
 ---
 
 <BaseLayout lang={lang} preloadTypingFont preloadSentencesLang={contentLang} jsonLd>
   <h1 class="mb-2">{ui.meta.homeHeading}</h1>
-  <p class="mb-6 font-ui text-body-long text-text-muted">{ui.meta.tagline}</p>
+  <p class="mb-2 font-ui text-body-long text-text-muted">{ui.meta.tagline}</p>
+  <!-- In the first HTML, so it moves nothing when the test loads. One short line, so the test stays high on a phone. -->
+  <p class="mb-6 font-ui text-caption text-text-muted" data-testid="guide-hint">
+    {hintBefore}<a href={getLocalePath(lang, 'guide')} class="text-accent underline">{ui.home.guideHint.link}</a>{hintAfter}
+  </p>
   <TypingTest
     client:load
     lang={lang}
@@ -52,5 +44,5 @@ const categoryLabels = startCategories.map((category) => getCategoryLabel(startC
     initialContentLang={contentLang}
     repoUrl={siteConfig.repoUrl}
   />
-  <HomeContent ui={ui} categoryLabels={categoryLabels} examples={examples} />
+  <HomeContent lang={lang} ui={ui} />
 </BaseLayout>

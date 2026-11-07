@@ -1,4 +1,0 @@
-# Read by Cloudflare Pages and Netlify. The root answers with a real 301 to the default language
-# (the meta-refresh page Astro builds for `/` stays as a fallback for other hosts). Keep the target
-# equal to DEFAULT_LANGUAGE in src/i18n/config.ts (a test checks it).
-/ /id/ 301

@@ -234,7 +234,7 @@ The privacy page changes its analytics paragraph by itself depending on whether 
 
 ### 3.3 Search engines
 
-0. The statistics, collection and settings pages are deliberately `noindex` and not in the sitemap; Search Console will list them under "Excluded by noindex tag". That is expected, not a problem. After deploy, `curl -sI https://<your-domain>/` should answer `301` with `location: /id/`.
+0. The statistics, collection and settings pages are deliberately `noindex` and not in the sitemap; Search Console will list them under "Excluded by noindex tag". That is expected, not a problem. The typing guide pages (`/id/guide/` and `/en/guide/`) are indexed: after deploy, check that both are listed in `sitemap-0.xml` (this needs `SITE_URL`) and that the home page shows the hint line under the tagline. The root address `/` is a small page that sends the visitor to `/id/` or `/en/` by browser language, so `curl -sI https://<your-domain>/` answers `200`, not a redirect.
 1. **Google Search Console** (<https://search.google.com/search-console>): add your site as a property, verify it (Cloudflare DNS or the HTML tag method), then **Sitemaps > Add** `sitemap-index.xml`.
 2. **Bing Webmaster Tools** (<https://www.bing.com/webmasters>): add the site (you can import it from Search Console), then submit the same sitemap.
 
@@ -396,6 +396,7 @@ Tick each item before you announce the site.
 - [ ] **Recalibrate the difficulty thresholds** (`DIFFICULTY_THRESHOLDS` in `src/lib/difficulty.ts`) once a language nears 100 sentences per category: run `pnpm content:stats`, compare each threshold with the median score it prints, and if you move one, relabel the sentences with `pnpm content:stats --scores` (the build lists any label that no longer matches).
 - [ ] **Copyright line.** `LICENSE` says "The typing contributors"; replace it with your own name if you prefer. Leave `LICENSE-CONTENT` as it is.
 - [ ] **Review the privacy text** on `/id/privacy/` and `/en/privacy/`, including the sentences about hosting logs and analytics. It describes what the app really does but has not been reviewed as a legal text; have it checked if you need it to be one.
+- [ ] **Read the typing guide text** (`/id/guide/`, `/en/guide/`; the text is in the dictionary section `guide.page`) and the home page hint and card (`home.guideHint`, `home.guideCard`). It gives general posture advice and a few claims about how long learning takes; make sure you agree with every sentence, and keep it free of medical claims.
 - [ ] **Test on real phones:** iOS Safari and Android Chrome. Type a full sentence, close the keyboard in the middle (the "Tap to continue" overlay must appear and work), rotate the phone, switch the theme, and use the language switches.
 - [ ] `SITE_URL` and `PUBLIC_REPO_URL` are set for Production, and [3.1](#31-fill-in-the-public-values) passes.
 - [ ] Security headers verified ([2.5](#25-check-the-security-headers)), no Content Security Policy message in the console.

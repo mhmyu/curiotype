@@ -1,21 +1,24 @@
 ---
+import type { Language } from '@/i18n/config';
+import { getLocalePath } from '@/i18n';
 import type { Dictionary } from '@/i18n/types';
-import type { Sentence } from '@/lib/types';
 
 interface Props {
+  lang: Language;
   ui: Dictionary;
-  /** Labels of the categories of the starting sentence language, in display order. */
-  categoryLabels: string[];
-  /** Fixed example sentences (see lib/home-examples.ts). */
-  examples: Sentence[];
 }
 
-const { ui, categoryLabels, examples } = Astro.props;
+const { lang, ui } = Astro.props;
 const text = ui.home;
 ---
 
-<!-- Static text under the test and the history: what the site is and how it works. No script. -->
+<!-- Static text under the test and the history: what the site is, what it offers, how it works. No script. -->
 <section class="mt-12 flex flex-col gap-10" aria-label={text.sectionLabel} data-testid="home-content">
+  <div class="flex flex-col gap-3">
+    <h2>{text.aboutTitle}</h2>
+    {text.aboutBody.map((paragraph) => <p class="text-body-long">{paragraph}</p>)}
+  </div>
+
   <div class="flex flex-col gap-3">
     <h2>{text.howTitle}</h2>
     <ol class="flex flex-col gap-3">
@@ -38,52 +41,44 @@ const text = ui.home;
     </ol>
   </div>
 
-  {
-    categoryLabels.length > 0 && (
-      <div class="flex flex-col gap-3">
-        <h2>{text.categoriesTitle}</h2>
-        <p class="text-body-long">{text.categoriesIntro}</p>
-        <ul class="flex flex-wrap gap-2">
-          {categoryLabels.map((label) => (
-            <li class="rounded-xs border-2 border-border bg-surface px-3 py-1 font-ui text-ui">{label}</li>
-          ))}
-        </ul>
-      </div>
-    )
-  }
-
-  {
-    examples.length > 0 && (
-      <div class="flex flex-col gap-3">
-        <h2>{text.examplesTitle}</h2>
-        <p class="text-body-long">{text.examplesIntro}</p>
-        <ul class="flex flex-col gap-3">
-          {examples.map((sentence) => (
-            <li class="card flex flex-col gap-2 p-5" data-testid="home-example">
-              {/* The sentence is in the sentence language, which can differ from the page. */}
-              <p class="text-body-long font-semibold" lang={sentence.lang}>
-                {sentence.text}
-              </p>
-              <p class="text-caption text-text-muted">
-                {ui.results.sourceLabel}:{' '}
-                <a
-                  href={sentence.source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-accent underline underline-offset-2"
-                >
-                  {sentence.source.title}
-                </a>
-              </p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )
-  }
+  <div class="flex flex-col gap-3">
+    <h2>{text.featuresTitle}</h2>
+    <p class="text-body-long">{text.featuresIntro}</p>
+    <ul class="grid gap-3 sm:grid-cols-2" data-testid="home-features">
+      {
+        text.features.map((feature) => (
+          <li class="card flex flex-col gap-1 p-5">
+            <p class="font-ui text-ui">{feature.title}</p>
+            <p class="text-body-long">{feature.body}</p>
+          </li>
+        ))
+      }
+      <li class="card flex flex-col items-start gap-1 p-5 sm:col-span-2" data-testid="home-guide-card">
+        <p class="font-ui text-ui">{text.guideCard.title}</p>
+        <p class="text-body-long">{text.guideCard.body}</p>
+        <a href={getLocalePath(lang, 'guide')} class="inline-flex min-h-11 items-center text-accent underline">
+          {text.guideCard.link}
+        </a>
+      </li>
+    </ul>
+  </div>
 
   <div class="flex flex-col gap-3">
     <h2>{text.whyTitle}</h2>
-    <p class="text-body-long">{text.whyBody}</p>
+    {text.whyBody.map((paragraph) => <p class="text-body-long">{paragraph}</p>)}
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <h2>{text.faqTitle}</h2>
+    <div class="flex flex-col gap-3" data-testid="home-faq">
+      {
+        text.faq.map((item) => (
+          <div class="card flex flex-col gap-1 p-5">
+            <h3>{item.question}</h3>
+            <p class="text-body-long">{item.answer}</p>
+          </div>
+        ))
+      }
+    </div>
   </div>
 </section>

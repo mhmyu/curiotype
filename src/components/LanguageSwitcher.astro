@@ -6,9 +6,11 @@ import { getLocalePath } from '@/i18n';
 interface Props {
   lang: Language;
   label: string;
+  /** Path of the current page inside its language ('' = home): each link leads to the same page in its language. */
+  path?: string;
 }
 
-const { lang, label } = Astro.props;
+const { lang, label, path = '' } = Astro.props;
 ---
 
 <nav aria-labelledby="language-label" class="language-nav">
@@ -19,7 +21,7 @@ const { lang, label } = Astro.props;
       LANGUAGES.map((code) => (
         <li>
           <a
-            href={getLocalePath(code)}
+            href={getLocalePath(code, path)}
             hreflang={code}
             lang={code}
             aria-current={code === lang ? 'page' : undefined}

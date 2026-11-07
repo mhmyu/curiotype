@@ -19,6 +19,7 @@ export const id: Dictionary = {
     noscript:
       'Situs ini membutuhkan JavaScript untuk menjalankan tes mengetik. Aktifkan JavaScript di peramban Anda, lalu muat ulang halaman.',
     home: 'Beranda',
+    guide: 'Panduan',
     stats: 'Statistik',
     collection: 'Koleksi',
     settings: 'Pengaturan',
@@ -290,6 +291,12 @@ export const id: Dictionary = {
   },
   home: {
     sectionLabel: 'Tentang curiotype',
+    guideHint: { text: 'Baru belajar mengetik? Ikuti {link}.', link: 'panduan mengetik 10 jari' },
+    aboutTitle: 'Apa itu curiotype?',
+    aboutBody: [
+      'curiotype adalah tes mengetik gratis yang memakai fakta nyata, bukan kata acak. Setiap kalimat yang kamu ketik berasal dari sains, sejarah, teknologi, atau kesehatan, dan punya sumber yang bisa kamu periksa sendiri.',
+      'Situs ini dibuat untuk pelajar, penulis, programmer, dan siapa saja yang ingin mengetik lebih cepat dan lebih akurat sambil belajar sesuatu. Bisa dipakai dalam bahasa Indonesia atau Inggris, di komputer atau di HP, tanpa akun.',
+    ],
     howTitle: 'Cara kerja',
     steps: [
       {
@@ -305,13 +312,232 @@ export const id: Dictionary = {
         body: 'Setelah tes selesai, tiap kalimat tampil lagi dengan penjelasan singkat dan tautan ke sumbernya.',
       },
     ],
-    categoriesTitle: 'Topik untuk berlatih',
-    categoriesIntro: 'Setiap kalimat adalah fakta dari salah satu bidang ini, lengkap dengan sumber yang bisa kamu periksa sendiri.',
-    examplesTitle: 'Contoh kalimat yang akan kamu ketik',
-    examplesIntro: 'Tiga contoh dari koleksi, masing-masing dengan sumbernya.',
+    featuresTitle: 'Yang bisa kamu lakukan di sini',
+    featuresIntro: 'Semua fitur di bawah berjalan di browser, tanpa perlu mendaftar.',
+    features: [
+      {
+        title: 'Lima cara berlatih',
+        body: 'Waktu (15 detik sampai 2 menit), satu kalimat, sejumlah kalimat, mode santai tanpa timer dan skor, serta teks buatanmu sendiri.',
+      },
+      {
+        title: 'Hasil yang jelas',
+        body: 'Kecepatan dalam kata per menit, kecepatan mentah, akurasi, konsistensi, dan grafik kecepatan per detik, dengan penanda saat kamu memecahkan rekor pribadi.',
+      },
+      {
+        title: 'Belajar sambil mengetik',
+        body: 'Setiap kalimat disertai penjelasan dan tautan sumber. Simpan yang kamu suka ke koleksi, dan laporkan fakta yang tampak keliru.',
+      },
+      {
+        title: 'Latih tombol yang lemah',
+        body: 'Halaman statistik menunjukkan tombol yang paling sering salah lewat peta panas keyboard, dan satu tombol membuat tes yang berfokus pada tombol itu.',
+      },
+      {
+        title: 'Streak dan target harian',
+        body: 'Atur target 1, 3, atau 5 tes per hari, jaga streak tetap berjalan, dan ketik fakta hari ini.',
+      },
+      {
+        title: 'Dibuat agar nyaman',
+        body: 'Tema terang dan gelap, tiga ukuran teks, pilihan gaya caret, suara ketikan dan stop-on-error (opsional), pintasan keyboard, serta gambar hasil yang bisa dibagikan.',
+      },
+      {
+        title: 'Jalan di HP dan tanpa internet',
+        body: 'Mengetik bisa dengan keyboard layar. Pasang sebagai aplikasi dan situs tetap berfungsi tanpa koneksi.',
+      },
+      {
+        title: 'Datamu tetap milikmu',
+        body: 'Tidak ada akun. Riwayat, rekor, dan pengaturanmu disimpan di browser, dan bisa kamu ekspor, impor, atau hapus kapan saja.',
+      },
+    ],
+    guideCard: {
+      title: 'Belajar mengetik 10 jari',
+      body: 'Belum terbiasa mengetik tanpa melihat keyboard? Panduan ini menunjukkan jari mana yang menekan tombol mana, lengkap dengan gambar keyboard dan rencana latihan bertahap.',
+      link: 'Buka panduan',
+    },
     whyTitle: 'Mengapa mengetik kalimat yang bermakna?',
-    whyBody:
-      'Kata acak mudah diketik dan mudah terlupa. Kalimat berisi fakta membuatmu membaca dulu sebelum mengetik, sehingga mata selalu selangkah di depan jari, seperti saat menulis sungguhan. Angka, tanda baca, dan huruf kapital di dalam kalimat memberi jari lebih banyak latihan daripada daftar kata. Dan setiap tes selesai dengan pengetahuan yang belum kamu punya sebelumnya.',
+    whyBody: [
+      'Kata acak mudah diketik dan mudah terlupa. Kalimat berisi fakta membuatmu membaca dulu sebelum mengetik, sehingga mata selalu selangkah di depan jari, seperti saat menulis sungguhan.',
+      'Angka, tanda baca, dan huruf kapital di dalam kalimat memberi jari lebih banyak latihan daripada daftar kata. Dan setiap tes selesai dengan pengetahuan yang belum kamu punya sebelumnya.',
+    ],
+    faqTitle: 'Pertanyaan yang sering diajukan',
+    faq: [
+      {
+        question: 'Apakah curiotype gratis?',
+        answer: 'Ya. Situs ini gratis dipakai, tanpa akun dan tanpa pendaftaran.',
+      },
+      {
+        question: 'Apa arti WPM dan akurasi?',
+        answer: 'WPM adalah kata per menit, dengan satu kata sama dengan lima karakter dan hanya karakter yang benar dihitung. Akurasi adalah porsi ketikanmu yang benar, jadi kesalahan yang sudah kamu hapus tetap menurunkannya.',
+      },
+      {
+        question: 'Apakah kemajuanku tersimpan?',
+        answer: 'Ya, di browsermu sendiri: riwayat, rekor pribadi, favorit, dan streak. Tidak perlu akun, dan semuanya bisa kamu ekspor atau hapus di pengaturan.',
+      },
+      {
+        question: 'Bisakah dipakai di HP atau tanpa internet?',
+        answer: 'Bisa. Ketuk teksnya untuk membuka keyboard layar lalu mulai mengetik. Situs juga bisa dipasang sebagai aplikasi dan tetap berfungsi tanpa internet.',
+      },
+      {
+        question: 'Bahasa apa saja yang tersedia?',
+        answer: 'Situs dan kalimatnya tersedia dalam bahasa Indonesia dan Inggris. Kamu bisa mengetik kalimat dalam satu bahasa sementara situsnya memakai bahasa lainnya.',
+      },
+    ],
+  },
+  guide: {
+    diagram: {
+      labelBoth: 'Diagram keyboard yang menunjukkan jari mana menekan tiap tombol. Baris dasar diberi penanda.',
+      labelLeft: 'Sisi kiri keyboard dengan jari untuk tiap tombol. Baris dasar diberi penanda.',
+      labelRight: 'Sisi kanan keyboard dengan jari untuk tiap tombol. Baris dasar diberi penanda.',
+      leftHand: 'Tangan kiri',
+      rightHand: 'Tangan kanan',
+      handLetter: { left: 'Ki', right: 'Ka' },
+      legend:
+        'Tiap tombol menunjukkan jarinya: Ki adalah tangan kiri dan Ka tangan kanan; 1 kelingking, 2 jari manis, 3 jari tengah, 4 telunjuk, dan 5 jempol. Tombol hijau adalah baris dasar, tempat jarimu beristirahat. Garis di bawah F dan J menandai tonjolan yang bisa dirasakan telunjukmu.',
+      fingerNames: {
+        left: ['Kelingking kiri', 'Jari manis kiri', 'Jari tengah kiri', 'Telunjuk kiri', 'Jempol kiri'],
+        right: ['Kelingking kanan', 'Jari manis kanan', 'Jari tengah kanan', 'Telunjuk kanan', 'Jempol kanan'],
+      },
+      tableCaption: 'Jari mana menekan tombol mana',
+      tableFinger: 'Jari',
+      tableKeys: 'Tombol',
+    },
+    page: {
+      title: 'Cara Mengetik 10 Jari: Posisi Tiap Jari',
+      description:
+        'Belajar mengetik 10 jari: letak jari di keyboard, baris dasar, jari mana menekan tiap tombol, plus rencana latihan bertahap dan tips untuk pemula.',
+      heading: 'Cara mengetik 10 jari: panduan untuk pemula',
+      intro: [
+        'Mengetik 10 jari berarti mengetik dengan kesepuluh jari sementara matamu tetap di layar. Tiap jari punya tombolnya sendiri, jadi tanganmu belajar ke mana harus bergerak tanpa melihat. Panduan ini menunjukkan letak jarimu, jari mana menekan tombol mana, dan cara berlatih selangkah demi selangkah.',
+        'Kamu tidak perlu cepat untuk memulai. Semua orang mulai dengan pelan, dan beberapa sesi singkat tiap hari akan menumpuk.',
+      ],
+      whyTitle: 'Mengapa mengetik dengan 10 jari?',
+      whyBody: [
+        'Mengetik dengan dua atau tiga jari memang bisa, tetapi matamu terus berpindah antara tombol dan layar. Dengan 10 jari, pekerjaan terbagi ke kedua tangan, kamu tetap bisa membaca teks, dan kesalahan terlihat saat sedang terjadi.',
+        'Cara ini juga membentuk kebiasaan. Begitu tiap jari memegang beberapa tombol, tanganmu mengingat gerakannya dan perhatianmu bebas untuk apa yang sedang kamu tulis, bukan di mana letak hurufnya. Itu sebabnya beberapa minggu pertama terasa lambat: kamu sedang mengganti kebiasaan lama dengan yang baru.',
+      ],
+      postureTitle: 'Cara duduk dan meletakkan tangan',
+      postureIntro:
+        'Posisi yang nyaman membuat latihan lebih mudah. Ini saran umum; sesuaikan dengan meja dan tubuhmu.',
+      posture: [
+        'Duduk tegak dengan telapak kaki rata di lantai dan punggung bersandar.',
+        'Taruh layar sejajar mata, sejauh sekitar satu lengan, supaya leher tetap santai.',
+        'Dekatkan siku ke badan, tekuk sekitar sudut siku-siku, dengan lengan bawah kurang lebih sejajar keyboard.',
+        'Jaga pergelangan tangan tetap lurus dan sedikit di atas meja, jangan ditekan ke tepi meja.',
+        'Lengkungkan jari dengan ringan dan tekan tombol dengan lembut. Kamu tidak perlu tenaga.',
+      ],
+      postureNote: 'Istirahat sebentar sesekali, dan berhenti bila mengetik terasa sakit.',
+      homeRowTitle: 'Mulai dari baris dasar',
+      homeRowBody: [
+        'Baris dasar (home row) adalah baris huruf di tengah. Taruh jari tangan kirimu di A, S, D, dan F, dan jari tangan kananmu di J, K, L, dan titik koma (;). Kedua jempol berada di spasi.',
+        'Telunjukmu adalah penuntun. Ada tonjolan kecil di F dan di J (garis di bawah kedua tombol itu pada diagram di bawah). Kamu bisa merasakannya tanpa melihat, jadi selalu bisa menemukan kembali posisi yang benar.',
+        'Setelah menekan satu tombol, kembalikan jari ke tombol dasarnya. Baris dasar adalah titik awal setiap gerakan.',
+      ],
+      diagramTitle: 'Jari mana menekan tombol mana',
+      tableTitle: 'Informasi yang sama dalam bentuk tabel',
+      fingersTitle: 'Jari mana untuk tombol mana',
+      fingersIntro:
+        'Tiap jari menjangkau tombol di kolomnya sendiri, bergerak lurus ke atas atau ke bawah dari tombol dasarnya. Telunjuk menjangkau dua kolom.',
+      fingerGroups: [
+        {
+          title: 'Baris atas (Q sampai P)',
+          body: 'Jangkau ke atas dari baris dasar. Tangan kiri: Q dengan kelingking, W dengan jari manis, E dengan jari tengah, R dan T dengan telunjuk. Tangan kanan: Y dan U dengan telunjuk, I dengan jari tengah, O dengan jari manis, P dengan kelingking.',
+        },
+        {
+          title: 'Baris bawah (Z sampai /)',
+          body: 'Jangkau ke bawah dari baris dasar. Tangan kiri: Z dengan kelingking, X dengan jari manis, C dengan jari tengah, V dan B dengan telunjuk. Tangan kanan: N dan M dengan telunjuk, koma dengan jari tengah, titik dengan jari manis, dan garis miring dengan kelingking.',
+        },
+        {
+          title: 'Baris angka',
+          body: 'Di kiri: 1 dengan kelingking, 2 dengan jari manis, 3 dengan jari tengah, 4 dan 5 dengan telunjuk. Di kanan: 6 dan 7 dengan telunjuk, 8 dengan jari tengah, 9 dengan jari manis, 0 dengan kelingking. Kembali ke baris dasar setelah tiap angka.',
+        },
+        {
+          title: 'Shift dan huruf kapital',
+          body: 'Tekan Shift dengan kelingking tangan yang tidak mengetik hurufnya. Untuk huruf kapital A, tahan Shift kanan dengan kelingking kanan dan tekan A dengan tangan kiri.',
+        },
+        {
+          title: 'Tanda baca dan tombol lain',
+          body: 'Kelingking mengurus sebagian besar sisanya: titik koma, apostrof, kurung siku, tanda hubung, Enter, dan Backspace di kanan, serta Tab, Caps Lock, dan Shift kiri di kiri. Koma dan titik menjadi bagian jari tengah dan jari manis tangan kananmu.',
+        },
+        {
+          title: 'Spasi',
+          body: 'Pakai jempol mana pun yang terasa wajar untuk spasi. Diagram membagi spasi jadi dua hanya untuk menunjukkan kedua jempol.',
+        },
+      ],
+      planTitle: 'Rencana latihan bertahap',
+      planIntro:
+        'Lanjut ke langkah berikutnya hanya bila langkah yang sekarang sudah terasa mudah dan akurat. Tidak ada tenggat.',
+      plan: [
+        {
+          title: 'Langkah 1: baris dasar',
+          body: 'Taruh jarimu di baris dasar dan tekan A S D F J K L ; dengan jari yang tepat, kembali ke tombol dasar setelah tiap tekanan. Lakukan beberapa menit dengan mata di layar. Bila sudah bisa tanpa menunduk, lanjut.',
+        },
+        {
+          title: 'Langkah 2: baris atas',
+          body: 'Tambahkan Q W E R T Y U I O P. Jangkau ke atas dari baris dasar lalu kembali. Kata seperti “were”, “their”, dan “quiet” memakai banyak tombol baris atas.',
+        },
+        {
+          title: 'Langkah 3: baris bawah',
+          body: 'Tambahkan Z X C V B N M, koma, dan titik. Jangkau ke bawah lalu kembali. Kata seperti “can” dan “move” bagus untuk diulang.',
+        },
+        {
+          title: 'Langkah 4: angka, huruf kapital, dan simbol',
+          body: 'Akhiri dengan baris angka, huruf kapital dengan Shift, dan tanda baca. Bagian ini paling lambat dipelajari, jadi jangan terburu-buru.',
+        },
+      ],
+      tipsTitle: 'Tips membangun kebiasaan',
+      tips: [
+        {
+          title: 'Jangan menatap keyboard.',
+          body: 'Menunduk terasa lebih cepat di awal, tetapi mempertahankan kebiasaan lama. Bila tersesat, cari tonjolan di F dan J dengan telunjukmu lalu mulai lagi.',
+        },
+        {
+          title: 'Akurasi dulu, kecepatan kemudian.',
+          body: 'Ketik cukup pelan agar kesalahannya sedikit. Kecepatan datang lewat pengulangan.',
+        },
+        {
+          title: 'Sesi singkat setiap hari.',
+          body: 'Sepuluh sampai lima belas menit sehari cenderung lebih baik daripada satu sesi panjang seminggu sekali.',
+        },
+        {
+          title: 'Jaga ritme yang rata.',
+          body: 'Tekan tombol dengan tempo tetap, jangan sepotong-sepotong. Ritme yang pelan dan rata akan menjadi lebih cepat dengan sendirinya.',
+        },
+        {
+          title: 'Pakai jari yang tepat, walau terasa canggung.',
+          body: 'Sekali memakai jari yang salah, kamu mengajari tanganmu kebiasaan yang salah.',
+        },
+        {
+          title: 'Manfaatkan fitur situs ini.',
+          body: 'Mode Santai tidak punya waktu dan skor, jadi pas untuk mulai dengan tenang, dan tingkat Mudah menjaga kalimat tetap pendek. Setelah beberapa tes, halaman statistik menunjukkan tombol yang paling sering salah dan tes bisa memilih kalimat untuk tombol itu (Latih tombol lemah).',
+        },
+      ],
+      faqTitle: 'Pertanyaan tentang mengetik 10 jari',
+      faq: [
+        {
+          question: 'Berapa lama belajar mengetik 10 jari?',
+          answer:
+            'Tidak ada waktu yang pasti. Dengan sesi singkat tiap hari, letak huruf biasanya mulai terasa alami setelah beberapa minggu, dan kecepatan terus membaik sesudahnya. Kecepatanmu sendiri adalah kecepatan yang tepat.',
+        },
+        {
+          question: 'Apakah perlu berganti bila sudah cepat mengetik dengan beberapa jari?',
+          answer:
+            'Bisa jadi perlu. Bila kamu banyak mengetik dan ingin mata tetap di teks, 10 jari membagi pekerjaan lebih rata. Tetap memakai caramu sekarang juga tidak apa-apa: panduan ini untuk orang yang ingin berubah.',
+        },
+        {
+          question: 'Bagaimana bila keyboardku bukan QWERTY?',
+          answer:
+            'Panduan ini memakai tata letak QWERTY, yang paling umum. Pada tata letak lain seperti AZERTY atau QWERTZ, baris dasar dan kedua tonjolan berada di tempat yang sama, tetapi beberapa huruf berada di bawah jari yang berbeda.',
+        },
+        {
+          question: 'Apakah ini berlaku di ponsel atau tablet?',
+          answer:
+            'Tidak. Panduan ini tentang keyboard fisik. Layar sentuh tidak punya baris dasar, jadi caranya tidak berlaku di sana.',
+        },
+      ],
+      ctaTitle: 'Siap berlatih?',
+      ctaBody:
+        'Buka tes mengetik, pilih mode Santai bila ingin tanpa waktu, lalu ketik kalimat pertamamu dengan jari di baris dasar.',
+      ctaLabel: 'Mulai berlatih',
+    },
   },
   history: {
     title: 'Riwayat',

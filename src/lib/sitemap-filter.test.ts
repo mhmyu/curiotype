@@ -4,9 +4,10 @@ import { LANGUAGES } from '../i18n/config';
 import { NOINDEX_PAGES, isSitemapPage } from './sitemap-filter';
 
 describe('isSitemapPage', () => {
-  it('keeps the home and privacy pages of both languages', () => {
+  it('keeps the home, guide and privacy pages of both languages', () => {
     for (const lang of LANGUAGES) {
       expect(isSitemapPage(`https://example.org/${lang}/`)).toBe(true);
+      expect(isSitemapPage(`https://example.org/${lang}/guide/`)).toBe(true);
       expect(isSitemapPage(`https://example.org/${lang}/privacy/`)).toBe(true);
     }
   });
@@ -34,7 +35,7 @@ describe('noindex pages', () => {
     expect(source).toMatch(/<BaseLayout[^>]*\bnoindex\b[^>]*\bfollow\b/s);
   });
 
-  it('privacy.astro stays indexable', () => {
-    expect(readFileSync('src/pages/[lang]/privacy.astro', 'utf8')).not.toMatch(/<BaseLayout[^>]*\bnoindex\b/s);
+  it.each(['privacy', 'guide'])('%s.astro stays indexable', (page) => {
+    expect(readFileSync(`src/pages/[lang]/${page}.astro`, 'utf8')).not.toMatch(/<BaseLayout[^>]*\bnoindex\b/s);
   });
 });

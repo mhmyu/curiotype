@@ -32,6 +32,8 @@ export interface Dictionary {
     /** Shown only when JavaScript is off: the typing test needs it. */
     noscript: string;
     home: string;
+    /** The ten-finger typing guide. */
+    guide: string;
     stats: string;
     collection: string;
     settings: string;
@@ -344,15 +346,82 @@ export interface Dictionary {
   home: {
     /** Accessible name of the whole block. */
     sectionLabel: string;
+    /** One line under the tagline: `text` holds a `{link}` placeholder that is replaced by the link `link`. */
+    guideHint: { text: string; link: string };
+    /** "What is it" section: one string per paragraph. */
+    aboutTitle: string;
+    aboutBody: string[];
     howTitle: string;
     /** Three steps, in order. */
     steps: { title: string; body: string }[];
-    categoriesTitle: string;
-    categoriesIntro: string;
-    examplesTitle: string;
-    examplesIntro: string;
+    featuresTitle: string;
+    featuresIntro: string;
+    features: { title: string; body: string }[];
+    /** One extra card after the features that leads to the typing guide. */
+    guideCard: { title: string; body: string; link: string };
+    /** "Why" section: one string per paragraph. */
     whyTitle: string;
-    whyBody: string;
+    whyBody: string[];
+    faqTitle: string;
+    faq: { question: string; answer: string }[];
+  };
+  /** The ten-finger typing guide. */
+  guide: {
+    /** Texts of the keyboard diagram and of the table that lists the same information. */
+    diagram: {
+      /** Accessible name of the diagram: both hands (wide screens), the left hand, the right hand. */
+      labelBoth: string;
+      labelLeft: string;
+      labelRight: string;
+      /** Headings of the two single-hand diagrams on narrow screens. */
+      leftHand: string;
+      rightHand: string;
+      /** Short hand letters printed before the finger number on a key (for example "L" and "R"). */
+      handLetter: { left: string; right: string };
+      /** Explains the numbers, the highlighted home row and the bumps. */
+      legend: string;
+      /** Full finger names, index 0 = pinky to index 4 = thumb. */
+      fingerNames: { left: string[]; right: string[] };
+      tableCaption: string;
+      tableFinger: string;
+      tableKeys: string;
+    };
+    /** Text of the guide page (pages/[lang]/guide.astro). */
+    page: {
+      /** Page title (the layout adds " | site name"), meta description (140-155 characters) and the single h1. */
+      title: string;
+      description: string;
+      heading: string;
+      /** Opening paragraphs, one string each. */
+      intro: string[];
+      whyTitle: string;
+      whyBody: string[];
+      postureTitle: string;
+      postureIntro: string;
+      /** Bullet list, one string each. */
+      posture: string[];
+      postureNote: string;
+      homeRowTitle: string;
+      homeRowBody: string[];
+      /** Heading above the keyboard diagram and above the table with the same information. */
+      diagramTitle: string;
+      tableTitle: string;
+      fingersTitle: string;
+      fingersIntro: string;
+      /** One entry per group of keys: top row, bottom row, numbers, Shift, punctuation, space bar. */
+      fingerGroups: { title: string; body: string }[];
+      planTitle: string;
+      planIntro: string;
+      /** Ordered practice steps: home row, top row, bottom row, numbers and symbols. */
+      plan: { title: string; body: string }[];
+      tipsTitle: string;
+      tips: { title: string; body: string }[];
+      faqTitle: string;
+      faq: { question: string; answer: string }[];
+      ctaTitle: string;
+      ctaBody: string;
+      ctaLabel: string;
+    };
   };
   history: {
     title: string;

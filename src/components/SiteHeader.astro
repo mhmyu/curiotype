@@ -48,7 +48,7 @@ const hasMenu = showNav || showLanguageSwitcher;
           <div id="site-menu" class="site-menu" data-site-menu>
             <div class="site-menu-inner">
               {showNav && <MainNav lang={lang} ui={ui} current={current} />}
-              {showLanguageSwitcher && <LanguageSwitcher lang={lang} label={ui.nav.language} />}
+              {showLanguageSwitcher && <LanguageSwitcher lang={lang} label={ui.nav.language} path={current} />}
             </div>
           </div>
         </>

@@ -19,6 +19,7 @@ export const en: Dictionary = {
     noscript:
       'This site needs JavaScript to run the typing test. Turn on JavaScript in your browser and reload the page.',
     home: 'Home',
+    guide: 'Guide',
     stats: 'Statistics',
     collection: 'Collection',
     settings: 'Settings',
@@ -290,6 +291,12 @@ export const en: Dictionary = {
   },
   home: {
     sectionLabel: 'About curiotype',
+    guideHint: { text: 'New to typing? Follow the {link}.', link: 'ten-finger typing guide' },
+    aboutTitle: 'What is curiotype?',
+    aboutBody: [
+      'curiotype is a free typing test that uses real facts instead of random words. Every sentence you type comes from science, history, technology or health, and has a source you can check yourself.',
+      'It is made for students, writers, programmers and anyone who wants to type faster and more accurately while learning something. You can use it in English or Indonesian, on a computer or on a phone, without an account.',
+    ],
     howTitle: 'How it works',
     steps: [
       {
@@ -305,13 +312,232 @@ export const en: Dictionary = {
         body: 'When the test ends, each sentence comes back with a short explanation and a link to its source.',
       },
     ],
-    categoriesTitle: 'Topics to practice with',
-    categoriesIntro: 'Every sentence is a fact from one of these areas, with a source you can check yourself.',
-    examplesTitle: 'Sentences you may type',
-    examplesIntro: 'Three examples from the collection, each with its source.',
+    featuresTitle: 'What you can do here',
+    featuresIntro: 'Everything below works in your browser, with no sign-up.',
+    features: [
+      {
+        title: 'Five ways to practice',
+        body: 'Time (15 seconds to 2 minutes), a single sentence, a set number of sentences, a relaxed mode without a timer or a score, and your own text.',
+      },
+      {
+        title: 'Clear results',
+        body: 'Speed in words per minute, raw speed, accuracy, consistency and a chart of your speed second by second, with a note when you set a personal best.',
+      },
+      {
+        title: 'Learn as you type',
+        body: 'Each sentence comes with an explanation and a source link. Save the ones you like to your collection and report a fact that looks wrong.',
+      },
+      {
+        title: 'Practice your weak keys',
+        body: 'The statistics page shows which keys you miss most on a keyboard heat map, and one switch builds a test around them.',
+      },
+      {
+        title: 'Streaks and a daily goal',
+        body: 'Set a goal of 1, 3 or 5 tests a day, keep a streak going, and type the fact of the day.',
+      },
+      {
+        title: 'Made to be comfortable',
+        body: 'Light and dark themes, three text sizes, a choice of caret styles, optional typing sound and stop-on-error, keyboard shortcuts, and a result image you can share.',
+      },
+      {
+        title: 'Works on your phone and offline',
+        body: 'Typing works with the on-screen keyboard. Install it as an app and it keeps working without a connection.',
+      },
+      {
+        title: 'Your data stays with you',
+        body: 'There are no accounts. Your history, records and settings are stored in your browser, and you can export, import or delete them at any time.',
+      },
+    ],
+    guideCard: {
+      title: 'Learn to type with ten fingers',
+      body: 'Not used to typing without looking at the keyboard? The guide shows which finger presses which key, with a keyboard picture and a step-by-step practice plan.',
+      link: 'Open the guide',
+    },
     whyTitle: 'Why type sentences that mean something?',
-    whyBody:
-      'Random words are easy to type and easy to forget. A sentence with a fact makes you read before you type, so your eyes stay a step ahead of your fingers, as in real writing. The numbers, punctuation and capital letters inside the sentences give your fingers more to practice than a word list does. And you finish every test knowing something you did not know before.',
+    whyBody: [
+      'Random words are easy to type and easy to forget. A sentence with a fact makes you read before you type, so your eyes stay a step ahead of your fingers, as in real writing.',
+      'The numbers, punctuation and capital letters inside the sentences give your fingers more to practice than a word list does. And you finish every test knowing something you did not know before.',
+    ],
+    faqTitle: 'Frequently asked questions',
+    faq: [
+      {
+        question: 'Is curiotype free?',
+        answer: 'Yes. The site is free to use, with no account and no sign-up.',
+      },
+      {
+        question: 'What do WPM and accuracy mean?',
+        answer: 'WPM is words per minute, where a word is five characters and only correct characters count. Accuracy is the share of your keystrokes that were correct, so a mistake you delete still lowers it.',
+      },
+      {
+        question: 'Does it save my progress?',
+        answer: 'Yes, in your own browser: your history, personal bests, favorites and streak. Nothing needs an account, and you can export or delete all of it in the settings.',
+      },
+      {
+        question: 'Can I use it on my phone or offline?',
+        answer: 'Yes. Tap the text to open the on-screen keyboard and start typing. You can also install the site as an app, and it keeps working without internet.',
+      },
+      {
+        question: 'Which languages are available?',
+        answer: 'The site and its sentences are in English and Indonesian. You can type sentences in one language while the site is in the other.',
+      },
+    ],
+  },
+  guide: {
+    diagram: {
+      labelBoth: 'Keyboard diagram showing which finger presses each key. The home row is highlighted.',
+      labelLeft: 'Left side of the keyboard with the finger for each key. The home row is highlighted.',
+      labelRight: 'Right side of the keyboard with the finger for each key. The home row is highlighted.',
+      leftHand: 'Left hand',
+      rightHand: 'Right hand',
+      handLetter: { left: 'L', right: 'R' },
+      legend:
+        'Each key shows its finger: L is the left hand and R the right hand; 1 is the pinky, 2 the ring finger, 3 the middle finger, 4 the index finger and 5 the thumb. The green keys are the home row, where your fingers rest. The bar under F and J marks the bumps you can feel with your index fingers.',
+      fingerNames: {
+        left: ['Left pinky', 'Left ring finger', 'Left middle finger', 'Left index finger', 'Left thumb'],
+        right: ['Right pinky', 'Right ring finger', 'Right middle finger', 'Right index finger', 'Right thumb'],
+      },
+      tableCaption: 'Which finger presses which key',
+      tableFinger: 'Finger',
+      tableKeys: 'Keys',
+    },
+    page: {
+      title: 'Touch Typing Guide: Where Each Finger Goes',
+      description:
+        'Learn to type with ten fingers: where your fingers rest on the keyboard, the home row, which finger presses each key, and a step-by-step practice plan.',
+      heading: 'How to type with ten fingers: a guide for beginners',
+      intro: [
+        'Touch typing means typing with all ten fingers while your eyes stay on the screen. Each finger has its own keys, so your hands learn where to go without looking. This guide shows where your fingers rest, which finger presses which key, and how to practice step by step.',
+        'You do not need to be fast to start. Everyone begins slowly, and a few short sessions a day add up.',
+      ],
+      whyTitle: 'Why type with ten fingers?',
+      whyBody: [
+        'Typing with two or three fingers works, but your eyes keep jumping between keys and screen. With ten fingers the work is shared between both hands, you keep reading the text, and you notice mistakes as they happen.',
+        'It also builds a habit. Once each finger owns a few keys, your hands remember the movements and your attention is free for what you write instead of where the letters are. That is why the first weeks feel slow: old habits are being replaced.',
+      ],
+      postureTitle: 'Sit and place your hands',
+      postureIntro:
+        'A comfortable position makes practice easier. These are general suggestions; adjust them to your desk and your body.',
+      posture: [
+        'Sit upright with your feet flat on the floor and your back supported.',
+        'Put the screen at about eye level, an arm’s length away.',
+        'Keep your elbows close to your body, bent at about a right angle.',
+        'Keep your wrists straight and slightly above the desk, not pressed on its edge.',
+        'Curve your fingers lightly and press the keys gently. You do not need force.',
+      ],
+      postureNote: 'Take a short break now and then, and stop if typing hurts.',
+      homeRowTitle: 'Start from the home row',
+      homeRowBody: [
+        'The home row is the middle row of letters. Rest the fingers of your left hand on A, S, D and F, and the fingers of your right hand on J, K, L and the semicolon (;). Your thumbs rest on the space bar.',
+        'Your index fingers are your guides. F and J have a small bump (the bars under those keys in the diagram below) that you can feel without looking, so you can always find your way back.',
+        'After every key you press, bring the finger back to its home key. The home row is the starting point of every movement.',
+      ],
+      diagramTitle: 'Which finger presses which key',
+      tableTitle: 'The same information as a table',
+      fingersTitle: 'Which finger for which key',
+      fingersIntro:
+        'Each finger covers the keys in its own column, moving straight up or down from its home key. Your index fingers cover two.',
+      fingerGroups: [
+        {
+          title: 'Top row (Q to P)',
+          body: 'Reach up from the home row. Left hand: Q with the little finger, W with the ring finger, E with the middle finger, R and T with the index finger. Right hand: Y and U with the index finger, I with the middle finger, O with the ring finger, P with the little finger.',
+        },
+        {
+          title: 'Bottom row (Z to /)',
+          body: 'Reach down from the home row. Left hand: Z with the little finger, X with the ring finger, C with the middle finger, V and B with the index finger. Right hand: N and M with the index finger, the comma with the middle finger, the period with the ring finger, and the slash with the little finger.',
+        },
+        {
+          title: 'Number row',
+          body: 'On the left: 1 with the little finger, 2 with the ring finger, 3 with the middle finger, 4 and 5 with the index finger. On the right: 6 and 7 with the index finger, 8 with the middle finger, 9 with the ring finger, 0 with the little finger. Return to the home row after each number.',
+        },
+        {
+          title: 'Shift and capital letters',
+          body: 'Press Shift with the little finger of the hand that is not typing the letter. For a capital A, hold the right Shift with your right little finger and press A with your left.',
+        },
+        {
+          title: 'Punctuation and other keys',
+          body: 'The little fingers handle most of the rest: the semicolon, apostrophe, brackets, hyphen, Enter and Backspace on the right, and Tab, Caps Lock and the left Shift on the left. The comma and period go to the middle and ring fingers of the right hand.',
+        },
+        {
+          title: 'Space bar',
+          body: 'Use whichever thumb feels natural. The diagram splits the bar in two only to show both thumbs.',
+        },
+      ],
+      planTitle: 'A step-by-step practice plan',
+      planIntro:
+        'Move to the next step only when the current one feels easy and accurate.',
+      plan: [
+        {
+          title: 'Step 1: the home row',
+          body: 'Place your fingers on the home row and press A S D F J K L ; with the right finger, returning to the home keys after every press. Do this for a few minutes with your eyes on the screen. When you can do it without looking down, move on.',
+        },
+        {
+          title: 'Step 2: the top row',
+          body: 'Add Q W E R T Y U I O P. Reach up from the home row and come back. Words such as “were”, “their” and “quiet” use many top-row keys.',
+        },
+        {
+          title: 'Step 3: the bottom row',
+          body: 'Add Z X C V B N M, the comma and the period. Reach down and come back.',
+        },
+        {
+          title: 'Step 4: numbers, capitals and symbols',
+          body: 'Finish with the number row, capital letters with Shift, and punctuation.',
+        },
+      ],
+      tipsTitle: 'Tips for building the habit',
+      tips: [
+        {
+          title: 'Do not look at the keyboard.',
+          body: 'Looking down feels faster at first but keeps the old habit alive. If you get lost, find the bumps on F and J and start again.',
+        },
+        {
+          title: 'Accuracy first, speed later.',
+          body: 'Type slowly enough to make few mistakes. Speed comes with repetition.',
+        },
+        {
+          title: 'Short sessions every day.',
+          body: 'Ten to fifteen minutes a day tends to work better than one long session a week.',
+        },
+        {
+          title: 'Keep an even rhythm.',
+          body: 'Press the keys at a steady pace instead of in bursts. A slow, even rhythm turns faster on its own.',
+        },
+        {
+          title: 'Use the right finger, even when it feels clumsy.',
+          body: 'Using the wrong finger once teaches the wrong habit.',
+        },
+        {
+          title: 'Use the tools of this site.',
+          body: 'The Relaxed mode has no timer or score, which makes it a gentle start, and the Easy difficulty keeps sentences short. After a few tests, the statistics page shows your weakest keys, and Practice weak keys picks sentences for them.',
+        },
+      ],
+      faqTitle: 'Questions about touch typing',
+      faq: [
+        {
+          question: 'How long does it take to learn touch typing?',
+          answer:
+            'There is no fixed time. With short daily sessions the positions of the letters usually start to feel natural after a few weeks, and speed keeps improving after that.',
+        },
+        {
+          question: 'Is it worth changing if I already type fast with a few fingers?',
+          answer:
+            'It can be. If you type a lot and want to keep your eyes on the text, ten fingers share the work more evenly. Keeping your current way is fine too.',
+        },
+        {
+          question: 'What if my keyboard is not QWERTY?',
+          answer:
+            'This guide uses the QWERTY layout, the most common one. On other layouts, such as AZERTY or QWERTZ, the home row and the two bumps are in the same places, but some letters sit under different fingers.',
+        },
+        {
+          question: 'Does this work on a phone or a tablet?',
+          answer:
+            'No. This guide is about a physical keyboard; a touch screen has no home row.',
+        },
+      ],
+      ctaTitle: 'Ready to practice?',
+      ctaBody:
+        'Open the typing test, choose the Relaxed mode if you want no timer, and type a sentence with your fingers on the home row.',
+      ctaLabel: 'Start practicing',
+    },
   },
   history: {
     title: 'History',

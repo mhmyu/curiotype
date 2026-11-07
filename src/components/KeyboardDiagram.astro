@@ -1,0 +1,134 @@
+---
+import type { Dictionary } from '@/i18n/types';
+import {
+  KEYBOARD_KEYS,
+  KEYBOARD_ROWS,
+  KEYBOARD_WIDTH,
+  getHandExtent,
+  getZoneShade,
+  type Hand,
+  type KeyboardKey,
+} from '@/features/guide/keyboard-fingers';
+
+interface Props {
+  ui: Dictionary;
+  /** `both`: the whole keyboard. `left` or `right`: only the keys of that hand (narrow screens). */
+  hand?: Hand | 'both';
+}
+
+const { ui, hand = 'both' } = Astro.props;
+const text = ui.guide.diagram;
+
+// Geometry in SVG units: one key unit = UNIT. Keys are drawn inset by GAP / 2 on every side.
+const UNIT = 48;
+const GAP = 4;
+const PAD = 2;
+
+const keys: KeyboardKey[] = KEYBOARD_KEYS.filter((key) => hand === 'both' || key.hand === hand);
+
+// The whole space bar is one shape with both thumbs; a single hand shows its half.
+const halves = keys.filter((key) => key.id.startsWith('space-'));
+const drawn: (KeyboardKey & { badges: { hand: Hand; finger: number; side: 'start' | 'end' | 'cell' }[] })[] =
+  keys
+    .filter((key) => !key.id.startsWith('space-'))
+    .map((key) => ({ ...key, badges: [{ hand: key.hand, finger: key.finger, side: 'cell' as const }] }));
+if (halves.length === 2) {
+  const [left, right] = halves as [KeyboardKey, KeyboardKey];
+  drawn.push({
+    ...left,
+    id: 'space',
+    width: left.width + right.width,
+    badges: [
+      { hand: 'left', finger: 5, side: 'start' },
+      { hand: 'right', finger: 5, side: 'end' },
+    ],
+  });
+} else if (halves.length === 1) {
+  const only = halves[0]!;
+  drawn.push({
+    ...only,
+    badges: [{ hand: only.hand, finger: 5, side: only.hand === 'left' ? 'start' : 'end' }],
+  });
+}
+
+// Crop the view to the keys that are drawn.
+const extent =
+  hand === 'both' ? { min: 0, max: KEYBOARD_WIDTH } : getHandExtent(hand);
+const viewX = extent.min * UNIT - PAD;
+const viewWidth = (extent.max - extent.min) * UNIT + PAD * 2;
+const viewHeight = KEYBOARD_ROWS * UNIT + PAD * 2;
+
+const label = hand === 'both' ? text.labelBoth : hand === 'left' ? text.labelLeft : text.labelRight;
+---
+
+<svg
+  viewBox={`${viewX} ${-PAD} ${viewWidth} ${viewHeight}`}
+  role="img"
+  aria-label={label}
+  class="block h-auto w-full"
+  data-testid={`keyboard-diagram-${hand}`}
+>
+  {
+    drawn.map((key) => {
+      const x = key.x * UNIT + GAP / 2;
+      const y = key.row * UNIT + GAP / 2;
+      const width = key.width * UNIT - GAP;
+      const height = UNIT - GAP;
+      const shade = getZoneShade(key.finger);
+      const fill = key.home ? 'fill-primary' : shade === 'a' ? 'fill-surface' : 'fill-background';
+      const stroke = key.home ? 'stroke-on-primary' : 'stroke-border';
+      const ink = key.home ? 'fill-on-primary' : 'fill-text';
+      return (
+        <g data-key={key.label} data-finger={`${key.hand}-${key.finger}`}>
+          <rect
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            rx="6"
+            class={`${fill} ${stroke}`}
+            stroke-width={key.home ? 2.5 : 1.5}
+          />
+          <text
+            x={x + width / 2}
+            y={y + height - 8}
+            text-anchor="middle"
+            class={`${ink} font-ui`}
+            font-size={key.special ? 15 : 22}
+            font-weight={key.special ? 600 : 700}
+          >
+            {key.label}
+          </text>
+          {key.bump && (
+            <rect
+              x={x + width / 2 - 8}
+              y={y + height - 6}
+              width="16"
+              height="3"
+              rx="1.5"
+              class="fill-on-primary"
+              data-testid="keyboard-bump"
+            />
+          )}
+          {key.badges.map((badge) => {
+            const anchor = badge.side === 'start' ? 'start' : 'end';
+            const badgeX = badge.side === 'start' ? x + 8 : x + width - 6;
+            return (
+              <text
+                x={badgeX}
+                y={y + 17}
+                text-anchor={anchor}
+                class={`${ink} font-ui`}
+                font-size="16"
+                font-weight="700"
+              >
+                {text.handLetter[badge.hand]}
+                {badge.finger}
+              </text>
+            );
+          })}
+        </g>
+      );
+    })
+  }
+</svg>

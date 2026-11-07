@@ -6,7 +6,7 @@ import type { Dictionary } from '@/i18n/types';
 interface Props {
   lang: Language;
   ui: Dictionary;
-  /** Path of the current page inside its language ('' = home, 'stats', 'collection', 'settings'), as passed to BaseLayout. */
+  /** Path of the current page inside its language ('' = home, 'guide', 'stats', 'collection', 'settings'), as passed to BaseLayout. */
   current: string;
 }
 
@@ -16,6 +16,7 @@ const { lang, ui, current } = Astro.props;
 // dictionaries.
 const items = [
   { path: '', label: ui.nav.home },
+  { path: 'guide', label: ui.nav.guide },
   { path: 'stats', label: ui.nav.stats },
   { path: 'collection', label: ui.nav.collection },
   { path: 'settings', label: ui.nav.settings },

@@ -71,4 +71,12 @@ for (const { code } of LANGUAGES) {
     await page.goto(`/${code}/privacy/`);
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
   });
+
+  test(`/${code}/guide/ is indexable and has its own description`, async ({ page }) => {
+    const ui = code === 'id' ? id : en;
+    await page.goto(`/${code}/guide/`);
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', ui.guide.page.description);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  });
 }

@@ -18,6 +18,7 @@ Stack: Astro 7 (static, Jamstack) + Svelte 5 islands + Tailwind CSS v4. No backe
 - **Knowledge, not random words**: each sentence comes with an explanation and a source link; filter by category and by difficulty (easy or hard, measured from the text).
 - **Progress**: speed and accuracy per test, personal bests, statistics, a keyboard heat map with your weak keys and a practice mode for them.
 - **Habits**: daily streak and goal, fact of the day, favorites collection.
+- **Typing guide**: a page on ten-finger typing with a keyboard diagram that shows the finger for every key, a practice plan and tips (`/id/guide/`, `/en/guide/`), linked from the home page, the main menu and the home page text.
 - **Share** your result as an image.
 - **Works offline** as an installable app (PWA), light and dark themes, mobile-first and keyboard friendly.
 - **Private by design**: no accounts, no tracking by default; everything is stored in your browser and can be exported or deleted.
@@ -70,6 +71,7 @@ src/
     [lang]/stats.astro                       # statistics page: /id/stats/ and /en/stats/
     [lang]/collection.astro                  # collection page: /id/collection/ and /en/collection/ (saved sentences)
     [lang]/settings.astro                    # settings page: /id/settings/ and /en/settings/ (settings + data tools)
+    [lang]/guide.astro                       # ten-finger typing guide: /id/guide/ and /en/guide/ (static text + keyboard diagram)
     [lang]/privacy.astro                     # privacy policy: /id/privacy/ and /en/privacy/
     data/[lang]/sentences.json.ts            # static JSON endpoint consumed by the island
     404.astro                                # one bilingual "not found" page
@@ -96,6 +98,7 @@ src/
     results/                                 # results panel, WPM chart, SentenceCard (sentence + explanation + source, shared with the collection), "what you just typed", share image (share-image.ts, share-result.ts, share-button-state.ts)
     history/                                 # history list and personal bests
     seen/                                    # ids of sentences typed to the end (seen.ts)
+    guide/                                   # keyboard-fingers.ts: the finger of every key on a QWERTY keyboard (pure, tested); guide-text.test.ts guards the guide text
     relaxed/                                 # relaxed mode: relaxed-session.ts (pure session state), RelaxedSession.svelte
     custom-text/                             # custom text: normalize.ts, custom-texts.ts (saved texts), CustomTextInput.svelte
     shortcuts/                               # shortcuts.ts: pure rules for the Esc / Enter shortcuts of the result screens
