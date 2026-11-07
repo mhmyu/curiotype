@@ -1,0 +1,89 @@
+---
+import type { Dictionary } from '@/i18n/types';
+import type { Sentence } from '@/lib/types';
+
+interface Props {
+  ui: Dictionary;
+  /** Labels of the categories of the starting sentence language, in display order. */
+  categoryLabels: string[];
+  /** Fixed example sentences (see lib/home-examples.ts). */
+  examples: Sentence[];
+}
+
+const { ui, categoryLabels, examples } = Astro.props;
+const text = ui.home;
+---
+
+<!-- Static text under the test and the history: what the site is and how it works. No script. -->
+<section class="mt-12 flex flex-col gap-10" aria-label={text.sectionLabel} data-testid="home-content">
+  <div class="flex flex-col gap-3">
+    <h2>{text.howTitle}</h2>
+    <ol class="flex flex-col gap-3">
+      {
+        text.steps.map((step, index) => (
+          <li class="card flex gap-4 p-5">
+            <span
+              class="flex size-8 shrink-0 items-center justify-center rounded-xs border-2 border-on-primary bg-primary font-ui text-ui text-on-primary"
+              aria-hidden="true"
+            >
+              {index + 1}
+            </span>
+            <div class="flex flex-col gap-1">
+              <h3>{step.title}</h3>
+              <p class="text-body-long">{step.body}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  {
+    categoryLabels.length > 0 && (
+      <div class="flex flex-col gap-3">
+        <h2>{text.categoriesTitle}</h2>
+        <p class="text-body-long">{text.categoriesIntro}</p>
+        <ul class="flex flex-wrap gap-2">
+          {categoryLabels.map((label) => (
+            <li class="rounded-xs border-2 border-border bg-surface px-3 py-1 font-ui text-ui">{label}</li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  {
+    examples.length > 0 && (
+      <div class="flex flex-col gap-3">
+        <h2>{text.examplesTitle}</h2>
+        <p class="text-body-long">{text.examplesIntro}</p>
+        <ul class="flex flex-col gap-3">
+          {examples.map((sentence) => (
+            <li class="card flex flex-col gap-2 p-5" data-testid="home-example">
+              {/* The sentence is in the sentence language, which can differ from the page. */}
+              <p class="text-body-long font-semibold" lang={sentence.lang}>
+                {sentence.text}
+              </p>
+              <p class="text-caption text-text-muted">
+                {ui.results.sourceLabel}:{' '}
+                <a
+                  href={sentence.source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-accent underline underline-offset-2"
+                >
+                  {sentence.source.title}
+                </a>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  <div class="flex flex-col gap-3">
+    <h2>{text.whyTitle}</h2>
+    <p class="text-body-long">{text.whyBody}</p>
+  </div>
+</section>

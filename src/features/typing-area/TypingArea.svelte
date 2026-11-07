@@ -2,6 +2,7 @@
   import { tick } from 'svelte';
   import type { TypingState } from '@/features/typing-engine/engine';
   import { settingsStore } from '@/features/settings/settings.svelte';
+  import { TYPING_SIZE_CLASS } from './sizes';
   import type { Dictionary } from '@/i18n/types';
   import { isComposingKey, shouldDeferInput } from './composition';
 
@@ -62,17 +63,10 @@
     incorrect: 'bg-error/15 text-error underline decoration-2 underline-offset-4',
   } as const;
 
-  /*
-   * Size comes from the fontSize setting. The text box is exactly four lines high:
-   * line-height is 1.6, so 4 x 1.6 x font size gives the height for each size.
-   */
-  const SIZE_CLASS = {
-    sm: 'text-typing-sm h-[6.4rem]',
-    md: 'text-typing-md h-32',
-    lg: 'text-typing-lg h-[9.6rem]',
-  } as const;
-
-  const sizeClass = $derived(SIZE_CLASS[settingsStore.current.fontSize]);
+  // Size comes from the fontSize setting (classes in ./sizes, shared with the loading placeholder).
+  const sizeClass = $derived(
+    `${TYPING_SIZE_CLASS[settingsStore.current.fontSize].text} ${TYPING_SIZE_CLASS[settingsStore.current.fontSize].height}`,
+  );
   const caretStyle = $derived(settingsStore.current.caretStyle);
 
   function clearOverlayTimer() {

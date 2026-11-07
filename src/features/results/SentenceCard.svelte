@@ -22,8 +22,9 @@
 
 <!-- One sentence with its explanation and source. Used by the results list and the collection page. -->
 <li class="card flex flex-col gap-2 p-5" data-sentence-id={sentence.id}>
-  <p class="text-body-long font-semibold">{sentence.text}</p>
-  <p class="text-body-long text-text-muted">{sentence.explanation}</p>
+  <!-- The sentence and its explanation are in the sentence language, which can differ from the page. -->
+  <p class="text-body-long font-semibold" lang={sentence.lang}>{sentence.text}</p>
+  <p class="text-body-long text-text-muted" lang={sentence.lang}>{sentence.explanation}</p>
   <p class="text-caption text-text-muted">
     {categoryLabel(sentence.category)} ·
     <!-- The level is spelled out (never colour alone): badge with a 2px radius. -->

@@ -4,14 +4,20 @@ export const en: Dictionary = {
   meta: {
     siteName: 'curiotype',
     homeTitle: 'curiotype: Typing Test with Sentences That Teach',
+    homeHeading: 'Typing Test with Sentences That Teach',
     tagline: 'Practice typing with sentences that teach you something.',
     description:
-      'A typing test that shows meaningful sentences from science, history, technology and health instead of random words.',
+      'Practice touch typing with meaningful sentences from science, history, technology and health. Measure your WPM and accuracy, then learn the fact in each.',
+    ogImageAlt:
+      'The curiotype logo, a black letter T on a green square, with the site name, the tagline Practice typing with sentences that teach you something, and the four sentence categories.',
   },
   nav: {
     language: 'Language',
     main: 'Main navigation',
     menu: 'Menu',
+    skipToContent: 'Skip to content',
+    noscript:
+      'This site needs JavaScript to run the typing test. Turn on JavaScript in your browser and reload the page.',
     home: 'Home',
     stats: 'Statistics',
     collection: 'Collection',
@@ -21,6 +27,8 @@ export const en: Dictionary = {
     updateAvailable: 'A new version is available.',
     reload: 'Reload',
     later: 'Later',
+    screenshotNarrow: 'curiotype home page on a phone: a typing box with a sentence that teaches you something',
+    screenshotWide: 'curiotype home page on a wide screen: a typing box with a sentence that teaches you something',
   },
   footer: {
     label: 'Site links',
@@ -279,6 +287,31 @@ export const en: Dictionary = {
     shareBusy: 'Preparing image...',
     shareSaved: 'The result image was saved as a PNG file.',
     shareFailed: 'The image could not be created. Try again.',
+  },
+  home: {
+    sectionLabel: 'About curiotype',
+    howTitle: 'How it works',
+    steps: [
+      {
+        title: 'Pick a mode',
+        body: 'Choose a time limit, a single sentence, or a set number of sentences. Filters narrow the category or the difficulty if you want.',
+      },
+      {
+        title: 'Type the sentence',
+        body: 'The timer starts at your first keystroke. Your speed in WPM and your accuracy update as you type.',
+      },
+      {
+        title: 'Learn the fact',
+        body: 'When the test ends, each sentence comes back with a short explanation and a link to its source.',
+      },
+    ],
+    categoriesTitle: 'Topics to practice with',
+    categoriesIntro: 'Every sentence is a fact from one of these areas, with a source you can check yourself.',
+    examplesTitle: 'Sentences you may type',
+    examplesIntro: 'Three examples from the collection, each with its source.',
+    whyTitle: 'Why type sentences that mean something?',
+    whyBody:
+      'Random words are easy to type and easy to forget. A sentence with a fact makes you read before you type, so your eyes stay a step ahead of your fingers, as in real writing. The numbers, punctuation and capital letters inside the sentences give your fingers more to practice than a word list does. And you finish every test knowing something you did not know before.',
   },
   history: {
     title: 'History',

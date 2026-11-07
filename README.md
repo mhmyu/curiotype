@@ -50,6 +50,8 @@ Before the browser tests run for the first time: `pnpm exec playwright install c
 | `pnpm test:run`| Run unit tests once (used by CI)        |
 | `pnpm test:e2e`| Run browser tests (build first)         |
 | `pnpm assets:generate` | Regenerate favicon, icons and Open Graph images |
+| `pnpm assets:favicon-ico` | Rebuild only `public/favicon.ico` from `public/favicon.svg` |
+| `pnpm assets:screenshots` | Re-shoot the install-dialog screenshots in `public/screenshots/` (run `pnpm build` first) |
 | `pnpm content:add-category <name> --id "<label>" --en "<label>"` | Add a sentence category: appends it to `src/content/categories.json` and creates a placeholder file per sentence language (`--langs`, `--order`, `--dry-run`; see `CONTENT_GUIDE.md`) |
 | `pnpm content:stats` | Count sentences per language, category and difficulty; show the score spread (`--scores`: the score and level of every sentence); warn below 100 or off 50/50 |
 | `pnpm content:check-sources` | Request every source URL and report broken links (needs a network) |
@@ -71,7 +73,7 @@ src/
     data/[lang]/sentences.json.ts            # static JSON endpoint consumed by the island
     404.astro                                # one bilingual "not found" page
     robots.txt.ts                            # robots.txt (needs the public origin, so it is generated)
-  layouts/ components/                       # Astro shell (header, main navigation, language switcher, footer)
+  layouts/ components/                       # Astro shell (header, main navigation, language switcher, footer) and the static home text (HomeContent.astro)
   i18n/                                      # languages, Dictionary type, id/en UI strings
   lib/
     taxonomy.ts                              # difficulties (the category list lives in content/categories.json)
@@ -103,7 +105,7 @@ src/
     data-tools/                              # data export / import / delete (data-schema.ts, data-transfer.ts, DataTools.svelte)
     settings/                                # Settings type, defaults, load/save, shared reactive store, theme (theme.ts), settings page UI (SettingsPanel), sentence language switch
   styles/                                    # global.css (Tailwind mapping, type scale, base rules), tokens.css (colors)
-public/                                      # favicon.svg, apple-touch-icon.png, icons/, og/ (generated; see "Brand assets" in `ARCHITECTURE.md`), _headers (host headers; see "Deploy" in `ARCHITECTURE.md`)
+public/                                      # favicon.svg, favicon.ico, apple-touch-icon.png, icons/, og/ (generated; see "Brand assets" in `ARCHITECTURE.md`), _headers (host headers; see "Deploy" in `ARCHITECTURE.md`)
 scripts/generate-assets.mjs                  # draws the brand assets from the design palette
 scripts/content-stats.ts, check-sources.ts, add-category.ts   # content tools (`pnpm content:stats`, `pnpm content:check-sources`, `pnpm content:add-category`); read-corpus.ts is their shared file reader
 tests/e2e/                                   # Playwright browser tests

@@ -13,8 +13,13 @@ export interface Dictionary {
     siteName: string;
     /** Title of the home page (and fallback when a page has none): name plus a short keyword phrase, under 60 characters. */
     homeTitle: string;
+    /** Visible `h1` of the home page: the keyword phrase of `homeTitle` without the site name. */
+    homeHeading: string;
     tagline: string;
+    /** Meta and Open Graph description, 140 to 155 characters. */
     description: string;
+    /** Alt text of the Open Graph image: what the picture shows. */
+    ogImageAlt: string;
   };
   nav: {
     language: string;
@@ -22,6 +27,10 @@ export interface Dictionary {
     main: string;
     /** Accessible name of the button that opens the menu on small screens. */
     menu: string;
+    /** Text of the skip link (first focusable element of every page). */
+    skipToContent: string;
+    /** Shown only when JavaScript is off: the typing test needs it. */
+    noscript: string;
     home: string;
     stats: string;
     collection: string;
@@ -32,6 +41,9 @@ export interface Dictionary {
     updateAvailable: string;
     reload: string;
     later: string;
+    /** Descriptions of the install-dialog screenshots (the manifest `label`). */
+    screenshotNarrow: string;
+    screenshotWide: string;
   };
   footer: {
     /** Accessible name of the footer links. */
@@ -327,6 +339,20 @@ export interface Dictionary {
     /** Announced after the image was saved as a file because the browser cannot share files. */
     shareSaved: string;
     shareFailed: string;
+  };
+  /** Static text of the home page under the test (see components/HomeContent.astro). */
+  home: {
+    /** Accessible name of the whole block. */
+    sectionLabel: string;
+    howTitle: string;
+    /** Three steps, in order. */
+    steps: { title: string; body: string }[];
+    categoriesTitle: string;
+    categoriesIntro: string;
+    examplesTitle: string;
+    examplesIntro: string;
+    whyTitle: string;
+    whyBody: string;
   };
   history: {
     title: string;

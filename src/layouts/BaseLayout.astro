@@ -11,10 +11,13 @@ import { LANGUAGES, getOgLocale } from '@/i18n/config';
 import type { Language } from '@/i18n/config';
 import { getDictionary, getLocalePath } from '@/i18n';
 import { getManifestPath } from '@/lib/manifest';
+import { getSentencesUrl } from '@/lib/sentence-url';
 import {
   OG_IMAGE_SIZE,
   buildAlternates,
+  robotsMetaContent,
   buildWebApplicationJsonLd,
+  buildWebSiteJsonLd,
   localeUrl,
   ogImageUrl,
   serializeJsonLd,
@@ -26,10 +29,14 @@ interface Props {
   description?: string;
   /** Preload the latin file of the typing font; set it on pages that show the typing area. */
   preloadTypingFont?: boolean;
+  /** Sentence language whose file the page starts downloading at once (the home page sets it). */
+  preloadSentencesLang?: string;
   /** Path of the page inside its language, without slashes ('' = home, 'settings'). Used for canonical and hreflang. */
   path?: string;
   /** Keep the page out of search results and skip canonical, hreflang and structured data (404). */
   noindex?: boolean;
+  /** With `noindex`: still let crawlers follow the links of the page (`noindex, follow`). */
+  follow?: boolean;
   /** Add schema.org WebApplication data; set it on the home page only. */
   jsonLd?: boolean;
   /** Show the language switcher in the header (the 404 page has its own language links). */
@@ -43,8 +50,10 @@ const {
   title,
   description,
   preloadTypingFont = false,
+  preloadSentencesLang,
   path = '',
   noindex = false,
+  follow = false,
   jsonLd = false,
   showLanguageSwitcher = true,
   showNav = true,
@@ -80,12 +89,21 @@ const otherLanguages = LANGUAGES.filter((code) => code !== lang);
 const structuredData =
   site && jsonLd && !noindex
     ? serializeJsonLd(
-        buildWebApplicationJsonLd({
-          site,
-          lang,
-          name: ui.meta.siteName,
-          description: pageDescription,
-        }),
+        // Two entities in one block: the app and the website it lives on.
+        [
+          buildWebApplicationJsonLd({
+            site,
+            lang,
+            name: ui.meta.siteName,
+            description: pageDescription,
+          }),
+          buildWebSiteJsonLd({
+            site,
+            lang,
+            name: ui.meta.siteName,
+            alternateName: ui.meta.homeHeading,
+          }),
+        ],
       )
     : undefined;
 ---
@@ -98,12 +116,13 @@ const structuredData =
     <!-- Applies a saved light/dark choice before the first paint (no flash). Keep it first. -->
     <script is:inline set:html={THEME_INIT_SCRIPT} />
     <meta name="description" content={pageDescription} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href={getManifestPath(lang)} />
     <meta name="theme-color" content={THEME_COLOR_LIGHT} media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content={THEME_COLOR_DARK} media="(prefers-color-scheme: dark)" />
-    {noindex && <meta name="robots" content="noindex" />}
+    {noindex && <meta name="robots" content={robotsMetaContent(follow)} />}
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
     {alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
     <meta property="og:type" content="website" />
@@ -119,7 +138,7 @@ const structuredData =
           <meta property="og:image" content={ogImageUrl(site, lang)} />
           <meta property="og:image:width" content={String(OG_IMAGE_SIZE.width)} />
           <meta property="og:image:height" content={String(OG_IMAGE_SIZE.height)} />
-          <meta property="og:image:alt" content={ui.meta.siteName} />
+          <meta property="og:image:alt" content={ui.meta.ogImageAlt} />
           <meta name="twitter:card" content="summary_large_image" />
         </>
       )
@@ -133,11 +152,27 @@ const structuredData =
         <link rel="preload" href={typingFontPreloadUrl} as="font" type="font/woff2" crossorigin />
       )
     }
+    {
+      preloadSentencesLang && (
+        <link rel="preload" href={getSentencesUrl(preloadSentencesLang)} as="fetch" crossorigin />
+      )
+    }
     <title>{pageTitle}</title>
   </head>
   <body class="flex min-h-dvh flex-col bg-background text-text antialiased">
+    <!-- First focusable element of the page: keyboard users jump past the header to <main>. -->
+    <a
+      href="#main"
+      class="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-[max(0.5rem,env(safe-area-inset-top))] focus:z-50"
+    >
+      {ui.nav.skipToContent}
+    </a>
     <SiteHeader lang={lang} ui={ui} current={path} showLanguageSwitcher={showLanguageSwitcher} showNav={showNav} />
-    <main class="mx-auto w-full max-w-3xl flex-1 px-4 pb-10">
+    <!-- tabindex="-1": the skip link moves the focus here; the box itself is not a control. -->
+    <main id="main" tabindex="-1" class="mx-auto w-full max-w-3xl flex-1 px-4 pb-10 focus:outline-none">
+      <noscript>
+        <p class="card mt-4 p-5 text-body-long" data-testid="noscript-message">{ui.nav.noscript}</p>
+      </noscript>
       <slot />
     </main>
     <footer class="mx-auto w-full max-w-3xl px-4 pb-8 text-caption text-text-muted">

@@ -13,7 +13,17 @@ export function getStaticPaths() {
 export const GET: APIRoute = ({ params }) => {
   const lang = params.lang as Language;
   const ui = getDictionary(lang);
-  const manifest = buildManifest({ lang, name: ui.meta.siteName, description: ui.meta.description });
+  const manifest = buildManifest({
+    lang,
+    name: ui.meta.siteName,
+    description: ui.meta.description,
+    text: {
+      statsName: ui.nav.stats,
+      collectionName: ui.nav.collection,
+      screenshotNarrow: ui.pwa.screenshotNarrow,
+      screenshotWide: ui.pwa.screenshotWide,
+    },
+  });
   return new Response(JSON.stringify(manifest), {
     headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' },
   });

@@ -49,12 +49,36 @@ export function buildWebApplicationJsonLd(input: WebApplicationInput): Record<st
     name: input.name,
     description: input.description,
     url: localeUrl(input.site, input.lang),
+    image: ogImageUrl(input.site, input.lang),
     inLanguage: LOCALE_TAGS[input.lang],
     applicationCategory: 'EducationalApplication',
     operatingSystem: 'Any',
     browserRequirements: 'Requires JavaScript',
     isAccessibleForFree: true,
+    // The app is free: an explicit zero price lets search engines show it as such.
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   };
+}
+
+export interface WebSiteInput {
+  site: URL | string;
+  lang: Language;
+  name: string;
+  /** Other name of the site, for example its longer keyword title. */
+  alternateName?: string;
+}
+
+/** schema.org `WebSite` description of one language version of the site (home page only). */
+export function buildWebSiteJsonLd(input: WebSiteInput): Record<string, unknown> {
+  const data: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: input.name,
+    url: localeUrl(input.site, input.lang),
+    inLanguage: LOCALE_TAGS[input.lang],
+  };
+  if (input.alternateName && input.alternateName !== input.name) data.alternateName = input.alternateName;
+  return data;
 }
 
 /**
@@ -69,6 +93,11 @@ export function serializeJsonLd(data: unknown): string {
     .replace(/&/g, '\\u0026')
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029');
+}
+
+/** Content of the robots meta tag of a noindex page: `follow` lets crawlers still follow its links. */
+export function robotsMetaContent(follow: boolean): string {
+  return follow ? 'noindex, follow' : 'noindex';
 }
 
 /** Content of `robots.txt`: everything is allowed; the sitemap line needs the public origin. */

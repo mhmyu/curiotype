@@ -53,6 +53,18 @@ for (const { code, ui } of LANGS) {
       const file = await page.request.get(icon.src);
       expect(file.ok(), icon.src).toBe(true);
     }
+    expect(manifest.categories).toEqual(['education']);
+    // Shortcuts and screenshots are served files and pages, not just entries in the manifest.
+    for (const shortcut of manifest.shortcuts as Array<{ url: string }>) {
+      expect((await page.request.get(shortcut.url)).ok(), shortcut.url).toBe(true);
+    }
+    const factors = (manifest.screenshots as Array<{ form_factor: string }>).map((shot) => shot.form_factor);
+    expect(factors).toEqual(['narrow', 'wide']);
+    for (const shot of manifest.screenshots as Array<{ src: string }>) {
+      const file = await page.request.get(shot.src);
+      expect(file.ok(), shot.src).toBe(true);
+      expect(file.headers()['content-type']).toContain('image/png');
+    }
   });
 }
 
@@ -136,7 +148,9 @@ test('a new version shows a toast, never reloads by itself, and reloads when ask
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
   await Promise.all([page.waitForEvent('load'), toast.getByRole('button', { name: id.pwa.reload, exact: true }).click()]);
-  await expect(page.getByTestId('update-toast')).toHaveCount(0);
+  // The page really reloaded. The toast is not asserted away here: the simulated new version
+  // is `/sw.js?update-test`, so after the reload the page registers the real `/sw.js`, which the
+  // browser sees as yet another update and may announce again (how soon depends on load speed).
   expect(await page.evaluate(() => (window as unknown as { __marker?: boolean }).__marker)).toBeUndefined();
   await waitForWorker(page);
 });

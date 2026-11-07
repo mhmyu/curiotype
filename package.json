@@ -23,6 +23,8 @@
     "test:run": "vitest run",
     "test:e2e": "playwright test",
     "assets:generate": "node scripts/generate-assets.mjs",
+    "assets:favicon-ico": "node scripts/generate-favicon-ico.mjs",
+    "assets:screenshots": "node scripts/generate-manifest-screenshots.mjs",
     "content:stats": "node scripts/content-stats.ts",
     "content:check-sources": "node scripts/check-sources.ts",
     "content:add-category": "node scripts/add-category.ts"

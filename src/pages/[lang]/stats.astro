@@ -24,7 +24,7 @@ const contentLang = resolveContentLang(lang, contentLangs);
 const categories = await getCategories();
 ---
 
-<BaseLayout lang={lang} path="stats" title={ui.stats.title} description={ui.stats.description}>
+<BaseLayout lang={lang} path="stats" noindex follow title={ui.stats.title} description={ui.stats.description}>
   <h1 class="mb-6">{ui.stats.title}</h1>
   <StatsPage
     client:load

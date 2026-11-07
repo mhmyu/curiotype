@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { getSentencesUrl } from '@/lib/sentence-url';
   import { onMount, tick } from 'svelte';
   import { COUNT_OPTIONS, MODES, MODE_IDS, TIME_DURATIONS } from '@/features/test-modes';
   import type { ProgressSnapshot } from '@/features/test-modes';
@@ -38,6 +39,7 @@
   } from '@/features/custom-text/custom-texts';
   import type { CustomText } from '@/features/custom-text/custom-texts';
   import RelaxedSession from '@/features/relaxed/RelaxedSession.svelte';
+  import { TYPING_SIZE_CLASS } from '@/features/typing-area/sizes';
   import StreakBadge from '@/features/streak/StreakBadge.svelte';
   import {
     EMPTY_STREAK,
@@ -555,7 +557,7 @@
   async function fetchSentences(code: ContentLang): Promise<Sentence[]> {
     const cached = sentenceCache.get(code);
     if (cached) return cached;
-    const response = await fetch(`/data/${code}/sentences.json`);
+    const response = await fetch(getSentencesUrl(code));
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const sentences = (await response.json()) as Sentence[];
     sentenceCache.set(code, sentences);
@@ -645,13 +647,56 @@
   });
 </script>
 
+<!--
+  Time bar. Before the sentences load (the server HTML) it carries no style attribute, which the
+  page's CSP would block; the CSS falls back to a full bar.
+-->
+{#snippet timeBar()}
+  <div class="time-bar" aria-hidden="true" data-testid="time-bar">
+    <div
+      class="time-bar-fill"
+      data-running={status === 'running'}
+      data-testid="time-bar-fill"
+      style:--bar-now={loaded ? barNow : undefined}
+      style:--bar-next={loaded ? barNext : undefined}
+    ></div>
+  </div>
+{/snippet}
+
+<!-- Mode description, Restart row and hints under the typing box; `busy` while the sentences load. -->
+{#snippet belowBox(busy: boolean)}
+  <ModeDescription {ui} mode={settings.mode} />
+
+  <!-- After the typing area in the DOM, so Tab from the field lands on Restart, then Enter works. -->
+  <div class="flex flex-wrap items-center gap-3">
+    <button type="button" class="btn btn-primary" onclick={() => void startNewTest()} disabled={busy}>
+      {ui.test.restart}
+    </button>
+    <p class="shortcut-hint text-caption text-text-muted" data-testid="shortcut-hint-restart">
+      <kbd class="kbd">Esc</kbd>: {ui.test.shortcutRestart}
+    </p>
+  </div>
+
+  <p class="text-caption text-text-muted">{ui.test.hint}</p>
+  {#if settings.mode === 'custom'}
+    <p class="text-caption text-text-muted">{ui.customText.hint}</p>
+  {/if}
+  {#if stopOnError}
+    <p class="text-caption text-text-muted" data-testid="stop-on-error-note">
+      {ui.test.stopOnErrorNote}
+    </p>
+  {/if}
+{/snippet}
+
 <section class="mx-auto flex w-full max-w-3xl flex-col gap-5 pb-10">
   <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</p>
 
-  {#if loaded}
-    <StreakBadge {ui} view={streakView} dailyGoal={settingsStore.current.dailyGoal} />
-
-    <div class="flex flex-col gap-3">
+  <!--
+    The controls are on screen from the first paint (server HTML included), so nothing around them
+    moves when the sentences arrive. Until then they are disabled (a real `disabled`, so tests and
+    assistive technology wait for them as well).
+  -->
+  <div class="flex flex-col gap-3" aria-busy={!loaded}>
       <!--
         One row, in this order: sentence language, mode, duration (Time) or sentence count (Count),
         filter button. All are native selects (the phone's own picker opens) without a visible
@@ -663,6 +708,7 @@
         {#if selectableContentLangs.length > 1}
           <ContentLangSwitch
             compact
+            disabled={!loaded}
             codes={selectableContentLangs}
             value={contentLang}
             {lang}
@@ -674,6 +720,7 @@
         <select
           class="field field-compact"
           aria-label={ui.test.modeLabel}
+          disabled={!loaded}
           title={ui.test.modes[settings.mode]}
           value={settings.mode}
           onchange={(event) => updateSettings({ mode: event.currentTarget.value as ModeId }, false)}
@@ -696,6 +743,7 @@
             <select
               class="field field-compact"
               aria-label={ui.test.durationLabel}
+              disabled={!loaded}
               value={String(settings.durationSec)}
               onchange={(event) =>
                 updateSettings({ durationSec: Number(event.currentTarget.value) }, false)}
@@ -724,6 +772,7 @@
           <select
             class="field field-compact"
             aria-label={ui.test.countLabel}
+            disabled={!loaded}
             value={String(settings.sentenceCount)}
             onchange={(event) =>
               updateSettings({ sentenceCount: Number(event.currentTarget.value) }, false)}
@@ -759,6 +808,7 @@
             class="btn btn-icon ml-auto"
             aria-expanded={filtersOpen}
             aria-controls="filter-panel"
+            disabled={!loaded}
             aria-label={activeFilterCount > 0 ? `${ui.test.filters} (${activeFilterCount})` : ui.test.filters}
             title={ui.test.filters}
             data-testid="filters-toggle"
@@ -867,10 +917,23 @@
         </div>
       {/if}
     </div>
-  {/if}
 
   {#if status === 'loading'}
-    <p class="text-body-long text-text-muted" role="status">{ui.test.loading}</p>
+    <!--
+      Placeholder with the size of the real thing (time bar, typing box, description, Restart row),
+      so the page below does not move when the first sentences are in.
+    -->
+    <div class="flex flex-col gap-2" data-testid="typing-skeleton">
+      {#if settings.mode === 'time'}{@render timeBar()}{/if}
+      <div
+        class="flex items-center justify-center rounded-container border-2 border-border bg-surface p-5"
+      >
+        <p class="w-full text-center text-body-long text-text-muted {TYPING_SIZE_CLASS[settingsStore.current.fontSize].height} content-center" role="status">
+          {ui.test.loading}
+        </p>
+      </div>
+    </div>
+    {@render belowBox(true)}
   {:else if status === 'error'}
     <p class="text-body-long text-error" role="alert">{ui.test.loadError}</p>
   {:else if status === 'empty'}
@@ -937,17 +1000,7 @@
       result appears. Decorative: the countdown above has the numbers.
     -->
     <div class="flex flex-col gap-2">
-      {#if settings.mode === 'time'}
-        <div class="time-bar" aria-hidden="true" data-testid="time-bar">
-          <div
-            class="time-bar-fill"
-            data-running={status === 'running'}
-            data-testid="time-bar-fill"
-            style:--bar-now={barNow}
-            style:--bar-next={barNext}
-          ></div>
-        </div>
-      {/if}
+      {#if settings.mode === 'time'}{@render timeBar()}{/if}
       <TypingArea
         bind:this={typingArea}
         typingState={engine}
@@ -958,31 +1011,20 @@
       />
     </div>
 
-    <ModeDescription {ui} mode={settings.mode} />
-
-    <!-- After the typing area in the DOM, so Tab from the field lands on Restart, then Enter works. -->
-    <div class="flex flex-wrap items-center gap-3">
-      <button type="button" class="btn btn-primary" onclick={() => void startNewTest()}>
-        {ui.test.restart}
-      </button>
-      <p class="shortcut-hint text-caption text-text-muted" data-testid="shortcut-hint-restart">
-        <kbd class="kbd">Esc</kbd>: {ui.test.shortcutRestart}
-      </p>
-    </div>
-
-    <p class="text-caption text-text-muted">{ui.test.hint}</p>
-    {#if settings.mode === 'custom'}
-      <p class="text-caption text-text-muted">{ui.customText.hint}</p>
-    {/if}
-    {#if stopOnError}
-      <p class="text-caption text-text-muted" data-testid="stop-on-error-note">
-        {ui.test.stopOnErrorNote}
-      </p>
-    {/if}
+    {@render belowBox(false)}
   {/if}
 
-  {#if loaded && dailyFact}
-    <DailyFact {ui} {categoryLabel} sentence={dailyFact} onType={(sentence) => void startWithSentence(sentence)} />
+  <!-- The slot is reserved before the sentences arrive, so the fact fills it instead of pushing the history down. -->
+  {#if dailyFact || (!loaded && status !== 'error')}
+    <div class="daily-fact-slot" data-testid="daily-fact-slot">
+      {#if loaded && dailyFact}
+        <DailyFact {ui} {categoryLabel} sentence={dailyFact} onType={(sentence) => void startWithSentence(sentence)} />
+      {/if}
+    </div>
+  {/if}
+
+  {#if loaded}
+    <StreakBadge {ui} view={streakView} dailyGoal={settingsStore.current.dailyGoal} />
   {/if}
 
   <HistoryList {history} {personalBests} {ui} {lang} />

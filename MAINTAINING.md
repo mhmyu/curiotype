@@ -234,6 +234,7 @@ The privacy page changes its analytics paragraph by itself depending on whether 
 
 ### 3.3 Search engines
 
+0. The statistics, collection and settings pages are deliberately `noindex` and not in the sitemap; Search Console will list them under "Excluded by noindex tag". That is expected, not a problem. After deploy, `curl -sI https://<your-domain>/` should answer `301` with `location: /id/`.
 1. **Google Search Console** (<https://search.google.com/search-console>): add your site as a property, verify it (Cloudflare DNS or the HTML tag method), then **Sitemaps > Add** `sitemap-index.xml`.
 2. **Bing Webmaster Tools** (<https://www.bing.com/webmasters>): add the site (you can import it from Search Console), then submit the same sitemap.
 

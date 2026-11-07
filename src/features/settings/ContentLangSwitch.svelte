@@ -19,9 +19,11 @@
      * the full name stays in the `aria-label` and `title`.
      */
     compact?: boolean;
+    /** Greys the select out (compact variant; the home page does this until its sentences have loaded). */
+    disabled?: boolean;
   }
 
-  let { codes, value, lang, label, onSelect, showLabel = true, compact = false }: Props = $props();
+  let { codes, value, lang, label, onSelect, showLabel = true, compact = false, disabled = false }: Props = $props();
 
   const currentName = $derived(getLanguageDisplayName(value, lang));
   /** "pt-br" -> "PT": the part before the region. */
@@ -37,6 +39,7 @@
     class="field field-compact"
     aria-label={label}
     title={currentName}
+    {disabled}
     {value}
     onchange={(event) => onSelect(event.currentTarget.value)}
   >

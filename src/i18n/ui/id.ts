@@ -4,14 +4,20 @@ export const id: Dictionary = {
   meta: {
     siteName: 'curiotype',
     homeTitle: 'curiotype: Tes Mengetik dengan Kalimat Edukatif',
+    homeHeading: 'Tes Mengetik dengan Kalimat Edukatif',
     tagline: 'Latihan mengetik dengan kalimat yang menambah pengetahuan.',
     description:
-      'Tes mengetik dengan kalimat bermakna dari sains, sejarah, teknologi, dan kesehatan, bukan kata acak.',
+      'Latihan mengetik 10 jari dengan kalimat bermakna dari sains, sejarah, teknologi, dan kesehatan. Ukur WPM dan akurasi, lalu pelajari faktanya.',
+    ogImageAlt:
+      'Logo curiotype, huruf T hitam pada kotak hijau, dengan nama situs, slogan Latihan mengetik dengan kalimat yang menambah pengetahuan, dan empat kategori kalimat.',
   },
   nav: {
     language: 'Bahasa',
     main: 'Navigasi utama',
     menu: 'Menu',
+    skipToContent: 'Lewati ke konten',
+    noscript:
+      'Situs ini membutuhkan JavaScript untuk menjalankan tes mengetik. Aktifkan JavaScript di peramban Anda, lalu muat ulang halaman.',
     home: 'Beranda',
     stats: 'Statistik',
     collection: 'Koleksi',
@@ -21,6 +27,8 @@ export const id: Dictionary = {
     updateAvailable: 'Versi baru tersedia.',
     reload: 'Muat ulang',
     later: 'Nanti',
+    screenshotNarrow: 'Beranda curiotype di ponsel: kotak ketik dengan kalimat yang menambah pengetahuan',
+    screenshotWide: 'Beranda curiotype di layar lebar: kotak ketik dengan kalimat yang menambah pengetahuan',
   },
   footer: {
     label: 'Tautan situs',
@@ -279,6 +287,31 @@ export const id: Dictionary = {
     shareBusy: 'Menyiapkan gambar...',
     shareSaved: 'Gambar hasil disimpan sebagai berkas PNG.',
     shareFailed: 'Gambar tidak bisa dibuat. Coba lagi.',
+  },
+  home: {
+    sectionLabel: 'Tentang curiotype',
+    howTitle: 'Cara kerja',
+    steps: [
+      {
+        title: 'Pilih mode',
+        body: 'Pilih batas waktu, satu kalimat, atau sejumlah kalimat. Filter bisa mempersempit kategori atau tingkat kesulitan bila kamu mau.',
+      },
+      {
+        title: 'Ketik kalimatnya',
+        body: 'Waktu mulai berjalan sejak ketikan pertama. Kecepatan (WPM) dan akurasimu diperbarui selama kamu mengetik.',
+      },
+      {
+        title: 'Pelajari faktanya',
+        body: 'Setelah tes selesai, tiap kalimat tampil lagi dengan penjelasan singkat dan tautan ke sumbernya.',
+      },
+    ],
+    categoriesTitle: 'Topik untuk berlatih',
+    categoriesIntro: 'Setiap kalimat adalah fakta dari salah satu bidang ini, lengkap dengan sumber yang bisa kamu periksa sendiri.',
+    examplesTitle: 'Contoh kalimat yang akan kamu ketik',
+    examplesIntro: 'Tiga contoh dari koleksi, masing-masing dengan sumbernya.',
+    whyTitle: 'Mengapa mengetik kalimat yang bermakna?',
+    whyBody:
+      'Kata acak mudah diketik dan mudah terlupa. Kalimat berisi fakta membuatmu membaca dulu sebelum mengetik, sehingga mata selalu selangkah di depan jari, seperti saat menulis sungguhan. Angka, tanda baca, dan huruf kapital di dalam kalimat memberi jari lebih banyak latihan daripada daftar kata. Dan setiap tes selesai dengan pengetahuan yang belum kamu punya sebelumnya.',
   },
   history: {
     title: 'Riwayat',

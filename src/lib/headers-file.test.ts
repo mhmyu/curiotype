@@ -22,8 +22,8 @@ function parseHeadersFile(text: string): Map<string, Map<string, string>> {
 const rules = parseHeadersFile(readFileSync('public/_headers', 'utf8'));
 
 describe('public/_headers', () => {
-  it('has a rule for every page and one for the hashed assets', () => {
-    expect([...rules.keys()]).toEqual(['/*', '/sw.js', '/_astro/*']);
+  it('has a rule for every page and one per asset group', () => {
+    expect([...rules.keys()]).toEqual(['/*', '/sw.js', '/_astro/*', '/icons/*', '/og/*', '/favicon.svg', '/data/*']);
   });
 
   it('sets the security headers on every path', () => {
@@ -49,6 +49,24 @@ describe('public/_headers', () => {
 
   it('caches the hashed assets for a year as immutable', () => {
     expect(rules.get('/_astro/*')?.get('cache-control')).toBe('public, max-age=31536000, immutable');
+  });
+
+  it('isolates the browsing context group', () => {
+    expect(rules.get('/*')?.get('cross-origin-opener-policy')).toBe('same-origin');
+  });
+
+  it('caches the brand files for 30 days, not as immutable (the names do not change)', () => {
+    for (const path of ['/icons/*', '/og/*', '/favicon.svg']) {
+      const value = rules.get(path)?.get('cache-control') ?? '';
+      expect(value).toBe('public, max-age=2592000');
+      expect(value).not.toContain('immutable');
+    }
+  });
+
+  it('serves the sentence files from the cache for an hour and revalidates in the background', () => {
+    expect(rules.get('/data/*')?.get('cache-control')).toBe(
+      'public, max-age=3600, stale-while-revalidate=86400',
+    );
   });
 
   it('does not repeat the script and style policy, which Astro writes per build', () => {

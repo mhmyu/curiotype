@@ -12,6 +12,7 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
   X-Frame-Options: DENY
   Content-Security-Policy: frame-ancestors 'none'
+  Cross-Origin-Opener-Policy: same-origin
 
 # The service worker must always be revalidated, or an update could wait behind the HTTP cache
 # (browsers already bypass it for the worker script, this makes it explicit for every host).
@@ -21,3 +22,17 @@
 # Files under /_astro/ have a content hash in their name, so they never change.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Brand files keep their names when they change (they can be replaced with your own designs), so
+# they get a long but not immutable cache: 30 days.
+/icons/*
+  Cache-Control: public, max-age=2592000
+/og/*
+  Cache-Control: public, max-age=2592000
+/favicon.svg
+  Cache-Control: public, max-age=2592000
+
+# The sentence files change with the content, not with a hash in the name: serve from the cache for
+# an hour, and for a day more show the cached copy while a fresh one is fetched in the background.
+/data/*
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400

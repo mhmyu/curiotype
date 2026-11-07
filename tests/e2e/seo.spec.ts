@@ -22,8 +22,20 @@ for (const { code, ui, ogLocale, otherOgLocale } of LANGUAGES) {
     await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute('content', ogLocale);
     await expect(page.locator('meta[property="og:locale:alternate"]')).toHaveAttribute('content', otherOgLocale);
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(ui.meta.homeHeading);
+    expect(ui.meta.description.length).toBeGreaterThanOrEqual(140);
+    expect(ui.meta.description.length).toBeLessThanOrEqual(155);
+    await expect(page.locator('link[rel="icon"][href="/favicon.ico"]')).toHaveAttribute('sizes', '48x48');
+    await expect(page.locator('link[rel="icon"][href="/favicon.svg"]')).toHaveCount(1);
   });
 }
+
+test('/favicon.ico is served as an icon', async ({ request }) => {
+  const response = await request.get('/favicon.ico');
+  expect(response.status()).toBe(200);
+  expect((await response.body()).subarray(0, 4).toString('hex')).toBe('00000100');
+});
 
 test('an unknown URL shows the bilingual 404 page, kept out of search results', async ({ page }) => {
   const response = await page.goto('/this-page-does-not-exist/');
@@ -44,3 +56,19 @@ test('robots.txt allows crawling', async ({ request }) => {
   expect(body).toContain('User-agent: *');
   expect(body).toContain('Allow: /');
 });
+
+// Pages that hold per-user data stay out of search results but their links may still be followed.
+for (const { code } of LANGUAGES) {
+  for (const page of ['stats', 'collection', 'settings']) {
+    test(`/${code}/${page}/ is noindex, follow and has no canonical`, async ({ page: p }) => {
+      await p.goto(`/${code}/${page}/`);
+      await expect(p.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, follow');
+      await expect(p.locator('link[rel="canonical"]')).toHaveCount(0);
+    });
+  }
+
+  test(`/${code}/privacy/ stays indexable`, async ({ page }) => {
+    await page.goto(`/${code}/privacy/`);
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+  });
+}

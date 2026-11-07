@@ -6,6 +6,7 @@ import { parseAnalyticsToken, parseSiteUrl } from './src/config/parse.ts';
 import { analyticsCspSources } from './src/lib/analytics-config.ts';
 import { LORA_SUBSETS, loraSubsetFile } from './src/config/font-subsets.ts';
 import { DEFAULT_LANGUAGE, LOCALE_TAGS } from './src/i18n/config.ts';
+import { isSitemapPage } from './src/lib/sitemap-filter.ts';
 import { pwa } from './src/lib/pwa-integration.ts';
 
 // SITE_URL is the public origin of the deployed site (see .env.example). Real environment
@@ -48,7 +49,10 @@ export default defineConfig({
   integrations: [
     svelte(),
     ...(site
-      ? [sitemap({ i18n: { defaultLocale: DEFAULT_LANGUAGE, locales: { ...LOCALE_TAGS } } })]
+      ? [sitemap({
+            i18n: { defaultLocale: DEFAULT_LANGUAGE, locales: { ...LOCALE_TAGS } },
+            filter: isSitemapPage,
+          })]
       : []),
     // Last, so `dist/sw.js` is written after every other integration has finished its files (T30).
     pwa({ defaultLanguage: DEFAULT_LANGUAGE }),
@@ -130,6 +134,7 @@ export default defineConfig({
       },
     },
   ],
-  // The root URL redirects to the default language (static meta-refresh page).
+  // The root URL redirects to the default language. This static meta-refresh page is the fallback;
+  // on Cloudflare Pages and Netlify public/_redirects answers first with a real 301.
   redirects: { '/': `/${DEFAULT_LANGUAGE}/` },
 });

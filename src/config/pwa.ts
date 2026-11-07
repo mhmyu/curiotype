@@ -24,3 +24,19 @@ export const MANIFEST_ICONS: readonly ManifestIcon[] = [
   { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
   { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
 ];
+
+/** Store category of the app (the install dialogs of some browsers group apps by it). */
+export const MANIFEST_CATEGORIES: readonly string[] = ['education'];
+
+export type ScreenshotFormFactor = 'narrow' | 'wide';
+
+/** Pixel size of the install-dialog screenshots: a phone and a desktop window. */
+export const SCREENSHOT_SIZES: Record<ScreenshotFormFactor, { width: number; height: number }> = {
+  narrow: { width: 390, height: 844 },
+  wide: { width: 1280, height: 720 },
+};
+
+/** Path of a screenshot inside `public/`, made by `scripts/generate-manifest-screenshots.mjs`. */
+export function getScreenshotPath(lang: string, formFactor: ScreenshotFormFactor): string {
+  return `/screenshots/home-${lang}-${formFactor}.png`;
+}

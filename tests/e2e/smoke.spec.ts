@@ -44,7 +44,8 @@ for (const { code, ui } of LANGUAGES) {
       await page.goto(`/${code}/`);
 
       await expect(page.locator('html')).toHaveAttribute('lang', code);
-      await expect(page.getByRole('heading', { level: 1, name: ui.meta.tagline })).toBeVisible();
+      await expect(page.getByRole('heading', { level: 1, name: ui.meta.homeHeading })).toBeVisible();
+      await expect(page.getByText(ui.meta.tagline)).toBeVisible();
       // The input only exists after the island hydrated and loaded the sentences.
       await expect(page.getByLabel(ui.test.inputLabel)).toBeVisible();
       await expect(modeSelect(page, ui)).toBeVisible();

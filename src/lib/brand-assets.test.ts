@@ -61,3 +61,25 @@ describe('favicon.svg', () => {
     expect(statSync(path.join(PUBLIC_DIR, 'favicon.svg')).size).toBeLessThan(2048);
   });
 });
+
+describe('favicon.ico', () => {
+  const ico = readFileSync(path.join(PUBLIC_DIR, 'favicon.ico'));
+
+  it('is an icon file with the 16, 32 and 48 px images, each a PNG', () => {
+    expect(ico.readUInt16LE(0)).toBe(0);
+    expect(ico.readUInt16LE(2)).toBe(1);
+    const count = ico.readUInt16LE(4);
+    const sizes: number[] = [];
+    for (let i = 0; i < count; i++) {
+      const entry = 6 + 16 * i;
+      sizes.push(ico[entry]);
+      const offset = ico.readUInt32LE(entry + 12);
+      expect(ico.subarray(offset, offset + 8).toString('hex')).toBe(PNG_SIGNATURE);
+    }
+    expect(sizes).toEqual([16, 32, 48]);
+  });
+
+  it('is a small file', () => {
+    expect(ico.length).toBeLessThan(8 * 1024);
+  });
+});

@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { en } from '@/i18n/ui/en';
+import { id } from '@/i18n/ui/id';
 import {
+  robotsMetaContent,
   buildAlternates,
   buildRobotsTxt,
   buildWebApplicationJsonLd,
+  buildWebSiteJsonLd,
   localeUrl,
   ogImageUrl,
   serializeJsonLd,
@@ -57,6 +61,48 @@ describe('buildWebApplicationJsonLd', () => {
       isAccessibleForFree: true,
     });
   });
+
+  it('is free and has the Open Graph image of its language', () => {
+    const data = buildWebApplicationJsonLd({ site: SITE, lang: 'id', name: 'curiotype', description: 'x' });
+    expect(data.offers).toEqual({ '@type': 'Offer', price: '0', priceCurrency: 'USD' });
+    expect(data.image).toBe('https://typing.example.com/og/id.png');
+  });
+});
+
+describe('buildWebSiteJsonLd', () => {
+  it('describes one language version of the site', () => {
+    expect(buildWebSiteJsonLd({ site: SITE, lang: 'en', name: 'curiotype', alternateName: 'Typing Test' })).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'curiotype',
+      url: 'https://typing.example.com/en/',
+      inLanguage: 'en-US',
+      alternateName: 'Typing Test',
+    });
+  });
+
+  it('leaves out an alternate name that is missing or equal to the name', () => {
+    expect(buildWebSiteJsonLd({ site: SITE, lang: 'en', name: 'curiotype' })).not.toHaveProperty('alternateName');
+    expect(buildWebSiteJsonLd({ site: SITE, lang: 'en', name: 'a', alternateName: 'a' })).not.toHaveProperty(
+      'alternateName',
+    );
+  });
+});
+
+describe('home page metadata texts', () => {
+  for (const [code, ui] of [['id', id], ['en', en]] as const) {
+    it(`${code}: the description is 140 to 155 characters`, () => {
+      expect(ui.meta.description.length).toBeGreaterThanOrEqual(140);
+      expect(ui.meta.description.length).toBeLessThanOrEqual(155);
+    });
+
+    it(`${code}: the h1 phrase is part of the home title, and the image alt describes the picture`, () => {
+      expect(ui.meta.homeTitle).toContain(ui.meta.homeHeading);
+      expect(ui.meta.ogImageAlt).not.toBe(ui.meta.siteName);
+      expect(ui.meta.ogImageAlt.length).toBeGreaterThan(40);
+      expect(ui.meta.ogImageAlt.length).toBeLessThanOrEqual(420);
+    });
+  }
 });
 
 describe('serializeJsonLd', () => {
@@ -71,6 +117,13 @@ describe('serializeJsonLd', () => {
     expect(out).not.toContain('>');
     expect(out).not.toContain('\u2028');
     expect(out).not.toContain('\u2029');
+  });
+});
+
+describe('robotsMetaContent', () => {
+  it('is plain noindex by default and adds follow on request', () => {
+    expect(robotsMetaContent(false)).toBe('noindex');
+    expect(robotsMetaContent(true)).toBe('noindex, follow');
   });
 });
 
