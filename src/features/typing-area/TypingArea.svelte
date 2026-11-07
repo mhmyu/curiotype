@@ -5,6 +5,7 @@
   import { TYPING_SIZE_CLASS } from './sizes';
   import type { Dictionary } from '@/i18n/types';
   import { isComposingKey, shouldDeferInput } from './composition';
+  import { lockCaretToEnd, shouldBlockKey } from './caret-lock';
 
   interface Props {
     /** Current target and typed text. The parent owns it; this component only displays it. */
@@ -111,6 +112,15 @@
     if (input.value !== typingState.typed) input.value = typingState.typed;
   }
 
+  /*
+   * The engine only works while the caret is at the end of the input (see caret-lock.ts). Anything
+   * that moves it (a click, a tap, a drag, a script) is undone here. It is never touched during a
+   * composition, because changing the selection would cancel it.
+   */
+  function keepCaretAtEnd(event: Event & { currentTarget: HTMLInputElement }) {
+    if (!composing) lockCaretToEnd(event.currentTarget);
+  }
+
   function handleInput(event: Event & { currentTarget: HTMLInputElement }) {
     // Provisional text of a dead key or input method: neither counted nor rewritten.
     if (shouldDeferInput(composing, event as InputEvent)) return;
@@ -179,15 +189,28 @@
     autocorrect="off"
     spellcheck="false"
     {disabled}
-    onfocus={handleFocus}
+    onfocus={(event) => {
+      handleFocus();
+      keepCaretAtEnd(event);
+    }}
     onblur={handleBlur}
+    onbeforeinput={keepCaretAtEnd}
     oninput={handleInput}
+    onselect={keepCaretAtEnd}
+    onpointerup={keepCaretAtEnd}
+    onclick={keepCaretAtEnd}
     onpaste={(event) => event.preventDefault()}
+    ondrop={(event) => event.preventDefault()}
     oncompositionstart={() => (composing = true)}
     oncompositionend={handleCompositionEnd}
     onkeydown={(event) => {
       // Escape during a composition cancels the composition, not the test.
       if (isComposingKey(event)) return;
+      // Keys that move the caret or select text would shift the typed text against the target.
+      if (shouldBlockKey(event)) {
+        event.preventDefault();
+        return;
+      }
       if (event.key === 'Escape') {
         event.preventDefault();
         onEscape();

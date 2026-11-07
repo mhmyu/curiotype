@@ -126,3 +126,63 @@ test('the timer keeps running while the input has no focus', async ({ page }) =>
   // About two seconds later the countdown must have moved on (30 s default duration).
   await expect.poll(seconds).toBeLessThanOrEqual(28);
 });
+
+/*
+ * The engine compares the whole input with the target, so the caret must stay at the end. A key
+ * or a click that moved it used to make the next letter land in the middle and turn the typed
+ * text red.
+ */
+test.describe('the caret stays at the end of the typed text', () => {
+  async function typeTwenty(page: Page) {
+    const { input, targetText } = await openTest(page);
+    const target = await targetText();
+    await input.pressSequentially(target.slice(0, 20));
+    await expect(input).toHaveValue(target.slice(0, 20));
+    const redCount = () => input.locator('xpath=preceding-sibling::div[1]').locator('span.text-error').count();
+    return { input, target, redCount };
+  }
+
+  for (const key of ['Home', 'End', 'ArrowLeft', 'ArrowUp', 'PageUp', 'Delete', 'Control+a']) {
+    test(`${key} does not move the caret or shift the text`, async ({ page }) => {
+      const { input, target, redCount } = await typeTwenty(page);
+
+      await input.press(key);
+      await input.pressSequentially(target.slice(20, 23));
+
+      await expect(input).toHaveValue(target.slice(0, 23));
+      expect(await redCount()).toBe(0);
+    });
+  }
+
+  test('a click in the middle of the text does not move the caret', async ({ page }) => {
+    const { input, target, redCount } = await typeTwenty(page);
+
+    await input.click({ position: { x: 4, y: 4 } });
+    await input.pressSequentially(target.slice(20, 23));
+
+    await expect(input).toHaveValue(target.slice(0, 23));
+    expect(await redCount()).toBe(0);
+  });
+
+  test('a caret moved by a script is put back before the next letter', async ({ page }) => {
+    const { input, target, redCount } = await typeTwenty(page);
+
+    await input.evaluate((el: HTMLInputElement) => el.setSelectionRange(0, 0));
+    await input.pressSequentially(target.slice(20, 22));
+
+    await expect(input).toHaveValue(target.slice(0, 22));
+    expect(await redCount()).toBe(0);
+  });
+
+  test('Backspace still corrects a mistake at the end', async ({ page }) => {
+    const { input, target, redCount } = await typeTwenty(page);
+
+    await input.pressSequentially('#');
+    expect(await redCount()).toBe(1);
+    await input.press('Backspace');
+    await expect(input).toHaveValue(target.slice(0, 20));
+    await input.press('Backspace');
+    await expect(input).toHaveValue(target.slice(0, 19));
+    expect(await redCount()).toBe(0);
+  });
+});
