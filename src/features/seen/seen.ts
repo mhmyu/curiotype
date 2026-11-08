@@ -1,4 +1,5 @@
 import type { ContentLang } from '@/i18n/config';
+import { withStorageLock } from '@/lib/storage/lock';
 import type { StorageAdapter } from '@/lib/storage/types';
 
 // Versioned key, one per content language ("seen:v1:id"); the stored value is a plain array of sentence ids.
@@ -25,12 +26,15 @@ export async function markSeen(
   contentLang: ContentLang,
   ids: readonly string[],
 ): Promise<string[]> {
-  const seen = await loadSeen(storage, contentLang);
-  const known = new Set(seen);
-  const added = [...new Set(ids)].filter((id) => id.length > 0 && !known.has(id));
-  if (added.length === 0) return seen;
+  // Read inside the lock: ids added by another tab meanwhile stay in the list.
+  return withStorageLock(seenKey(contentLang), async () => {
+    const seen = await loadSeen(storage, contentLang);
+    const known = new Set(seen);
+    const added = [...new Set(ids)].filter((id) => id.length > 0 && !known.has(id));
+    if (added.length === 0) return seen;
 
-  const next = [...seen, ...added];
-  await storage.set(seenKey(contentLang), next);
-  return next;
+    const next = [...seen, ...added];
+    await storage.set(seenKey(contentLang), next);
+    return next;
+  });
 }

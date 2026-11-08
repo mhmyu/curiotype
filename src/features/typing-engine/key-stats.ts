@@ -1,4 +1,5 @@
 import type { ContentLang } from '@/i18n/config';
+import { withStorageLock } from '@/lib/storage/lock';
 import type { StorageAdapter } from '@/lib/storage/types';
 import { isAccentMerge } from './accents';
 
@@ -125,10 +126,12 @@ export async function recordKeyStats(
   contentLang: ContentLang,
   session: KeyStats,
 ): Promise<KeyStats> {
-  const stored = await loadKeyStats(storage, contentLang);
-  if (Object.keys(session).length === 0) return stored;
+  if (Object.keys(session).length === 0) return loadKeyStats(storage, contentLang);
 
-  const next = mergeKeyStats(stored, session);
-  await storage.set(keyStatsKey(contentLang), next);
-  return next;
+  // Read inside the lock: the counts of a test finished in another tab are added, not replaced.
+  return withStorageLock(keyStatsKey(contentLang), async () => {
+    const next = mergeKeyStats(await loadKeyStats(storage, contentLang), session);
+    await storage.set(keyStatsKey(contentLang), next);
+    return next;
+  });
 }

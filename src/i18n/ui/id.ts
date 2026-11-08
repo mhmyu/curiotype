@@ -236,6 +236,9 @@ export const id: Dictionary = {
     stopOnErrorNote: 'Berhenti saat salah menyala: hapus karakter yang salah untuk melanjutkan.',
     stopOnErrorTag: 'Berhenti saat salah',
     focusLost: 'Ketuk untuk melanjutkan',
+    capsLock: 'Caps Lock aktif',
+    stoppedTitle: 'Tes dihentikan',
+    stoppedBody: 'Tab ini tersembunyi lebih dari {seconds} detik, jadi tes ini tidak dihitung.',
     timeLeft: 'Sisa waktu',
     elapsed: 'Waktu',
   },
@@ -278,6 +281,8 @@ export const id: Dictionary = {
     consistency: 'Konsistensi',
     errors: 'Kesalahan',
     personalBest: 'Rekor pribadi baru!',
+    implausible:
+      'Hasil ini di atas {limit} WPM, melebihi kemampuan mengetik manusia, jadi tidak disimpan dan tidak dihitung untuk rekor maupun streak.',
     chartTitle: 'WPM per detik',
     learnedTitle: 'Yang baru saja kamu ketik',
     sourceLabel: 'Sumber',

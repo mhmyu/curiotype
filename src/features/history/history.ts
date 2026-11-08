@@ -1,15 +1,19 @@
 import { RECORD_MODE_IDS, SCORED_MODE_IDS } from '@/features/test-modes';
 import type { ContentLang } from '@/i18n/config';
+import { withStorageLock } from '@/lib/storage/lock';
 import type { StorageAdapter } from '@/lib/storage/types';
 import { isCategoryId } from '@/lib/categories';
 import { DIFFICULTIES } from '@/lib/taxonomy';
 import type { Category, Difficulty } from '@/lib/taxonomy';
 import type { CategoryChars, RecordModeId, ScoredModeId } from '@/lib/types';
+import { isPlausibleResult } from './plausibility';
 
 // Keys are versioned so the stored shape can be migrated later.
 export const HISTORY_KEY = 'history:v1';
 export const PERSONAL_BESTS_KEY = 'personal-bests:v1';
 export const MAX_HISTORY_ENTRIES = 200;
+/** Name of the lock held while history and personal bests are rewritten. */
+export const HISTORY_LOCK = 'history';
 
 export interface HistoryEntry {
   id: string;
@@ -232,6 +236,8 @@ export interface RecordOutcome {
   history: HistoryEntry[];
   personalBests: PersonalBests;
   isPersonalBest: boolean;
+  /** True when the result was implausible (see `plausibility.ts`): nothing was written. */
+  rejected?: boolean;
 }
 
 /** True for an entry of a mode that keeps records (everything except custom text). */
@@ -241,17 +247,35 @@ function hasRecordMode(entry: HistoryEntry): entry is HistoryEntry & { mode: Rec
 
 /**
  * Saves a finished test and updates the personal best of its bucket. A test of a mode without
- * records (custom text) only enters the history: it is never a personal best.
+ * records (custom text) only enters the history: it is never a personal best. A result above
+ * `options.maxWpm` (default `MAX_PLAUSIBLE_WPM`) is implausible: nothing is written and the
+ * outcome has `rejected: true`.
  */
-export async function recordResult(
+export function recordResult(
   storage: StorageAdapter,
   input: NewHistoryEntry,
+  options: { maxWpm?: number } = {},
+): Promise<RecordOutcome> {
+  // History and personal bests change together, so one lock covers both keys. The current
+  // values are read inside the lock: a result saved by another tab meanwhile is kept.
+  return withStorageLock(HISTORY_LOCK, () => recordResultLocked(storage, input, options));
+}
+
+async function recordResultLocked(
+  storage: StorageAdapter,
+  input: NewHistoryEntry,
+  options: { maxWpm?: number },
 ): Promise<RecordOutcome> {
   const entry: HistoryEntry = { ...input, id: createId(), finishedAt: Date.now() };
   const [history, personalBests] = await Promise.all([
     loadHistory(storage),
     loadPersonalBests(storage),
   ]);
+
+  // An implausible result (a script, a stuck key) is neither saved nor a record.
+  if (!isPlausibleResult(entry, options.maxWpm)) {
+    return { history, personalBests, isPersonalBest: false, rejected: true };
+  }
 
   if (!hasRecordMode(entry)) {
     const nextHistory = [entry, ...history].slice(0, MAX_HISTORY_ENTRIES);

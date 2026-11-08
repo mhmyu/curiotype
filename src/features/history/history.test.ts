@@ -12,6 +12,7 @@ import {
   recordResult,
 } from './history';
 import type { NewHistoryEntry } from './history';
+import { MAX_PLAUSIBLE_WPM } from './plausibility';
 
 const HISTORY_KEY = 'history:v1';
 const PERSONAL_BESTS_KEY = 'personal-bests:v1';
@@ -293,6 +294,60 @@ describe('recordResult', () => {
     }
     expect((await loadHistory(storage)).some((entry) => entry.wpm === 99)).toBe(false);
     expect((await loadPersonalBests(storage))['en:time:30']).toBe(99);
+  });
+});
+
+describe('implausible results', () => {
+  it('writes nothing for a result above the limit and reports it as rejected', async () => {
+    const storage = createMemoryStorage();
+    await recordResult(storage, result({ wpm: 60 }));
+    const before = {
+      history: await storage.get(HISTORY_KEY),
+      bests: await storage.get(PERSONAL_BESTS_KEY),
+    };
+
+    const outcome = await recordResult(storage, result({ wpm: 900 }));
+
+    expect(outcome.rejected).toBe(true);
+    expect(outcome.isPersonalBest).toBe(false);
+    expect(outcome.history).toHaveLength(1);
+    expect(outcome.personalBests).toEqual({ 'en:time:30': 60 });
+    expect(await storage.get(HISTORY_KEY)).toEqual(before.history);
+    expect(await storage.get(PERSONAL_BESTS_KEY)).toEqual(before.bests);
+  });
+
+  it('keeps a result exactly at the limit', async () => {
+    const storage = createMemoryStorage();
+    const outcome = await recordResult(storage, result({ wpm: MAX_PLAUSIBLE_WPM }));
+    expect(outcome.rejected).toBeUndefined();
+    expect(outcome.isPersonalBest).toBe(true);
+    expect(outcome.history).toHaveLength(1);
+  });
+
+  it('also rejects a custom text result (no record mode) above the limit', async () => {
+    const storage = createMemoryStorage();
+    const outcome = await recordResult(storage, result({ mode: 'custom', durationSec: null, wpm: 500 }));
+    expect(outcome.rejected).toBe(true);
+    expect(await loadHistory(storage)).toEqual([]);
+  });
+
+  it('applies a limit given by the caller (an automated browser lifts it)', async () => {
+    const storage = createMemoryStorage();
+    const outcome = await recordResult(storage, result({ wpm: 6000 }), {
+      maxWpm: Number.POSITIVE_INFINITY,
+    });
+    expect(outcome.rejected).toBeUndefined();
+    expect(outcome.personalBests).toEqual({ 'en:time:30': 6000 });
+  });
+
+  it('still loads and keeps a stored entry above the limit (data saved before the rule)', async () => {
+    const storage = createMemoryStorage();
+    await storage.set(HISTORY_KEY, [
+      { ...result({ wpm: 800 }), id: 'old', finishedAt: 1 },
+    ]);
+    await storage.set(PERSONAL_BESTS_KEY, { 'en:time:30': 800 });
+    expect((await loadHistory(storage))[0].wpm).toBe(800);
+    expect(await loadPersonalBests(storage)).toEqual({ 'en:time:30': 800 });
   });
 });
 

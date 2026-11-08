@@ -1,3 +1,4 @@
+import { withStorageLock } from '@/lib/storage/lock';
 import type { StorageAdapter } from '@/lib/storage/types';
 
 // Versioned key. One value for the whole app (a streak does not depend on the sentence language).
@@ -97,10 +98,13 @@ export function advanceStreak(streak: Streak, today: string): Streak {
 }
 
 /** Records one finished test (any scored mode) or one relaxed session at `now` and returns the new state. */
-export async function recordActivity(storage: StorageAdapter, now: Date = new Date()): Promise<Streak> {
-  const next = advanceStreak(await loadStreak(storage), toDayKey(now));
-  await storage.set(STREAK_KEY, next);
-  return next;
+export function recordActivity(storage: StorageAdapter, now: Date = new Date()): Promise<Streak> {
+  // The streak is read inside the lock, so two tabs finishing a test count both.
+  return withStorageLock(STREAK_KEY, async () => {
+    const next = advanceStreak(await loadStreak(storage), toDayKey(now));
+    await storage.set(STREAK_KEY, next);
+    return next;
+  });
 }
 
 export interface StreakView {

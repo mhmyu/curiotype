@@ -1,3 +1,4 @@
+import { withStorageLock } from '@/lib/storage/lock';
 import type { StorageAdapter } from '@/lib/storage/types';
 import { isNormalizedText } from './normalize';
 
@@ -74,17 +75,22 @@ export async function saveCustomText(
   now: number = Date.now(),
 ): Promise<CustomText[]> {
   if (!isNormalizedText(text)) return loadCustomTexts(storage);
-  const current = await loadCustomTexts(storage);
-  const known = current.find((entry) => entry.text === text);
-  const entry: CustomText = { id: known?.id ?? createId(), text, savedAt: now };
-  const next = [entry, ...current.filter((item) => item.text !== text)].slice(0, MAX_CUSTOM_TEXTS);
-  await storage.set(CUSTOM_TEXTS_KEY, next);
-  return next;
+  // Read inside the lock: texts saved by another tab meanwhile are kept.
+  return withStorageLock(CUSTOM_TEXTS_KEY, async () => {
+    const current = await loadCustomTexts(storage);
+    const known = current.find((entry) => entry.text === text);
+    const entry: CustomText = { id: known?.id ?? createId(), text, savedAt: now };
+    const next = [entry, ...current.filter((item) => item.text !== text)].slice(0, MAX_CUSTOM_TEXTS);
+    await storage.set(CUSTOM_TEXTS_KEY, next);
+    return next;
+  });
 }
 
-export async function removeCustomText(storage: StorageAdapter, id: string): Promise<CustomText[]> {
-  const current = await loadCustomTexts(storage);
-  const next = current.filter((entry) => entry.id !== id);
-  if (next.length !== current.length) await storage.set(CUSTOM_TEXTS_KEY, next);
-  return next;
+export function removeCustomText(storage: StorageAdapter, id: string): Promise<CustomText[]> {
+  return withStorageLock(CUSTOM_TEXTS_KEY, async () => {
+    const current = await loadCustomTexts(storage);
+    const next = current.filter((entry) => entry.id !== id);
+    if (next.length !== current.length) await storage.set(CUSTOM_TEXTS_KEY, next);
+    return next;
+  });
 }

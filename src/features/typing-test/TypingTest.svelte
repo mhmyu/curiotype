@@ -17,6 +17,7 @@
   import { loadHistory, loadPersonalBests, recordResult } from '@/features/history/history';
   import type { HistoryEntry, PersonalBests } from '@/features/history/history';
   import HistoryList from '@/features/history/HistoryList.svelte';
+  import { getPlausibilityLimit, isPlausibleResult, MAX_PLAUSIBLE_WPM } from '@/features/history/plausibility';
   import TypingArea from '@/features/typing-area/TypingArea.svelte';
   import ResultsPanel from '@/features/results/ResultsPanel.svelte';
   import { pickShareFact } from '@/features/results/share-image';
@@ -31,6 +32,7 @@
   import DailyFact from '@/features/daily-fact/DailyFact.svelte';
   import { pickDailyFact } from '@/features/daily-fact/daily-fact';
   import ModeDescription from './ModeDescription.svelte';
+  import { HIDDEN_TAB_LIMIT_MS, shouldStopForHiddenTab } from './hidden-tab';
   import CustomTextInput from '@/features/custom-text/CustomTextInput.svelte';
   import {
     loadCustomTexts,
@@ -113,13 +115,16 @@
     listSelectableContentLangs(contentLangs, { dev: import.meta.env.DEV, active: contentLang }),
   );
 
-  type Status = 'loading' | 'error' | 'empty' | 'ready' | 'running' | 'finished';
+  /** `stopped`: a running test was cancelled because its tab stayed hidden too long (not scored). */
+  type Status = 'loading' | 'error' | 'empty' | 'ready' | 'running' | 'finished' | 'stopped';
 
   const TICK_INTERVAL_MS = 100;
   const SAMPLE_INTERVAL_MS = 1000;
 
   // Reactive state
   let status = $state<Status>('loading');
+  /** Caps Lock is on (read from key events in the typing area); the note shows while a test can be typed. */
+  let capsLockOn = $state(false);
   // True once the first sentence file has loaded; the controls (language switch included) stay on screen after that, even while another language loads or fails.
   let loaded = $state(false);
   let settings = $state<TestSettings>({
@@ -144,6 +149,8 @@
   let history = $state.raw<HistoryEntry[]>([]);
   let personalBests = $state.raw<PersonalBests>({});
   let isPersonalBest = $state(false);
+  // The finished result is above the plausible WPM limit: it is shown with a note and not saved.
+  let implausible = $state(false);
   // Ids of the sentences saved in the collection of the current sentence language.
   let favoriteIds = $state.raw<ReadonlySet<string>>(new Set());
   let streak = $state.raw<Streak>({ ...EMPTY_STREAK });
@@ -225,6 +232,10 @@
   const barNext = $derived(getTimeBarFraction(settings.durationSec, remainingSec - 1));
   // Time mode swaps its duration select for the countdown while the test runs (spec 22.4); the
   // select is back on `ready` and `finished`, so the chosen duration is never lost or changed midway.
+  // The typing area is gone in the other states, so no key event can clear the flag: do it here.
+  $effect(() => {
+    if (status !== 'ready' && status !== 'running') capsLockOn = false;
+  });
   const countdownShown = $derived(settings.mode === 'time' && status === 'running');
   // The other timed modes show the elapsed time next to (or, without a second select, in the place
   // of) the second control, from the start: no layout shift when the test begins. Relaxed has no
@@ -235,14 +246,22 @@
       (settings.mode !== 'custom' || customTarget !== null),
   );
 
+  const stoppedBody = $derived(
+    ui.test.stoppedBody.replace('{seconds}', String(HIDDEN_TAB_LIMIT_MS / 1000)),
+  );
+
   /*
    * Text for the polite live region (screen readers). Only the final result and a
    * coarse countdown are announced, never single keystrokes.
    */
   const announcement = $derived.by(() => {
     if (status === 'finished' && result) {
-      return `${Math.round(result.wpm)} ${ui.results.wpm}, ${ui.results.accuracy} ${result.accuracy}%`;
+      const summary = `${Math.round(result.wpm)} ${ui.results.wpm}, ${ui.results.accuracy} ${result.accuracy}%`;
+      return implausible
+        ? `${summary}. ${ui.results.implausible.replace('{limit}', String(MAX_PLAUSIBLE_WPM))}`
+        : summary;
     }
+    if (status === 'stopped') return `${ui.test.stoppedTitle}. ${stoppedBody}`;
     const countdown = status === 'running' && settings.mode === 'time';
     if (countdown && remainingSec > 0 && (remainingSec % 10 === 0 || remainingSec === 5)) {
       return `${ui.test.timeLeft}: ${remainingSec}${ui.test.secondsSuffix}`;
@@ -297,6 +316,7 @@
     samples = [];
     result = null;
     isPersonalBest = false;
+    implausible = false;
     keyTally = {};
     stopOnError = settingsStore.current.stopOnError;
     practiceKeys = practiceOn ? weakKeys : null;
@@ -446,8 +466,22 @@
     stopTimer();
     elapsedMs = MODES[settings.mode].effectiveElapsedMs(now - startedAt, settings);
     result = computeResult(engine, elapsedMs, samples);
+    implausible = !isPlausibleResult(result, getPlausibilityLimit(navigator));
     status = 'finished';
-    pendingSave = persistResult(result);
+    // An implausible result saves nothing: no history, record, key statistics, `seen` or streak.
+    if (!implausible) pendingSave = persistResult(result);
+  }
+
+  /**
+   * Cancels a running test (its tab stayed hidden too long). Nothing is saved: no history entry, no
+   * record, no key statistics, no streak (all of that happens in `finish`).
+   */
+  function stopTest() {
+    stopTimer();
+    result = null;
+    isPersonalBest = false;
+    implausible = false;
+    status = 'stopped';
   }
 
   async function persistResult(finished: TestResult) {
@@ -469,21 +503,25 @@
     const finishedAt = new Date();
     const storage = getStorage();
 
-    const outcome = await recordResult(storage, {
-      contentLang: sentenceLang,
-      mode,
-      durationSec: mode === 'time' ? settings.durationSec : null,
-      sentenceCount: mode === 'count' ? settings.sentenceCount : null,
-      ...(ranWithStopOnError ? { stopOnError: true } : {}),
-      category: isCustom ? 'all' : settings.category,
-      difficulty: isCustom ? 'all' : settings.difficulty,
-      wpm: finished.wpm,
-      rawWpm: finished.rawWpm,
-      accuracy: finished.accuracy,
-      consistency: finished.consistency,
-      errors: finished.errors,
-      ...(isCustom ? {} : { sentenceIds: typedSentences.map((s) => s.id), categoryChars }),
-    });
+    const outcome = await recordResult(
+      storage,
+      {
+        contentLang: sentenceLang,
+        mode,
+        durationSec: mode === 'time' ? settings.durationSec : null,
+        sentenceCount: mode === 'count' ? settings.sentenceCount : null,
+        ...(ranWithStopOnError ? { stopOnError: true } : {}),
+        category: isCustom ? 'all' : settings.category,
+        difficulty: isCustom ? 'all' : settings.difficulty,
+        wpm: finished.wpm,
+        rawWpm: finished.rawWpm,
+        accuracy: finished.accuracy,
+        consistency: finished.consistency,
+        errors: finished.errors,
+        ...(isCustom ? {} : { sentenceIds: typedSentences.map((s) => s.id), categoryChars }),
+      },
+      { maxWpm: getPlausibilityLimit(navigator) },
+    );
     history = outcome.history;
     personalBests = outcome.personalBests;
     isPersonalBest = outcome.isPersonalBest;
@@ -624,12 +662,54 @@
   });
 
   /*
+   * A running test whose tab stays hidden for HIDDEN_TAB_LIMIT_MS is cancelled. A timer stops it
+   * while the tab is still hidden (so nothing runs on in the background), and coming back is checked
+   * too, in case the browser delayed that timer. A tab hidden for less than the limit changes nothing.
+   * Relaxed mode never has the `running` status, so it is not affected.
+   */
+  $effect(() => {
+    if (status !== 'running') return;
+    let hiddenSince: number | null = document.hidden ? performance.now() : null;
+    let timeoutId: number | undefined;
+
+    function clearHiddenTimer() {
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId);
+        timeoutId = undefined;
+      }
+    }
+
+    function onVisibilityChange() {
+      if (document.hidden) {
+        hiddenSince = performance.now();
+        clearHiddenTimer();
+        timeoutId = window.setTimeout(() => {
+          if (document.hidden) stopTest();
+        }, HIDDEN_TAB_LIMIT_MS);
+        return;
+      }
+      clearHiddenTimer();
+      const hiddenFor = hiddenSince === null ? 0 : performance.now() - hiddenSince;
+      hiddenSince = null;
+      if (shouldStopForHiddenTab(true, hiddenFor)) stopTest();
+    }
+
+    // The test may start while the tab is already hidden (a script, a restored tab).
+    if (document.hidden) onVisibilityChange();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      clearHiddenTimer();
+    };
+  });
+
+  /*
    * Result screen shortcuts: Escape and Enter do what "Try again" does.
-   * The listener exists only while a result is on screen. For custom text, "Try again" repeats
+   * The listener exists only while a result (or the stopped-test notice) is on screen. For custom text, "Try again" repeats
    * the same text (`customTarget` is kept); otherwise it starts a new test.
    */
   $effect(() => {
-    if (status !== 'finished' || !result) return;
+    if (!(status === 'finished' && result) && status !== 'stopped') return;
     const shownAt = performance.now();
 
     function onKeydown(event: KeyboardEvent) {
@@ -674,6 +754,17 @@
     </button>
     <p class="shortcut-hint text-caption text-text-muted" data-testid="shortcut-hint-restart">
       <kbd class="kbd">Esc</kbd>: {ui.test.shortcutRestart}
+    </p>
+    <!--
+      Caps Lock note. It uses the Restart row, which is already there, so nothing moves when it
+      appears. The live region is always present (empty) so screen readers announce the text.
+    -->
+    <p role="status" class="text-caption text-text" data-testid="caps-lock-region">
+      {#if capsLockOn}
+        <span class="rounded-xs border-2 border-border px-2 py-1 whitespace-nowrap" data-testid="caps-lock-note">
+          {ui.test.capsLock}
+        </span>
+      {/if}
     </p>
   </div>
 
@@ -968,6 +1059,7 @@
       {ui}
       {categoryLabel}
       {isPersonalBest}
+      {implausible}
       modeLabel={getModeLabel(ui, {
         mode: settings.mode,
         durationSec: settings.mode === 'time' ? settings.durationSec : null,
@@ -985,6 +1077,23 @@
       onRetry={() => void startNewTest()}
       onChangeText={settings.mode === 'custom' ? changeCustomText : undefined}
     />
+  {:else if status === 'stopped'}
+    <!-- Announced by the status region at the top (`announcement`), so no live role here. -->
+    <div
+      class="flex flex-col items-start gap-4 rounded-container border-2 border-border bg-surface p-5"
+      data-testid="test-stopped"
+    >
+      <h2 class="text-h3">{ui.test.stoppedTitle}</h2>
+      <p class="text-body-long text-text-muted">{stoppedBody}</p>
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-testid="stopped-retry"
+        onclick={() => void startNewTest()}
+      >
+        {ui.results.tryAgain}
+      </button>
+    </div>
   {:else}
     {#if settings.mode === 'custom'}
       <div class="flex justify-end">
@@ -1008,6 +1117,7 @@
         lang={contentLang}
         onInput={handleInput}
         onEscape={() => void startNewTest()}
+        onCapsLockChange={(on) => (capsLockOn = on)}
       />
     </div>
 

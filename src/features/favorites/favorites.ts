@@ -1,4 +1,5 @@
 import type { ContentLang } from '@/i18n/config';
+import { withStorageLock } from '@/lib/storage/lock';
 import type { StorageAdapter } from '@/lib/storage/types';
 
 // Versioned key, one per content language ("favorites:v1:id"), like `seen` and `key-stats`.
@@ -61,6 +62,29 @@ async function saveFavorites(
   else await storage.set(favoritesKey(contentLang), favorites);
 }
 
+/**
+ * Applies `change` to the list read inside the lock and saves the result when it differs (same
+ * length and same entries means nothing is written). Returns the list after the change.
+ */
+function updateFavorites(
+  storage: StorageAdapter,
+  contentLang: ContentLang,
+  change: (current: Favorite[]) => Favorite[],
+): Promise<Favorite[]> {
+  return withStorageLock(favoritesKey(contentLang), async () => {
+    const current = await loadFavorites(storage, contentLang);
+    const next = change(current);
+    if (next !== current && !sameFavorites(current, next)) {
+      await saveFavorites(storage, contentLang, next);
+    }
+    return next;
+  });
+}
+
+function sameFavorites(a: readonly Favorite[], b: readonly Favorite[]): boolean {
+  return a.length === b.length && a.every((item, i) => item.id === b[i].id && item.savedAt === b[i].savedAt);
+}
+
 /** Saved sentences of one content language, newest first. */
 export async function loadFavorites(
   storage: StorageAdapter,
@@ -70,30 +94,28 @@ export async function loadFavorites(
 }
 
 /** Saves the sentence when it is not saved yet, removes it when it is. Returns the new list. */
-export async function toggleFavorite(
+export function toggleFavorite(
   storage: StorageAdapter,
   contentLang: ContentLang,
   sentenceId: string,
   now: number = Date.now(),
 ): Promise<Favorite[]> {
-  const current = await loadFavorites(storage, contentLang);
-  const next = current.some((favorite) => favorite.id === sentenceId)
-    ? current.filter((favorite) => favorite.id !== sentenceId)
-    : normalize([{ id: sentenceId, savedAt: now }, ...current]);
-  await saveFavorites(storage, contentLang, next);
-  return next;
+  return updateFavorites(storage, contentLang, (current) =>
+    current.some((favorite) => favorite.id === sentenceId)
+      ? current.filter((favorite) => favorite.id !== sentenceId)
+      : normalize([{ id: sentenceId, savedAt: now }, ...current]),
+  );
 }
 
 /** Removes one sentence (nothing happens when it is not saved). Returns the new list. */
-export async function removeFavorite(
+export function removeFavorite(
   storage: StorageAdapter,
   contentLang: ContentLang,
   sentenceId: string,
 ): Promise<Favorite[]> {
-  const current = await loadFavorites(storage, contentLang);
-  const next = current.filter((favorite) => favorite.id !== sentenceId);
-  if (next.length !== current.length) await saveFavorites(storage, contentLang, next);
-  return next;
+  return updateFavorites(storage, contentLang, (current) =>
+    current.filter((favorite) => favorite.id !== sentenceId),
+  );
 }
 
 /**
@@ -101,29 +123,28 @@ export async function removeFavorite(
  * newest-first list (the "Undo" of the collection page). Nothing changes when the id is saved
  * again in the meantime (no duplicate); the limit of `MAX_FAVORITES` still holds. Returns the list.
  */
-export async function restoreFavorite(
+export function restoreFavorite(
   storage: StorageAdapter,
   contentLang: ContentLang,
   entry: Favorite,
 ): Promise<Favorite[]> {
-  const current = await loadFavorites(storage, contentLang);
-  if (!isFavorite(entry) || current.some((favorite) => favorite.id === entry.id)) return current;
-  const next = normalize([{ id: entry.id, savedAt: entry.savedAt }, ...current]);
-  await saveFavorites(storage, contentLang, next);
-  return next;
+  return updateFavorites(storage, contentLang, (current) =>
+    !isFavorite(entry) || current.some((favorite) => favorite.id === entry.id)
+      ? current
+      : normalize([{ id: entry.id, savedAt: entry.savedAt }, ...current]),
+  );
 }
 
 /**
  * Drops saved ids that no longer exist in the sentence corpus (a sentence that was removed from
  * the content files). Writes only when something was dropped. Returns the cleaned list.
  */
-export async function pruneFavorites(
+export function pruneFavorites(
   storage: StorageAdapter,
   contentLang: ContentLang,
   existingIds: ReadonlySet<string>,
 ): Promise<Favorite[]> {
-  const current = await loadFavorites(storage, contentLang);
-  const next = current.filter((favorite) => existingIds.has(favorite.id));
-  if (next.length !== current.length) await saveFavorites(storage, contentLang, next);
-  return next;
+  return updateFavorites(storage, contentLang, (current) =>
+    current.filter((favorite) => existingIds.has(favorite.id)),
+  );
 }

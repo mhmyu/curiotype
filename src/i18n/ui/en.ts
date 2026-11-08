@@ -236,6 +236,9 @@ export const en: Dictionary = {
     stopOnErrorNote: 'Stop on error is on: delete the wrong character to go on.',
     stopOnErrorTag: 'Stop on error',
     focusLost: 'Tap to continue',
+    capsLock: 'Caps Lock is on',
+    stoppedTitle: 'Test stopped',
+    stoppedBody: 'This tab was hidden for more than {seconds} seconds, so this test was not counted.',
     timeLeft: 'Time left',
     elapsed: 'Time',
   },
@@ -278,6 +281,8 @@ export const en: Dictionary = {
     consistency: 'Consistency',
     errors: 'Errors',
     personalBest: 'New personal best!',
+    implausible:
+      'This result is above {limit} WPM, more than a person can type, so it was not saved and does not count for records or your streak.',
     chartTitle: 'WPM per second',
     learnedTitle: 'What you just typed',
     sourceLabel: 'Source',

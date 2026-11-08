@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Dictionary } from '@/i18n/types';
   import type { TestResult } from '@/features/typing-engine/metrics';
+  import { MAX_PLAUSIBLE_WPM } from '@/features/history/plausibility';
   import FavoriteButton from '@/features/favorites/FavoriteButton.svelte';
   import type { Sentence } from '@/lib/types';
   import SentenceCard from './SentenceCard.svelte';
@@ -18,6 +19,8 @@
     /** Label of a category in the interface language. */
     categoryLabel: (id: string) => string;
     isPersonalBest: boolean;
+    /** The result is above the plausible limit: it was not saved; a note explains it. */
+    implausible?: boolean;
     /** Mode with its option for the shared image, e.g. "Time 30s" (from `getModeLabel`). */
     modeLabel: string;
     /** Text of one typed sentence to put on the shared image; null leaves the fact out. */
@@ -38,6 +41,7 @@
     ui,
     categoryLabel,
     isPersonalBest,
+    implausible = false,
     modeLabel,
     shareFact,
     repoUrl,
@@ -142,6 +146,12 @@
         </p>
       {/if}
     </div>
+
+    {#if implausible}
+      <p class="text-body-long text-text-muted" data-testid="result-implausible">
+        {ui.results.implausible.replace('{limit}', String(MAX_PLAUSIBLE_WPM))}
+      </p>
+    {/if}
 
     <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {#each stats as stat}

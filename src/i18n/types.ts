@@ -272,6 +272,12 @@ export interface Dictionary {
     /** Short tag after the mode in the history and statistics: its records are separate. */
     stopOnErrorTag: string;
     focusLost: string;
+    /** Note shown while Caps Lock is on (every letter would be a capital and a mistake). */
+    capsLock: string;
+    /** Title of the notice shown when a running test was cancelled because its tab stayed hidden. */
+    stoppedTitle: string;
+    /** Text of that notice; `{seconds}` is replaced by the time limit. */
+    stoppedBody: string;
     timeLeft: string;
     elapsed: string;
   };
@@ -326,6 +332,8 @@ export interface Dictionary {
     consistency: string;
     errors: string;
     personalBest: string;
+    /** Note under the figures of an implausible result; `{limit}` is the WPM limit. */
+    implausible: string;
     chartTitle: string;
     learnedTitle: string;
     sourceLabel: string;

@@ -6,6 +6,10 @@
   import type { Dictionary } from '@/i18n/types';
   import { isComposingKey, shouldDeferInput } from './composition';
   import { lockCaretToEnd, shouldBlockKey } from './caret-lock';
+  import { shouldCancelInput } from './input-types';
+  import { shouldRejectJump } from './input-recovery';
+  import { isCapsLockOn } from './caps-lock';
+  import { BROWSER_GUARD_ATTRIBUTES, EXTENSION_GUARD_ATTRIBUTES } from './extension-guards';
 
   interface Props {
     /** Current target and typed text. The parent owns it; this component only displays it. */
@@ -17,10 +21,12 @@
     onInput: (value: string) => void;
     /** Called when the user presses Escape (the parent restarts the test). */
     onEscape: () => void;
+    /** Called when Caps Lock turns on or off (read from key events), and with false when the field loses focus. */
+    onCapsLockChange?: (on: boolean) => void;
     disabled?: boolean;
   }
 
-  let { typingState, ui, lang, onInput, onEscape, disabled = false }: Props = $props();
+  let { typingState, ui, lang, onInput, onEscape, onCapsLockChange, disabled = false }: Props = $props();
 
   /** The overlay waits this long, so a click on a nearby button (which blurs the input briefly) does not flash it. */
   const OVERLAY_DELAY_MS = 150;
@@ -35,6 +41,7 @@
   /** True between compositionstart and compositionend (dead key or input method). */
   let composing = false;
   let overlayTimer: number | undefined;
+  let capsLockOn = false;
 
   /** Moves keyboard focus to the input (opens the virtual keyboard on phones). */
   export function focus() {
@@ -83,7 +90,15 @@
     overlayVisible = false;
   }
 
+  /** Reports Caps Lock only when it changes. */
+  function reportCapsLock(on: boolean) {
+    if (on === capsLockOn) return;
+    capsLockOn = on;
+    onCapsLockChange?.(on);
+  }
+
   function handleBlur() {
+    reportCapsLock(false);
     focusLost = true;
     clearOverlayTimer();
     overlayTimer = window.setTimeout(() => {
@@ -121,10 +136,36 @@
     if (!composing) lockCaretToEnd(event.currentTarget);
   }
 
+  /*
+   * Only the edits of typing reach the engine (see input-types.ts): undo, redo, cut, drop,
+   * replaced words (autocorrect, dictation), line breaks and forward deletes are cancelled.
+   * A composition step cannot be cancelled and is never touched.
+   */
+  function handleBeforeInput(event: InputEvent & { currentTarget: HTMLInputElement }) {
+    if (shouldCancelInput(event, composing)) {
+      event.preventDefault();
+      return;
+    }
+    keepCaretAtEnd(event);
+  }
+
+  /*
+   * Judged against `typingState.typed`, which commitInput keeps equal to the field, so a change
+   * that does not fit its kind is detected (see input-recovery.ts).
+   */
   function handleInput(event: Event & { currentTarget: HTMLInputElement }) {
     // Provisional text of a dead key or input method: neither counted nor rewritten.
     if (shouldDeferInput(composing, event as InputEvent)) return;
-    commitInput(event.currentTarget);
+    const input = event.currentTarget;
+    const { inputType, data } = event as InputEvent;
+    // A change the typing did not make (an extension or a script rewrote the text, a keyboard
+    // replaced earlier text): put the last good text back and ignore the change.
+    if (shouldRejectJump(typingState.typed, input.value, inputType, composing, data)) {
+      input.value = typingState.typed;
+      lockCaretToEnd(input);
+      return;
+    }
+    commitInput(input);
   }
 
   // The final text arrives with compositionend (Safari may also fire one more `input` after it;
@@ -184,17 +225,15 @@
     type="text"
     class="absolute inset-0 h-full w-full cursor-text rounded-container text-base opacity-0"
     aria-label={ui.test.inputLabel}
-    autocomplete="off"
-    autocapitalize="off"
-    autocorrect="off"
-    spellcheck="false"
+    {...BROWSER_GUARD_ATTRIBUTES}
+    {...EXTENSION_GUARD_ATTRIBUTES}
     {disabled}
     onfocus={(event) => {
       handleFocus();
       keepCaretAtEnd(event);
     }}
     onblur={handleBlur}
-    onbeforeinput={keepCaretAtEnd}
+    onbeforeinput={handleBeforeInput}
     oninput={handleInput}
     onselect={keepCaretAtEnd}
     onpointerup={keepCaretAtEnd}
@@ -203,7 +242,9 @@
     ondrop={(event) => event.preventDefault()}
     oncompositionstart={() => (composing = true)}
     oncompositionend={handleCompositionEnd}
+    onkeyup={(event) => reportCapsLock(isCapsLockOn(event))}
     onkeydown={(event) => {
+      reportCapsLock(isCapsLockOn(event));
       // Escape during a composition cancels the composition, not the test.
       if (isComposingKey(event)) return;
       // Keys that move the caret or select text would shift the typed text against the target.
