@@ -1,3 +1,4 @@
+import { LOGO_BODY_PATH, LOGO_FILL, LOGO_GLYPH_PATH, LOGO_INK, LOGO_RING_PATH } from '@/lib/logo';
 import type { Sentence } from '@/lib/types';
 
 /** Size of the result image (the usual Open Graph / link preview size). */
@@ -18,8 +19,6 @@ export const SHARE_PALETTE = {
   textMuted: '#5c5c5c',
   accent: '#0b6fb3',
   border: '#6b7f8c',
-  primary: '#a5ed6e',
-  onPrimary: '#111111',
 } as const;
 
 /** Everything the image shows, already translated by the caller. */
@@ -180,19 +179,17 @@ export async function renderShareImage(data: ShareImageData): Promise<Blob> {
   const right = SHARE_IMAGE_WIDTH - 88;
   ctx.textBaseline = 'alphabetic';
 
-  // Logo: primary square with a 2 px on-primary border and a "T" (same as the favicon)
+  // Logo: the one source in `lib/logo.ts` (same shapes and colors as the favicon and the page logo)
   const logo = 64;
   const logoY = 84;
-  roundedRect(ctx, left, logoY, logo, logo, 14);
-  ctx.fillStyle = p.primary;
-  ctx.fill();
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = p.onPrimary;
-  ctx.stroke();
-  ctx.fillStyle = p.onPrimary;
-  ctx.font = `700 42px ${HEADING_FONT}`;
-  ctx.textAlign = 'center';
-  ctx.fillText('T', left + logo / 2, logoY + 47);
+  ctx.save();
+  ctx.translate(left, logoY);
+  ctx.scale(logo / 24, logo / 24);
+  ctx.fillStyle = LOGO_FILL;
+  ctx.fill(new Path2D(LOGO_BODY_PATH));
+  ctx.fillStyle = LOGO_INK;
+  ctx.fill(new Path2D(LOGO_RING_PATH + LOGO_GLYPH_PATH));
+  ctx.restore();
 
   // Site name and mode
   ctx.textAlign = 'left';

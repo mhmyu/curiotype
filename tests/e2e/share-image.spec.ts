@@ -47,6 +47,20 @@ test('without the Web Share API the button downloads a 1200x630 PNG', { tag: '@s
   const box = await button.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 
+  // The buttons sit right below the results card (figures and chart) and above the sentence list
+  // (390x844); Try again comes before Share.
+  const cardBox = await page
+    .locator('section[aria-labelledby="results-title"] > .card')
+    .boundingBox();
+  const retryBox = await page.getByRole('button', { name: en.results.tryAgain }).boundingBox();
+  const firstSentenceBox = await page.locator('[data-sentence-id]').first().boundingBox();
+  expect(cardBox).not.toBeNull();
+  expect(retryBox).not.toBeNull();
+  expect(firstSentenceBox).not.toBeNull();
+  expect(retryBox!.y).toBeGreaterThanOrEqual(cardBox!.y + cardBox!.height);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(firstSentenceBox!.y);
+  expect(retryBox!.x).toBeLessThan(box!.x);
+
   const [download] = await Promise.all([page.waitForEvent('download'), button.click()]);
   expect(download.suggestedFilename()).toMatch(FILE_NAME);
 

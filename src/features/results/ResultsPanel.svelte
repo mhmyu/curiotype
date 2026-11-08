@@ -165,25 +165,7 @@
     <WpmChart samples={result.samples} label={ui.results.chartTitle} />
   </div>
 
-  {#if sentences.length > 0}
-    <div class="flex flex-col gap-3">
-      <h3 class="text-h3">{ui.results.learnedTitle}</h3>
-      <ul class="flex flex-col gap-3">
-        {#each sentences as sentence (sentence.id)}
-          <SentenceCard {sentence} {ui} {categoryLabel} {repoUrl}>
-            {#snippet actions()}
-              <FavoriteButton
-                saved={favoriteIds.has(sentence.id)}
-                label={ui.results.saveToCollection}
-                onToggle={() => onToggleFavorite(sentence.id)}
-              />
-            {/snippet}
-          </SentenceCard>
-        {/each}
-      </ul>
-    </div>
-  {/if}
-
+  <!-- Right below the chart, before the sentence list: the list length changes with the mode. -->
   <div class="flex flex-wrap items-center gap-3">
     <button type="button" class="btn btn-primary" onclick={onRetry}>
       {ui.results.tryAgain}
@@ -203,8 +185,34 @@
       {shareButton.label === 'busy' ? ui.results.shareBusy : ui.results.share}
     </button>
   </div>
-  <p class="text-caption text-text-muted" role="status" data-testid="share-status">{shareStatusText}</p>
+  <!-- Space for the status text is kept (two lines on a phone), so a message does not push the list down. -->
+  <p
+    class="min-h-[2.45rem] text-caption text-text-muted sm:min-h-[1.225rem]"
+    role="status"
+    data-testid="share-status"
+  >
+    {shareStatusText}
+  </p>
   <p class="shortcut-hint text-caption text-text-muted" data-testid="shortcut-hint-retry">
     <kbd class="kbd">Enter</kbd>: {ui.results.shortcutRetry}
   </p>
+
+  {#if sentences.length > 0}
+    <div class="flex flex-col gap-3">
+      <h3 class="text-h3">{ui.results.learnedTitle}</h3>
+      <ul class="flex flex-col gap-3">
+        {#each sentences as sentence (sentence.id)}
+          <SentenceCard {sentence} {ui} {categoryLabel} {repoUrl}>
+            {#snippet actions()}
+              <FavoriteButton
+                saved={favoriteIds.has(sentence.id)}
+                label={ui.results.saveToCollection}
+                onToggle={() => onToggleFavorite(sentence.id)}
+              />
+            {/snippet}
+          </SentenceCard>
+        {/each}
+      </ul>
+    </div>
+  {/if}
 </section>
