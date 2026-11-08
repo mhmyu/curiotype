@@ -7,7 +7,7 @@ const PERSONAL_BESTS_KEY = 'typing:personal-bests:v1';
 const SETTINGS_KEY = 'typing:settings:v1';
 
 // Interface in Indonesian, sentences in English: the sentence language is separate from the URL.
-test('switching the sentence language keeps the interface and the URL', async ({ page }) => {
+test('switching the sentence language keeps the interface and the URL', { tag: '@smoke' }, async ({ page }) => {
   await page.goto('/id/');
   const input = page.getByLabel(id.test.inputLabel);
   await expect(input).toBeVisible();
@@ -45,6 +45,10 @@ test('switching the sentence language keeps the interface and the URL', async ({
   await input.pressSequentially(target);
   await expect(page.getByRole('heading', { name: id.results.title })).toBeAttached();
 
+  // The result is saved under a storage lock, so it lands a moment after the card appears.
+  await expect
+    .poll(() => page.evaluate((key) => localStorage.getItem(key) !== null, HISTORY_KEY))
+    .toBe(true);
   const stored = await page.evaluate(
     ([historyKey, bestsKey, settingsKey]) => ({
       history: JSON.parse(localStorage.getItem(historyKey) ?? 'null'),

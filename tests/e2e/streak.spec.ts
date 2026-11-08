@@ -41,7 +41,7 @@ async function finishOneSentence(page: Page) {
   await expect(page.getByRole('heading', { name: en.results.title })).toBeAttached();
 }
 
-test('a new visitor sees no streak badge; the first finished test starts a streak', async ({ page }) => {
+test('a new visitor sees no streak badge; the first finished test starts a streak', { tag: '@smoke' }, async ({ page }) => {
   await page.goto('/en/');
   await expect(modeSelect(page, en)).toBeVisible();
   await expect(page.getByTestId('streak-badge')).toHaveCount(0);

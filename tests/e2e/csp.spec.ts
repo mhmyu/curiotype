@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { id } from '../../src/i18n/ui/id';
@@ -9,7 +8,9 @@ import { chooseMode } from './helpers';
  * `security.csp` in astro.config.mjs). These tests drive the real pages in the production build
  * and fail on any CSP violation, so a script, style, font or request that the policy blocks is
  * caught here and not by a user. `astro preview` does not apply `public/_headers`, so the
- * headers are covered by a unit test instead (`src/lib/headers-file.test.ts`).
+ * headers are covered by a unit test instead (`src/lib/headers-file.test.ts`). What the policy of each
+ * page SAYS (directives, the hash of every inline script) is read from the build in
+ * `tests/dist/csp.test.ts`; here the browser has to ENFORCE it.
  */
 
 interface Violation {
@@ -41,38 +42,6 @@ async function trackViolations(page: Page): Promise<() => Promise<string[]>> {
   };
 }
 
-test('every page declares a policy with the script hashes and no unsafe source', async ({ page }) => {
-  for (const url of ['/id/', '/en/', '/id/settings/', '/id/privacy/']) {
-    await page.goto(url);
-    const policy = await page
-      .locator('meta[http-equiv="content-security-policy"]')
-      .getAttribute('content');
-    expect(policy, url).toContain("default-src 'self'");
-    expect(policy, url).toContain("object-src 'none'");
-    expect(policy, url).toMatch(/script-src 'self'( 'sha256-[A-Za-z0-9+/]+=*')+/);
-    expect(policy, url).not.toMatch(/unsafe-inline|unsafe-eval/);
-  }
-});
-
-test('the policy lists the hash of every inline script on the page, theme script included', async ({ page }) => {
-  for (const url of ['/id/', '/en/settings/', '/id/privacy/', '/no-such-page/']) {
-    await page.goto(url);
-    const policy =
-      (await page.locator('meta[http-equiv="content-security-policy"]').getAttribute('content')) ?? '';
-    const scripts = await page.evaluate(() =>
-      [...document.querySelectorAll('script:not([src])')]
-        .filter((node) => node.getAttribute('type') !== 'application/ld+json')
-        .map((node) => node.textContent ?? ''),
-    );
-    // The theme script is always there, so this cannot pass by checking an empty list.
-    expect(scripts.some((text) => text.includes('data-theme')), url).toBe(true);
-    for (const text of scripts) {
-      const hash = `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
-      expect(policy, `${url}: ${text.slice(0, 40)}`).toContain(hash);
-    }
-  }
-});
-
 test('the policy is enforced: an injected inline script does not run', async ({ page }) => {
   const violations = await trackViolations(page);
   await page.goto('/id/');
@@ -88,7 +57,7 @@ test('the policy is enforced: an injected inline script does not run', async ({ 
     .toBe(true);
 });
 
-test('the home page runs a full test without a violation', async ({ page }) => {
+test('the home page runs a full test without a violation', { tag: '@smoke' }, async ({ page }) => {
   const violations = await trackViolations(page);
   await page.goto('/id/');
   await chooseMode(page, 'quote', id);

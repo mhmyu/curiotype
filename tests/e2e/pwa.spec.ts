@@ -8,10 +8,8 @@ import { chooseMode, modeSelect } from './helpers';
 // cannot hide their `page.route` rules; this one is about the worker, so it turns it on.
 test.use({ serviceWorkers: 'allow' });
 
-const LANGS = [
-  { code: 'id', ui: id },
-  { code: 'en', ui: en },
-] as const;
+// The manifests, the browser colors in the page head and the file list of sw.js are read from the build
+// in tests/dist/pwa.test.ts; this file keeps what needs a running worker: offline use and the update toast.
 
 /** Waits until the worker has installed (stored the whole site), activated, and controls the page. */
 async function waitForWorker(page: Page) {
@@ -29,71 +27,7 @@ async function openQuote(page: Page, lang: 'en' | 'id') {
   return { input, target };
 }
 
-for (const { code, ui } of LANGS) {
-  test(`${code}: the manifest opens the app in this language and its icons exist`, async ({ page }) => {
-    await page.goto(`/${code}/`);
-    const link = page.locator('link[rel="manifest"]');
-    await expect(link).toHaveAttribute('href', `/${code}/manifest.webmanifest`);
-
-    const response = await page.request.get(`/${code}/manifest.webmanifest`);
-    expect(response.ok()).toBe(true);
-    expect(response.headers()['content-type']).toContain('json');
-    const manifest = await response.json();
-    expect(manifest).toMatchObject({
-      name: ui.meta.siteName,
-      start_url: `/${code}/`,
-      scope: '/',
-      display: 'standalone',
-      theme_color: '#ddf4ff',
-      background_color: '#ddf4ff',
-    });
-    const purposes = (manifest.icons as Array<{ purpose: string }>).map((icon) => icon.purpose);
-    expect(purposes).toContain('maskable');
-    for (const icon of manifest.icons as Array<{ src: string; sizes: string }>) {
-      const file = await page.request.get(icon.src);
-      expect(file.ok(), icon.src).toBe(true);
-    }
-    expect(manifest.categories).toEqual(['education']);
-    // Shortcuts and screenshots are served files and pages, not just entries in the manifest.
-    for (const shortcut of manifest.shortcuts as Array<{ url: string }>) {
-      expect((await page.request.get(shortcut.url)).ok(), shortcut.url).toBe(true);
-    }
-    const factors = (manifest.screenshots as Array<{ form_factor: string }>).map((shot) => shot.form_factor);
-    expect(factors).toEqual(['narrow', 'wide']);
-    for (const shot of manifest.screenshots as Array<{ src: string }>) {
-      const file = await page.request.get(shot.src);
-      expect(file.ok(), shot.src).toBe(true);
-      expect(file.headers()['content-type']).toContain('image/png');
-    }
-  });
-}
-
-test('the page asks for light and dark browser colors', async ({ page }) => {
-  await page.goto('/id/');
-  const colors = await page
-    .locator('meta[name="theme-color"]')
-    .evaluateAll((nodes) => nodes.map((node) => [node.getAttribute('content'), node.getAttribute('media')]));
-  expect(colors).toEqual([
-    ['#ddf4ff', '(prefers-color-scheme: light)'],
-    ['#0f1c26', '(prefers-color-scheme: dark)'],
-  ]);
-});
-
-test('sw.js is served from the root and lists the pages of both languages and the sentence files', async ({
-  page,
-}) => {
-  const response = await page.request.get('/sw.js');
-  expect(response.ok()).toBe(true);
-  expect(response.headers()['content-type']).toContain('javascript');
-  const source = await response.text();
-  for (const path of ['"/id/"', '"/en/"', '"/id/settings/"', '"/id/stats/"', '"/data/id/sentences.json"', '"/data/en/sentences.json"']) {
-    expect(source, path).toContain(path);
-  }
-  // Social preview images, robots.txt and the worker itself are not stored.
-  expect(source).not.toMatch(/"\/og\/|"\/robots\.txt"|"\/sw\.js"/);
-});
-
-test('after one visit the site opens offline and a whole test can be finished', async ({ page, context }) => {
+test('after one visit the site opens offline and a whole test can be finished', { tag: '@smoke' }, async ({ page, context }) => {
   await page.goto('/id/');
   await waitForWorker(page);
 

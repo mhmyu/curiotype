@@ -34,7 +34,7 @@ async function expectNoHorizontalScroll(page: Page) {
 
 for (const { code, ui } of LANGUAGES) {
   test.describe(`/${code}/`, () => {
-    test('loads and hydrates without problems', async ({ page }) => {
+    test('loads and hydrates without problems', { tag: '@smoke' }, async ({ page }) => {
       const problems = trackProblems(page);
       await page.goto(`/${code}/`);
 
@@ -49,7 +49,7 @@ for (const { code, ui } of LANGUAGES) {
       expect(problems).toEqual([]);
     });
 
-    test('finishes a sentence, shows the result and saves it', async ({ page }) => {
+    test('finishes a sentence, shows the result and saves it', { tag: '@smoke' }, async ({ page }) => {
       const problems = trackProblems(page);
       await page.goto(`/${code}/`);
 

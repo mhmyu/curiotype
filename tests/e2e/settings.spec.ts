@@ -41,7 +41,7 @@ test('the English settings page is translated', async ({ page }) => {
   await expect(page.getByRole('contentinfo').getByText(en.footer.sentences)).toBeVisible();
 });
 
-test('the theme choice is applied, saved and kept on every page without a flash', async ({ page }) => {
+test('the theme choice is applied, saved and kept on every page without a flash', { tag: '@smoke' }, async ({ page }) => {
   await page.goto('/id/settings/');
   const html = page.locator('html');
   const dark = page.getByRole('button', { name: id.settings.themes.dark, exact: true });

@@ -16,34 +16,28 @@ async function openTest(page: Page) {
   return { input, targetText };
 }
 
-test('Escape restarts the test and clears the input', async ({ page }) => {
+test('Escape and the restart button restart the test, clear the input and keep typing possible', { tag: '@smoke' }, async ({
+  page,
+}) => {
   const { input, targetText } = await openTest(page);
   const target = await targetText();
 
   await input.pressSequentially(target.slice(0, 5));
   await expect(input).toHaveValue(target.slice(0, 5));
-
   await input.press('Escape');
-
   await expect(input).toHaveValue('');
   await expect(input).toBeFocused();
-  // A restarted test is ready again: typing works and the timer shows the full duration.
+  // A restarted test is ready again: typing works.
   await input.pressSequentially('a');
   await expect(input).toHaveValue('a');
-});
 
-test('the restart button clears the input and keeps typing possible', async ({ page }) => {
-  const { input, targetText } = await openTest(page);
-  const target = await targetText();
-  await input.pressSequentially(target.slice(0, 4));
-
+  await input.pressSequentially(target.slice(1, 4));
   await page.getByRole('button', { name: ui.test.restart, exact: true }).click();
-
   await expect(input).toHaveValue('');
   await expect(input).toBeFocused();
 });
 
-test('time mode appends sentences before the text runs out', async ({ page }) => {
+test('time mode appends sentences before the text runs out', { tag: '@smoke' }, async ({ page }) => {
   const { input, targetText } = await openTest(page);
   const initial = await targetText();
 
@@ -55,7 +49,9 @@ test('time mode appends sentences before the text runs out', async ({ page }) =>
   expect((await targetText()).startsWith(initial + ' ')).toBe(true);
 });
 
-test('paste is blocked', async ({ page }) => {
+test('paste is blocked and the input asks browser helpers and extensions to leave it alone', async ({
+  page,
+}) => {
   const { input } = await openTest(page);
   const prevented = await input.evaluate((element) => {
     const event = new ClipboardEvent('paste', { bubbles: true, cancelable: true });
@@ -63,34 +59,46 @@ test('paste is blocked', async ({ page }) => {
     return event.defaultPrevented;
   });
   expect(prevented).toBe(true);
+
+  const expected = {
+    autocomplete: 'off',
+    autocapitalize: 'off',
+    autocorrect: 'off',
+    spellcheck: 'false',
+    'data-gramm': 'false',
+    'data-gramm_editor': 'false',
+    'data-enable-grammarly': 'false',
+    'data-lpignore': 'true',
+    'data-1p-ignore': 'true',
+    'data-form-type': 'other',
+  };
+  for (const [name, value] of Object.entries(expected)) {
+    await expect(input, name).toHaveAttribute(name, value);
+  }
 });
 
-test('losing focus shows the overlay, and a tap on it restores focus', async ({ page }) => {
+test('losing focus shows the overlay; a tap on it or a key press restores focus', { tag: '@smoke' }, async ({
+  page,
+}) => {
   const { input } = await openTest(page);
   const overlay = page.getByRole('button', { name: ui.test.focusLost });
   await expect(overlay).toHaveCount(0);
 
   await input.blur();
   await expect(overlay).toBeVisible();
-
   await overlay.click();
   await expect(input).toBeFocused();
   await expect(overlay).toHaveCount(0);
-
   // Typing works again right away.
   await input.pressSequentially('a');
   await expect(input).toHaveValue('a');
-});
 
-test('a key press brings the focus back when nothing else is focused', async ({ page }) => {
-  const { input } = await openTest(page);
+  // A key press brings the focus back when nothing else is focused.
   await input.blur();
-  await expect(page.getByRole('button', { name: ui.test.focusLost })).toBeVisible();
-
+  await expect(overlay).toBeVisible();
   await page.keyboard.press('x');
-
   await expect(input).toBeFocused();
-  await expect(page.getByRole('button', { name: ui.test.focusLost })).toHaveCount(0);
+  await expect(overlay).toHaveCount(0);
 });
 
 test('keyboard users keep control of the focused mode select while the input has no focus', async ({
@@ -143,36 +151,29 @@ test.describe('the caret stays at the end of the typed text', () => {
     return { input, target, redCount };
   }
 
-  for (const key of ['Home', 'End', 'ArrowLeft', 'ArrowUp', 'PageUp', 'Delete', 'Control+a']) {
-    test(`${key} does not move the caret or shift the text`, async ({ page }) => {
-      const { input, target, redCount } = await typeTwenty(page);
-
-      await input.press(key);
-      await input.pressSequentially(target.slice(20, 23));
-
-      await expect(input).toHaveValue(target.slice(0, 23));
-      expect(await redCount()).toBe(0);
-    });
-  }
-
-  test('a click in the middle of the text does not move the caret', async ({ page }) => {
+  test('keys, clicks and scripts that move the caret neither move it nor shift the text', async ({
+    page,
+  }) => {
     const { input, target, redCount } = await typeTwenty(page);
+    let typed = 20;
+    // After every attempt to move the caret, two more letters must still land at the end.
+    const typeTwoMore = async (what: string) => {
+      await input.pressSequentially(target.slice(typed, typed + 2));
+      typed += 2;
+      await expect(input, what).toHaveValue(target.slice(0, typed));
+      expect(await redCount(), what).toBe(0);
+    };
+
+    for (const key of ['Home', 'End', 'ArrowLeft', 'ArrowUp', 'PageUp', 'Delete', 'Control+a']) {
+      await input.press(key);
+      await typeTwoMore(key);
+    }
 
     await input.click({ position: { x: 4, y: 4 } });
-    await input.pressSequentially(target.slice(20, 23));
-
-    await expect(input).toHaveValue(target.slice(0, 23));
-    expect(await redCount()).toBe(0);
-  });
-
-  test('a caret moved by a script is put back before the next letter', async ({ page }) => {
-    const { input, target, redCount } = await typeTwenty(page);
+    await typeTwoMore('a click in the middle');
 
     await input.evaluate((el: HTMLInputElement) => el.setSelectionRange(0, 0));
-    await input.pressSequentially(target.slice(20, 22));
-
-    await expect(input).toHaveValue(target.slice(0, 22));
-    expect(await redCount()).toBe(0);
+    await typeTwoMore('a caret moved by a script');
   });
 
   test('Backspace still corrects a mistake at the end', async ({ page }) => {
@@ -201,7 +202,9 @@ test.describe('only typing edits reach the field', () => {
     return { input, target };
   }
 
-  test('Ctrl+Z, Ctrl+Y and Ctrl+Shift+Z do not change the typed text', async ({ page }) => {
+  test('undo and redo keys change nothing, and forbidden edit kinds are cancelled while typing kinds are not', async ({
+    page,
+  }) => {
     const { input, target } = await typeTwenty(page);
 
     for (const key of ['Control+z', 'Control+y', 'Control+Shift+z']) await input.press(key);
@@ -209,10 +212,6 @@ test.describe('only typing edits reach the field', () => {
     await expect(input).toHaveValue(target.slice(0, 20));
     await input.pressSequentially(target.slice(20, 22));
     await expect(input).toHaveValue(target.slice(0, 22));
-  });
-
-  test('forbidden edit kinds are cancelled and typing kinds are not', async ({ page }) => {
-    const { input } = await typeTwenty(page);
 
     const cancelled = await input.evaluate((element) => {
       const kinds = [
@@ -275,13 +274,20 @@ test.describe('Caps Lock note', () => {
     );
   }
 
-  test('shows while Caps Lock is on and goes away when it is off', async ({ page }) => {
+  test('shows while Caps Lock is on, goes away when it is off or the field loses focus, and is announced', async ({
+    page,
+  }) => {
     const { input } = await openTest(page);
     const note = page.getByTestId('caps-lock-note');
+    const region = page.getByTestId('caps-lock-region');
     await expect(note).toHaveCount(0);
+    // The status region is always present, so the note is announced when it appears.
+    await expect(region).toHaveAttribute('role', 'status');
+    await expect(region).toHaveText('');
 
     await sendKey(input, 'keydown', true);
     await expect(note).toHaveText(ui.test.capsLock);
+    await expect(region).toHaveText(ui.test.capsLock);
 
     await sendKey(input, 'keyup', false);
     await expect(note).toHaveCount(0);
@@ -291,27 +297,12 @@ test.describe('Caps Lock note', () => {
     await expect(note).toBeVisible();
     await input.pressSequentially('a');
     await expect(note).toHaveCount(0);
-  });
 
-  test('goes away when the field loses focus', async ({ page }) => {
-    const { input } = await openTest(page);
+    // Losing focus clears it as well.
     await sendKey(input, 'keydown', true);
-    await expect(page.getByTestId('caps-lock-note')).toBeVisible();
-
+    await expect(note).toBeVisible();
     await input.blur();
-
-    await expect(page.getByTestId('caps-lock-note')).toHaveCount(0);
-  });
-
-  test('the note is announced through a status region that is always present', async ({ page }) => {
-    const { input } = await openTest(page);
-    const region = page.getByTestId('caps-lock-region');
-    await expect(region).toHaveAttribute('role', 'status');
-    await expect(region).toHaveText('');
-
-    await sendKey(input, 'keydown', true);
-
-    await expect(region).toHaveText(ui.test.capsLock);
+    await expect(note).toHaveCount(0);
   });
 
   for (const [path, dictionary] of [
@@ -343,25 +334,6 @@ test.describe('Caps Lock note', () => {
   }
 });
 
-test('the input asks browser helpers and extensions to leave it alone', async ({ page }) => {
-  const { input } = await openTest(page);
-  const expected = {
-    autocomplete: 'off',
-    autocapitalize: 'off',
-    autocorrect: 'off',
-    spellcheck: 'false',
-    'data-gramm': 'false',
-    'data-gramm_editor': 'false',
-    'data-enable-grammarly': 'false',
-    'data-lpignore': 'true',
-    'data-1p-ignore': 'true',
-    'data-form-type': 'other',
-  };
-  for (const [name, value] of Object.entries(expected)) {
-    await expect(input, name).toHaveAttribute(name, value);
-  }
-});
-
 /*
  * A change the typing did not make (an extension or a script rewriting the field) must not reach
  * the engine: the last good text is put back (input-recovery.ts).
@@ -376,29 +348,23 @@ test.describe('a change the typing did not make is undone', () => {
     return { input, target, redCount };
   }
 
-  test('text appended by a script is thrown away', async ({ page }) => {
+  test('text appended by a script or rewritten in the middle is put back', async ({ page }) => {
     const { input, target, redCount } = await typeTwenty(page);
 
     await input.evaluate((el: HTMLInputElement) => {
       el.value += ' inserted by an extension';
       el.dispatchEvent(new Event('input', { bubbles: true }));
     });
-
     await expect(input).toHaveValue(target.slice(0, 20));
     expect(await redCount()).toBe(0);
     await input.pressSequentially(target.slice(20, 23));
     await expect(input).toHaveValue(target.slice(0, 23));
-  });
-
-  test('text rewritten in the middle is put back', async ({ page }) => {
-    const { input, target, redCount } = await typeTwenty(page);
 
     await input.evaluate((el: HTMLInputElement) => {
       el.value = 'ZZZ' + el.value.slice(3);
       el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'Z' }));
     });
-
-    await expect(input).toHaveValue(target.slice(0, 20));
+    await expect(input).toHaveValue(target.slice(0, 23));
     expect(await redCount()).toBe(0);
   });
 

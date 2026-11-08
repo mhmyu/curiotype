@@ -66,11 +66,11 @@ function exportFile(data: Record<string, unknown>, overrides: Record<string, unk
 const t = id.dataTools;
 
 test.describe('privacy page', () => {
-  for (const { code, ui } of [
-    { code: 'id', ui: id },
-    { code: 'en', ui: en },
-  ] as const) {
-    test(`/${code}/privacy/ lists the stored data and links to the settings`, async ({ page }) => {
+  test('the privacy page lists the stored data and links to the settings, in both languages', async ({ page }) => {
+    for (const { code, ui } of [
+      { code: 'id', ui: id },
+      { code: 'en', ui: en },
+    ] as const) {
       await page.goto(`/${code}/privacy/`);
       await expect(page.getByRole('heading', { level: 1, name: ui.privacy.title })).toBeVisible();
       await expect(page.getByText(ui.privacy.data.history, { exact: true })).toBeVisible();
@@ -82,8 +82,8 @@ test.describe('privacy page', () => {
         `/${code}/settings/`,
       );
       await expectNoHorizontalScroll(page);
-    });
-  }
+    }
+  });
 
   test('the footer links to the privacy page on every page', async ({ page }) => {
     await page.goto('/id/');
@@ -191,7 +191,7 @@ test.describe('data tools on the settings page', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   });
 
-  test('deleting all data asks first, then empties the storage and resets the theme', async ({ page }) => {
+  test('deleting all data asks first, then empties the storage and resets the theme', { tag: '@smoke' }, async ({ page }) => {
     await page.goto('/id/settings/');
     await page.getByRole('button', { name: id.settings.themes.dark, exact: true }).click();
     await seed(page, { [HISTORY_KEY]: [entry('a', 100)], [SEEN_KEY]: ['x'] });

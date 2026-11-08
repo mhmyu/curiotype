@@ -22,7 +22,7 @@ async function finishSentence(page: Page) {
 
 const resultsHeading = (page: Page) => page.getByRole('heading', { name: en.results.title });
 
-test('Enter on the result starts a new test once the guard time has passed', async ({ page }) => {
+test('Enter on the result starts a new test once the guard time has passed', { tag: '@smoke' }, async ({ page }) => {
   await finishSentence(page);
   await page.waitForTimeout(PAST_GUARD_MS);
 

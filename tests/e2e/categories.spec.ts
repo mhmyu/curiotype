@@ -43,19 +43,26 @@ async function readTarget(page: Page, ui: typeof en): Promise<string> {
   return (await input.locator('xpath=preceding-sibling::div[1]').textContent()) ?? '';
 }
 
-for (const { code, ui } of INTERFACES) {
+// Labels differ per interface language, so the filter is checked in both; the behaviour behind the
+// other pages does not depend on the language, so those tests run once, in Indonesian.
+test('the home category filter lists the categories of the sentence language, in file order, with file labels', async ({
+  page,
+}) => {
+  for (const { code, ui } of INTERFACES) {
+    await page.goto(`/${code}/`);
+    const select = (await openFilters(page, ui)).getByLabel(ui.test.categoryLabel);
+    const expected = await expectedCategories(code, code);
+    expect(expected.length, code).toBeGreaterThan(0);
+    await expect(select.getByRole('option'), code).toHaveText([ui.test.all, ...expected.map((c) => c.label)]);
+    const values = await select.getByRole('option').evaluateAll((options) => options.map((o) => (o as HTMLOptionElement).value));
+    expect(values, code).toEqual(['all', ...expected.map((c) => c.key)]);
+  }
+});
+
+{
+  const code = 'id';
+  const ui = id;
   test.describe(`/${code}/`, () => {
-    test('the home category filter lists the categories of the sentence language, in file order, with file labels', async ({
-      page,
-    }) => {
-      await page.goto(`/${code}/`);
-      const select = (await openFilters(page, ui)).getByLabel(ui.test.categoryLabel);
-      const expected = await expectedCategories(code, code);
-      expect(expected.length).toBeGreaterThan(0);
-      await expect(select.getByRole('option')).toHaveText([ui.test.all, ...expected.map((c) => c.label)]);
-      const values = await select.getByRole('option').evaluateAll((options) => options.map((o) => (o as HTMLOptionElement).value));
-      expect(values).toEqual(['all', ...expected.map((c) => c.key)]);
-    });
 
     test('the collection filter lists the same categories', async ({ page }) => {
       // The filter only shows once the collection has a sentence, so save one first.

@@ -3,8 +3,6 @@ import type { Page } from '@playwright/test';
 import { en } from '../../src/i18n/ui/en';
 import { id } from '../../src/i18n/ui/id';
 
-const PAGES = ['/id/', '/en/guide/', '/id/privacy/', '/en/settings/'];
-
 const button = (page: Page, name: string) => page.getByRole('button', { name });
 const ringOffset = (page: Page) =>
   page.evaluate(() =>
@@ -16,33 +14,48 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
 });
 
-for (const path of PAGES) {
-  test(`${path}: hidden at the top, visible after scrolling, and back to the top on click`, async ({ page }) => {
-    const name = path.startsWith('/en') ? en.nav.backToTop : id.nav.backToTop;
+test('/en/guide/: hidden at the top, visible after scrolling, and back to the top on click', async ({ page }) => {
+  await page.goto('/en/guide/');
+  const back = button(page, en.nav.backToTop);
+
+  // Not scrolled yet: not visible, and not reachable (no tab stop, not in the accessibility tree).
+  await expect(page.locator('[data-back-to-top]')).toBeHidden();
+  await expect(back).toHaveCount(0);
+
+  await page.evaluate(() => window.scrollTo(0, 600));
+  await expect(back).toBeVisible();
+  const box = await back.boundingBox();
+  expect(box!.width).toBeGreaterThanOrEqual(44);
+  expect(box!.height).toBeGreaterThanOrEqual(44);
+
+  // Bottom right, inside the viewport.
+  const viewport = page.viewportSize()!;
+  expect(box!.x + box!.width).toBeGreaterThan(viewport.width - 40);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+
+  await back.click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.locator('[data-back-to-top]')).toBeHidden();
+});
+
+// The button belongs to the shared layout; the full behavior is checked on the guide above. The
+// other kinds of page only prove that it is present there, in their own language, and starts hidden.
+test('the button appears on the home, privacy and settings pages in their own language', async ({ page }) => {
+  for (const [path, name] of [
+    ['/id/', id.nav.backToTop],
+    ['/id/privacy/', id.nav.backToTop],
+    ['/en/settings/', en.nav.backToTop],
+  ] as const) {
     await page.goto(path);
-    const back = button(page, name);
-
-    // Not scrolled yet: not visible, and not reachable (no tab stop, not in the accessibility tree).
-    await expect(page.locator('[data-back-to-top]')).toBeHidden();
-    await expect(back).toHaveCount(0);
-
-    await page.evaluate(() => window.scrollTo(0, 600));
-    await expect(back).toBeVisible();
-    const box = await back.boundingBox();
-    expect(box!.width).toBeGreaterThanOrEqual(44);
-    expect(box!.height).toBeGreaterThanOrEqual(44);
-
-    // Bottom right, inside the viewport.
-    const viewport = page.viewportSize()!;
-    expect(box!.x + box!.width).toBeGreaterThan(viewport.width - 40);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
-
-    await back.click();
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-    await expect(page.locator('[data-back-to-top]')).toBeHidden();
-  });
-}
+    await expect.soft(page.locator('[data-back-to-top]'), `${path} hidden at the top`).toBeHidden();
+    // Pages with an island grow after hydration; a scroll made too early is clamped, so scroll again.
+    await expect(async () => {
+      await page.evaluate(() => window.scrollTo(0, 600));
+      await expect(button(page, name)).toBeVisible({ timeout: 500 });
+    }, `${path} visible after scrolling`).toPass({ timeout: 5000 });
+  }
+});
 
 test('the ring fills as the page is scrolled', async ({ page }) => {
   await page.goto('/en/guide/');
@@ -86,18 +99,18 @@ test('the button stays clear of the page edges and adds no horizontal scroll at 
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-for (const [width, minGap] of [
-  [390, 20],
-  [1024, 36],
-] as const) {
-  test(`there is room between the header and the heading at ${width}px`, async ({ page }) => {
+test('there is room between the header and the heading at phone and desktop widths', async ({ page }) => {
+  for (const [width, minGap] of [
+    [390, 20],
+    [1024, 36],
+  ] as const) {
     await page.setViewportSize({ width, height: 800 });
     for (const path of ['/id/', '/en/guide/', '/id/stats/', '/en/collection/', '/id/settings/', '/en/privacy/']) {
       await page.goto(path);
       const header = await page.locator('[data-site-header]').boundingBox();
       const heading = await page.getByRole('heading', { level: 1 }).first().boundingBox();
       const gap = heading!.y - (header!.y + header!.height);
-      expect(gap, `${path} gap between header and h1`).toBeGreaterThanOrEqual(minGap);
+      expect.soft(gap, `${path} at ${width}px: gap between header and h1`).toBeGreaterThanOrEqual(minGap);
     }
-  });
-}
+  }
+});

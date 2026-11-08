@@ -37,7 +37,7 @@ async function withoutWebShare(page: Page) {
   });
 }
 
-test('without the Web Share API the button downloads a 1200x630 PNG', async ({ page }) => {
+test('without the Web Share API the button downloads a 1200x630 PNG', { tag: '@smoke' }, async ({ page }) => {
   const problems = trackProblems(page);
   await withoutWebShare(page);
   await finishQuote(page, 'en');

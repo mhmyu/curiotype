@@ -16,7 +16,7 @@ async function finishSentence(page: Page) {
   await expect(page.getByRole('button', { name: en.results.tryAgain })).toBeVisible();
 }
 
-test('two tabs finishing a test together keep both results and count both in the streak', async ({
+test('two tabs finishing a test together keep both results and count both in the streak', { tag: '@smoke' }, async ({
   context,
 }) => {
   const first = await context.newPage();

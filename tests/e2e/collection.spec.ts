@@ -39,7 +39,7 @@ async function finishOneSentence(page: Page): Promise<string> {
   return target;
 }
 
-test('a sentence saved with the star shows in the collection and can be removed', async ({ page }) => {
+test('a sentence saved with the star shows in the collection and can be removed', { tag: '@smoke' }, async ({ page }) => {
   const target = await finishOneSentence(page);
 
   const star = page.getByRole('button', { name: en.results.saveToCollection });

@@ -75,7 +75,7 @@ test('the preview shows the typeable text and how many characters were changed',
   await expect(page.getByTestId('custom-text-start')).toBeDisabled();
 });
 
-test('typing the text ends in a result that is in the history but is no record and no learned sentence', async ({
+test('typing the text ends in a result that is in the history but is no record and no learned sentence', { tag: '@smoke' }, async ({
   page,
 }) => {
   await openEditor(page);

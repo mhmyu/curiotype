@@ -29,7 +29,7 @@ async function typeSentenceFast(page: Page, ui: Dictionary) {
   await input.pressSequentially(target);
 }
 
-test('an implausibly fast result is shown with a note and saves nothing', async ({ page }) => {
+test('an implausibly fast result is shown with a note and saves nothing', { tag: '@smoke' }, async ({ page }) => {
   await pretendHuman(page);
   await page.goto('/en/');
   await typeSentenceFast(page, en);
@@ -72,5 +72,6 @@ test('the browser driven by automation is not limited (the other specs rely on i
   await page.goto('/en/');
   await typeSentenceFast(page, en);
   await expect(page.getByTestId('result-implausible')).toHaveCount(0);
-  expect(await stored(page, 'typing:history:v1')).not.toBeNull();
+  // Saving runs behind a storage lock, so it lands a moment after the result appears.
+  await expect.poll(() => stored(page, 'typing:history:v1')).not.toBeNull();
 });

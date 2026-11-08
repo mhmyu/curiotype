@@ -47,7 +47,7 @@ test('relaxed mode has no clock, no weak-key practice, and no duration or count 
   await expectNoHorizontalScroll(page);
 });
 
-test('a finished sentence shows its card; Enter continues; nothing is scored', async ({ page }) => {
+test('a finished sentence shows its card; Enter continues; nothing is scored', { tag: '@smoke' }, async ({ page }) => {
   await openRelaxed(page);
   await expect(page.getByTestId('relaxed-number')).toHaveText('Sentence 1');
 

@@ -51,7 +51,7 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-`pnpm check`, `pnpm test:run` and `pnpm build` must finish without errors. `pnpm test:e2e` runs the browser tests against the build you just made (run `pnpm build` first; it needs the Chromium download once).
+`pnpm check`, `pnpm test:run` and `pnpm build` must finish without errors. `pnpm test:e2e` runs the browser tests against the build you just made (run `pnpm build` first; it needs the Chromium download once). For a quick check while you work, `pnpm test:e2e:smoke` runs only the tests tagged `@smoke` (about 30 of them, under a minute); the full run stays the one that counts.
 
 ### 1.2 Create the repository on GitHub
 
@@ -88,7 +88,7 @@ If `pnpm install` stops with `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`, see [Trou
 ### 1.4 Check that CI is green
 
 1. On GitHub open the **Actions** tab. A run called **CI** starts by itself after the push.
-2. Wait a few minutes. Two jobs must finish with a green check: **Check and build** and **End-to-end tests**.
+2. Wait a few minutes. The run lists four jobs: **Check and build**, **End-to-end tests (shard 1 of 2)**, **End-to-end tests (shard 2 of 2)** and **End-to-end tests**. The two shards each run half of the browser tests in parallel; the last job only turns green when both shards are green. All of them must finish with a green check.
 3. If one is red, click it, open the red step and read the message (see [Troubleshooting](#9-troubleshooting)). Fix it before continuing.
 
 Note the two exact job names; you need them in 1.6.
@@ -120,7 +120,7 @@ This stops anyone (including you by mistake) from pushing broken changes straigh
    - **Restrict deletions** (usually ticked already).
    - **Block force pushes** (usually ticked already).
    - **Require a pull request before merging.** Set **Required approvals** to `0` while you are the only maintainer (GitHub does not let you approve your own pull request, so `1` would block you). Raise it when you have a second maintainer.
-   - **Require status checks to pass.** Click **Add checks** and add **Check and build** and **End-to-end tests**. Tick **Require branches to be up to date before merging** if offered.
+   - **Require status checks to pass.** Click **Add checks** and add **Check and build** and **End-to-end tests** (the one without "shard" in its name: it stands for both shards, so the rule keeps working if the number of shards changes). Tick **Require branches to be up to date before merging** if offered.
 5. Click **Create**.
 
 From now on, changes reach `main` only through a pull request whose two checks are green. You can still edit files in the browser: GitHub will make a branch and a pull request for you.
@@ -368,7 +368,7 @@ Quick checklist, in this order:
 | --- | --- | --- |
 | Build or CI fails with a message naming a sentence id and a rule | A content rule was broken (length, difficulty label, characters, id, source, duplicate) | Read the message, fix that sentence following `CONTENT_GUIDE.md` ("Automatic checks" and "Common mistakes"), run `pnpm build` again |
 | `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` on `pnpm install` | pnpm 12 refuses packages published too recently, and an old lockfile asks for one | Delete `pnpm-lock.yaml`, run `pnpm install`, test, commit the new lockfile. For a Dependabot pull request: wait a day, then comment `@dependabot rebase` on it |
-| Only **End-to-end tests** is red | A real browser test fails, or the browser could not start | Open the run, download the **playwright-report** file at the bottom (kept 7 days), and read the failed test. Reproduce with `pnpm build && pnpm test:e2e` |
+| **End-to-end tests** is red | One of the two shards failed: a real browser test fails, or the browser could not start | Open the run, see which **shard** is red, download its **playwright-report-shard-1** or **playwright-report-shard-2** file at the bottom (kept 7 days), and read the failed test. Reproduce with `pnpm build && pnpm test:e2e` |
 | CI is green locally but red on GitHub | Different Node or pnpm version, or a missing file | Compare with Node 24 and pnpm 12.15.0; check that every changed file was committed (`git status`) |
 | Cloudflare build fails at install: "pnpm" or "lockfile" | `PNPM_VERSION` missing, or `pnpm-lock.yaml` not committed | Set `PNPM_VERSION=12.15.0`, commit the lockfile, retry the deployment |
 | Cloudflare build fails with a Node version message | `NODE_VERSION` missing or too old | Set `NODE_VERSION=24` for both Production and Preview, retry |

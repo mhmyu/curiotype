@@ -74,7 +74,7 @@ test('the fact follows the local day (injected clock) and the sentence language'
   );
 });
 
-test('"Type this sentence" starts a Sentence test with the fact; the result counts like any test', async ({ page }) => {
+test('"Type this sentence" starts a Sentence test with the fact; the result counts like any test', { tag: '@smoke' }, async ({ page }) => {
   await page.goto('/en/');
   const expected = await expectedFact(page, 'en', dayKey());
   const input = page.getByLabel(en.test.inputLabel);
@@ -99,13 +99,17 @@ test('"Type this sentence" starts a Sentence test with the fact; the result coun
   await input.pressSequentially(expected.text);
   await expect(page.getByRole('heading', { name: en.results.title })).toBeAttached();
 
-  const stored = await page.evaluate(
-    ([historyKey, streakKey]) => ({
-      history: JSON.parse(localStorage.getItem(historyKey) ?? 'null'),
-      streak: JSON.parse(localStorage.getItem(streakKey) ?? 'null'),
-    }),
-    [HISTORY_KEY, STREAK_KEY],
-  );
+  // Saving runs behind a storage lock, so it lands a moment after the result appears: wait for both.
+  const readStored = () =>
+    page.evaluate(
+      ([historyKey, streakKey]) => ({
+        history: JSON.parse(localStorage.getItem(historyKey) ?? 'null'),
+        streak: JSON.parse(localStorage.getItem(streakKey) ?? 'null'),
+      }),
+      [HISTORY_KEY, STREAK_KEY],
+    );
+  await expect.poll(async () => (await readStored()).streak).not.toBeNull();
+  const stored = await readStored();
   expect(stored.history).toHaveLength(1);
   expect(stored.history[0].mode).toBe('quote');
   expect(stored.history[0].contentLang).toBe('en');

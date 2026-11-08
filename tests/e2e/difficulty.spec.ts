@@ -16,30 +16,28 @@ async function openSentenceMode(page: Page) {
   await chooseMode(page, 'quote', en);
 }
 
-test('the difficulty filter has two levels, no "Medium", and explains the chosen level', async ({ page }) => {
-  await page.goto('/en/');
-  const select = (await openFilters(page)).getByLabel(en.test.difficultyLabel);
-  await expect(select.getByRole('option')).toHaveText([en.test.all, en.difficulties.easy, en.difficulties.hard]);
-  await expect(page.getByTestId('difficulty-hint')).toHaveCount(0);
-
-  await select.selectOption('easy');
-  await expect(page.getByTestId('difficulty-hint')).toHaveText(en.test.difficultyEasyHint);
-  await expect(select).toHaveAttribute('aria-describedby', 'difficulty-hint');
-
-  await select.selectOption('hard');
-  await expect(page.getByTestId('difficulty-hint')).toHaveText(en.test.difficultyHardHint);
-
-  await select.selectOption('all');
-  await expect(page.getByTestId('difficulty-hint')).toHaveCount(0);
-  await expect(select).not.toHaveAttribute('aria-describedby', /.+/);
-});
-
 for (const level of ['easy', 'hard'] as const) {
   test(`the "${level}" filter serves sentences that really score ${level}, and the result card labels them`, async ({
     page,
   }) => {
     await openSentenceMode(page);
-    await (await openFilters(page)).getByLabel(en.test.difficultyLabel).selectOption(level);
+    const select = (await openFilters(page)).getByLabel(en.test.difficultyLabel);
+
+    if (level === 'easy') {
+      // The filter has two levels, no "Medium", and explains the chosen level.
+      await expect(select.getByRole('option')).toHaveText([en.test.all, en.difficulties.easy, en.difficulties.hard]);
+      await expect(page.getByTestId('difficulty-hint')).toHaveCount(0);
+      await select.selectOption('easy');
+      await expect(page.getByTestId('difficulty-hint')).toHaveText(en.test.difficultyEasyHint);
+      await expect(select).toHaveAttribute('aria-describedby', 'difficulty-hint');
+      await select.selectOption('hard');
+      await expect(page.getByTestId('difficulty-hint')).toHaveText(en.test.difficultyHardHint);
+      await select.selectOption('all');
+      await expect(page.getByTestId('difficulty-hint')).toHaveCount(0);
+      await expect(select).not.toHaveAttribute('aria-describedby', /.+/);
+    }
+
+    await select.selectOption(level);
 
     // A new test starts after the change; wait until the target is one of the chosen level
     // (the sentence of the first test may still be on screen for a moment).

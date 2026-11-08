@@ -50,6 +50,8 @@ Before the browser tests run for the first time: `pnpm exec playwright install c
 | `pnpm test`    | Run unit tests in watch mode (Vitest)   |
 | `pnpm test:run`| Run unit tests once (used by CI)        |
 | `pnpm test:e2e`| Run browser tests (build first)         |
+| `pnpm test:e2e:smoke`| Run only the tests tagged `@smoke` (build first), a quick check of the main flows |
+| `pnpm test:dist`| Check the files in `dist/` (build first) |
 | `pnpm assets:generate` | Regenerate favicon, icons and Open Graph images |
 | `pnpm assets:favicon-ico` | Rebuild only `public/favicon.ico` from `public/favicon.svg` |
 | `pnpm assets:screenshots` | Re-shoot the install-dialog screenshots in `public/screenshots/` (run `pnpm build` first) |

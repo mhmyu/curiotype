@@ -107,7 +107,7 @@ test('the statistics page is in the navigation and explains an empty history', a
   await expectNoHorizontalScroll(page);
 });
 
-test('totals, trend, accuracy per category and records come from the saved data', async ({ page }) => {
+test('totals, trend, accuracy per category and records come from the saved data', { tag: '@smoke' }, async ({ page }) => {
   await seed(page, {
     [HISTORY_KEY]: SEEDED_HISTORY,
     [BESTS_KEY]: { 'en:time:60': 50, 'en:quote:na': 30, 'id:time:60': 99 },

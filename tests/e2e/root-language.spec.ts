@@ -1,15 +1,13 @@
-import { createHash } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 
 // `/` sends a visitor to the language of the browser (lib/language-redirect.ts). Only `/` does:
-// `/id/` and `/en/` always stay where they are.
+// `/id/` and `/en/` always stay where they are. Other regions and languages (en-GB, es-ES, ...) are
+// matched by the pure function in lib/language-redirect.ts and covered by its unit test.
 
 const CASES: Array<{ locale: string; expected: RegExp; why: string }> = [
   { locale: 'id-ID', expected: /\/id\/$/, why: 'Indonesian browser' },
   { locale: 'en-US', expected: /\/en\/$/, why: 'English browser' },
-  { locale: 'en-GB', expected: /\/en\/$/, why: 'another English region' },
   { locale: 'fr-FR', expected: /\/en\/$/, why: 'a language the site does not have opens English' },
-  { locale: 'es-ES', expected: /\/en\/$/, why: 'a language the site does not have opens English' },
 ];
 
 for (const { locale, expected, why } of CASES) {
@@ -71,29 +69,9 @@ test.describe('without JavaScript', () => {
   });
 });
 
+// What the HTML of the root page promises (plain links, the noscript refresh, indexable, the hash of
+// each inline script in its policy) is checked against the build output in tests/dist/root-page.test.ts.
 test.describe('the root page itself', () => {
-  test('offers both languages as plain links and is indexable', async ({ request }) => {
-    const html = await (await request.get('/')).text();
-    expect(html).toMatch(/<a href="\/id\/" hreflang="id"/);
-    expect(html).toMatch(/<a href="\/en\/" hreflang="en"/);
-    expect(html).toMatch(/<noscript><meta http-equiv="refresh" content="0;url=\/id\/"/);
-    expect(html).not.toMatch(/name="robots"/);
-  });
-
-  test('the policy lists the hash of each of its inline scripts and allows nothing unsafe', async ({ request }) => {
-    const html = await (await request.get('/')).text();
-    const policy = /http-equiv="content-security-policy" content="([^"]*)"/.exec(html)?.[1] ?? '';
-    expect(policy).toContain("default-src 'self'");
-    expect(policy).not.toMatch(/unsafe-inline|unsafe-eval/);
-    const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
-    expect(scripts.some((text) => text.includes('location.replace'))).toBe(true);
-    expect(scripts.some((text) => text.includes('data-theme'))).toBe(true);
-    for (const text of scripts) {
-      const hash = `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
-      expect(policy, text.slice(0, 40)).toContain(hash);
-    }
-  });
-
   test('has no horizontal scroll at 320 px', async ({ page }) => {
     // The page without its scripts, so the redirect does not run while the size is measured.
     await page.setViewportSize({ width: 320, height: 640 });

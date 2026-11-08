@@ -47,7 +47,7 @@ async function lastResult(page: Page) {
 }
 
 test.describe('accented letters', () => {
-  test('precomposed letters (e with acute as one character) finish with no error', async ({
+  test('precomposed letters (e with acute as one character) finish with no error', { tag: '@smoke' }, async ({
     page,
   }) => {
     const { target } = await openAccentedSentence(page);

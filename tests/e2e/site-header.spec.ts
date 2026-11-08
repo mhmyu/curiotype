@@ -32,7 +32,7 @@ test.describe('phone (menu behind the hamburger button)', () => {
     await expectNoHorizontalScroll(page);
   });
 
-  test('the button opens and closes the menu, and the links are not buttons', async ({ page }) => {
+  test('the button opens and closes the menu; the links are plain, 44 px tall menu items', { tag: '@smoke' }, async ({ page }) => {
     await page.goto('/en/');
     await menuButton(page).click();
     await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'true');
@@ -50,24 +50,21 @@ test.describe('phone (menu behind the hamburger button)', () => {
     expect(style.border).toBe('0px');
     expect(style.background).toBe('rgba(0, 0, 0, 0)');
 
-    await menuButton(page).click();
-    await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'false');
-    await expect(nav).toBeHidden();
-  });
-
-  test('every menu link is at least 44 px tall', async ({ page }) => {
-    await page.goto('/en/');
-    await menuButton(page).click();
-    const links = mainNav(page).getByRole('link');
+    // Every item and the button itself are full-size touch targets.
+    const links = nav.getByRole('link');
     await expect(links).toHaveCount(5);
     for (let i = 0; i < 5; i += 1) {
       const box = await links.nth(i).boundingBox();
-      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+      expect.soft(box?.height ?? 0, `menu link ${i}`).toBeGreaterThanOrEqual(44);
     }
     const toggleBox = await menuButton(page).boundingBox();
-    expect(toggleBox?.width ?? 0).toBeGreaterThanOrEqual(44);
-    expect(toggleBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+    expect.soft(toggleBox?.width ?? 0).toBeGreaterThanOrEqual(44);
+    expect.soft(toggleBox?.height ?? 0).toBeGreaterThanOrEqual(44);
     await expectNoHorizontalScroll(page);
+
+    await menuButton(page).click();
+    await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(nav).toBeHidden();
   });
 
   test('Escape closes the menu, returns focus to the button and does not reach the page', async ({ page }) => {
@@ -153,21 +150,22 @@ test.describe('desktop (menu in the bar)', () => {
   });
 });
 
-for (const [width, ui, path] of [
-  [768, en, '/en/'],
-  [768, id, '/id/'],
-  [800, id, '/id/'],
-] as const) {
-  test(`the full menu fits one row at ${width}px (${path})`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 800 });
+// 768 px is the narrowest width that shows the full menu, so it is the tightest case. Both
+// languages are checked because the Indonesian labels are the longer ones; any wider width fits too.
+test('the full menu fits one row at 768px in both languages', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 800 });
+  for (const [ui, path] of [
+    [en, '/en/'],
+    [id, '/id/'],
+  ] as const) {
     await page.goto(path);
-    await expect(page.getByRole('button', { name: ui.nav.menu, exact: true })).toBeHidden();
+    await expect.soft(page.getByRole('button', { name: ui.nav.menu, exact: true }), path).toBeHidden();
     const links = page.getByRole('navigation', { name: ui.nav.main }).getByRole('link');
     const first = await links.first().boundingBox();
     const last = await links.last().boundingBox();
-    expect(Math.abs(first!.y - last!.y)).toBeLessThan(2);
+    expect.soft(Math.abs(first!.y - last!.y), `${path}: one row`).toBeLessThan(2);
     // The site name stays on one line (the bar is a single row of about 60 px).
-    expect((await page.locator('[data-site-header]').boundingBox())!.height).toBeLessThan(70);
+    expect.soft((await page.locator('[data-site-header]').boundingBox())!.height, `${path}: bar height`).toBeLessThan(70);
     await expectNoHorizontalScroll(page);
-  });
-}
+  }
+});
