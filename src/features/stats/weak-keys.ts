@@ -13,22 +13,25 @@ export const MIN_KEY_ATTEMPTS = 30;
 /** Weak keys listed on the page. */
 export const WEAK_KEYS_LIMIT = 5;
 
+/** The number row, the first row of every layout (the digits are counted like letters). */
+export const DIGIT_ROW = '1234567890';
+
 /**
- * Rows of the heat map for the default layout. The keys are the letters of the target text,
- * whatever the language of the interface; the layout follows the language of the *sentences*
- * (see `KEYBOARD_ROWS`).
+ * Rows of the heat map for the default layout. The keys are the digits and letters of the target
+ * text, whatever the language of the interface; the layout follows the language of the
+ * *sentences* (see `KEYBOARD_ROWS`).
  */
-export const QWERTY_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'] as const;
+export const QWERTY_ROWS = [DIGIT_ROW, 'qwertyuiop', 'asdfghjkl', 'zxcvbnm'] as const;
 
 /** French keyboards are AZERTY: the second row has ten letters, the third six. */
-export const AZERTY_ROWS = ['azertyuiop', 'qsdfghjklm', 'wxcvbn'] as const;
+export const AZERTY_ROWS = [DIGIT_ROW, 'azertyuiop', 'qsdfghjklm', 'wxcvbn'] as const;
 
 /** German keyboards are QWERTZ: Y and Z swap places. */
-export const QWERTZ_ROWS = ['qwertzuiop', 'asdfghjkl', 'yxcvbnm'] as const;
+export const QWERTZ_ROWS = [DIGIT_ROW, 'qwertzuiop', 'asdfghjkl', 'yxcvbnm'] as const;
 
 /**
  * Heat map rows per sentence language (spec 21.4). A language without an entry uses
- * `QWERTY_ROWS` (`id`, `en`, `es`, `pt-br`). Only plain letters are drawn; accented letters
+ * `QWERTY_ROWS` (`id`, `en`, `es`, `pt-br`). Only the digits 0-9 and plain letters are drawn; accented letters
  * are still counted in the key statistics and listed as weak keys and in weak-key practice,
  * they just have no cell on the map. Adding a language with another layout is one line here.
  */

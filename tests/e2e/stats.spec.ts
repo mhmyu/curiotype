@@ -219,7 +219,8 @@ test('the heat map and the weak keys come from the saved key counts', async ({ p
   await expect(heatmap.getByTestId('key-a')).toHaveAttribute('data-level', '0');
   await expect(heatmap.getByTestId('key-s')).toHaveAttribute('data-level', 'none');
   await expect(heatmap.getByTestId('key-q')).toHaveAttribute('data-level', 'none');
-  await expect(heatmap.locator('[data-testid^="key-"]')).toHaveCount(26);
+  await expect(heatmap.getByTestId('key-7')).toHaveAttribute('data-level', 'none');
+  await expect(heatmap.locator('[data-testid^="key-"]')).toHaveCount(36);
 
   // Weak keys: worst first; no zero-error key, no under-sampled key, no space bar.
   const weak = page.getByTestId('weak-keys').getByRole('listitem');

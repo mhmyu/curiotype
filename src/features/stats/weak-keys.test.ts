@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { KeyStats } from '@/features/typing-engine/key-stats';
 import {
   AZERTY_ROWS,
+  DIGIT_ROW,
   HEAT_THRESHOLDS,
   KEYBOARD_ROWS,
   MIN_KEY_ATTEMPTS,
@@ -91,13 +92,14 @@ describe('keyboard layouts', () => {
   it('uses AZERTY for French and QWERTZ for German', () => {
     expect(getKeyboardRows('fr')).toBe(AZERTY_ROWS);
     expect(getKeyboardRows('de')).toBe(QWERTZ_ROWS);
-    expect([...AZERTY_ROWS]).toEqual(['azertyuiop', 'qsdfghjklm', 'wxcvbn']);
-    expect([...QWERTZ_ROWS]).toEqual(['qwertzuiop', 'asdfghjkl', 'yxcvbnm']);
+    expect([...AZERTY_ROWS]).toEqual([DIGIT_ROW, 'azertyuiop', 'qsdfghjklm', 'wxcvbn']);
+    expect([...QWERTZ_ROWS]).toEqual([DIGIT_ROW, 'qwertzuiop', 'asdfghjkl', 'yxcvbnm']);
   });
 
-  it('draws every layout with the 26 letters exactly once', () => {
+  it('draws every layout with the number row first and the 26 letters exactly once', () => {
     for (const rows of [QWERTY_ROWS, AZERTY_ROWS, QWERTZ_ROWS, ...Object.values(KEYBOARD_ROWS)]) {
-      expect(sorted(rows)).toBe(ALPHABET);
+      expect(rows[0]).toBe('1234567890');
+      expect(sorted(rows.slice(1))).toBe(ALPHABET);
     }
   });
 
@@ -109,8 +111,8 @@ describe('keyboard layouts', () => {
   it('builds the AZERTY heat map in layout order, M on the second row', () => {
     const rows = buildHeatmap({}, getKeyboardRows('fr'));
     expect(rows.map((row) => row.map((cell) => cell.key).join(''))).toEqual([...AZERTY_ROWS]);
-    expect(rows[1]).toHaveLength(10);
-    expect(rows[2]).toHaveLength(6);
+    expect(rows[2]).toHaveLength(10);
+    expect(rows[3]).toHaveLength(6);
   });
 
   it('reads the counts of the swapped keys of QWERTZ', () => {
