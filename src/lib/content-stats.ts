@@ -1,4 +1,5 @@
 import { isDraftLanguage } from '../config/languages.ts';
+import { EXPLANATION_LENGTH, getTextLength } from './content-rules.ts';
 import { classifyDifficulty, getDifficultyThreshold, scoreSentence } from './difficulty.ts';
 import { DIFFICULTIES } from './taxonomy.ts';
 import type { Difficulty } from './taxonomy.ts';
@@ -160,6 +161,222 @@ export function percentOf(count: number, total: number): number {
   return total === 0 ? 0 : Math.round((count / total) * 100);
 }
 
+/** A sentence file with what the detail statistics read: text, explanation and source URL. */
+export interface DetailFile {
+  lang: string;
+  category: string;
+  items: readonly { text?: string; explanation?: string; source?: { url: string } }[];
+}
+
+/** A length is "near the limit" from this share of the maximum (90%). */
+export const NEAR_LIMIT_SHARE = 0.9;
+
+/** A letter with fewer occurrences than this in a language is listed as rare. */
+export const RARE_LETTER_MIN = 30;
+
+/** One source page may serve at most this share of a category (percent) before a warning. */
+export const SOURCE_SHARE_LIMIT = 10;
+
+/** Categories with fewer sentences than this skip the source check (too noisy to judge). */
+export const MIN_FOR_SOURCE_CHECK = 20;
+
+/** How many domains the report lists. */
+const TOP_DOMAINS = 3;
+
+export interface LengthSummary {
+  count: number;
+  min: number;
+  median: number;
+  max: number;
+  allowedMin: number;
+  allowedMax: number;
+  /** Items at 90% of the allowed maximum or more. */
+  nearLimit: number;
+}
+
+export interface LangDetails {
+  lang: string;
+  text: LengthSummary | null;
+  explanation: LengthSummary | null;
+  sources: {
+    pages: number;
+    domains: number;
+    topDomains: { domain: string; count: number }[];
+    topPage: { url: string; count: number } | null;
+  };
+  digits: { sentences: number; withDigit: number; counts: number[] };
+  letters: {
+    /** Letters a-z with fewer than `RARE_LETTER_MIN` occurrences, rarest first. */
+    rare: { letter: string; count: number }[];
+    /** Letters outside a-z (accents, other scripts) with their counts, most frequent first. */
+    other: { letter: string; count: number }[];
+  };
+}
+
+function medianOf(sorted: readonly number[]): number {
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+}
+
+function summarizeLengths(lengths: readonly number[], allowed: readonly [number, number]): LengthSummary | null {
+  if (lengths.length === 0) return null;
+  const sorted = [...lengths].sort((a, b) => a - b);
+  const limit = Math.floor(allowed[1] * NEAR_LIMIT_SHARE);
+  return {
+    count: sorted.length,
+    min: sorted[0],
+    median: medianOf(sorted),
+    max: sorted[sorted.length - 1],
+    allowedMin: allowed[0],
+    allowedMax: allowed[1],
+    nearLimit: sorted.filter((length) => length >= limit).length,
+  };
+}
+
+/** The page of a source URL without its `#fragment`, and its host without `www.`. */
+export function describeSourceUrl(url: string): { page: string; domain: string } {
+  try {
+    const parsed = new URL(url);
+    return {
+      page: `${parsed.origin}${parsed.pathname}${parsed.search}`,
+      domain: parsed.hostname.replace(/^www\./, ''),
+    };
+  } catch {
+    return { page: url, domain: url };
+  }
+}
+
+function sortedByCount<T extends { count: number }>(rows: T[], key: (row: T) => string): T[] {
+  return rows.sort((a, b) => b.count - a.count || key(a).localeCompare(key(b)));
+}
+
+/**
+ * Detail statistics per language: length of text and explanation against their allowed range,
+ * how the sources are spread, how often digits occur and which letters are rare. Information only
+ * (`findSourceWarnings` is the one check that warns).
+ */
+export function computeContentDetails(files: readonly DetailFile[]): LangDetails[] {
+  const langs = [...new Set(files.map((file) => file.lang))].sort();
+  return langs.map((lang) => {
+    const items = files.filter((file) => file.lang === lang).flatMap((file) => file.items);
+    const texts = items.flatMap((item) => (item.text === undefined ? [] : [item.text]));
+    const explanations = items.flatMap((item) => (item.explanation === undefined ? [] : [item.explanation]));
+
+    const pageCounts = new Map<string, number>();
+    const domainCounts = new Map<string, number>();
+    for (const item of items) {
+      if (!item.source) continue;
+      const { page, domain } = describeSourceUrl(item.source.url);
+      pageCounts.set(page, (pageCounts.get(page) ?? 0) + 1);
+      domainCounts.set(domain, (domainCounts.get(domain) ?? 0) + 1);
+    }
+    const pages = sortedByCount([...pageCounts].map(([url, count]) => ({ url, count })), (row) => row.url);
+    const domains = sortedByCount([...domainCounts].map(([domain, count]) => ({ domain, count })), (row) => row.domain);
+
+    const digitCounts = Array<number>(10).fill(0);
+    let withDigit = 0;
+    const letterCounts = new Map<string, number>();
+    for (const text of texts) {
+      let hasDigit = false;
+      for (const char of text.toLowerCase()) {
+        if (char >= '0' && char <= '9') {
+          digitCounts[Number(char)] += 1;
+          hasDigit = true;
+        } else if (/\p{L}/u.test(char)) {
+          letterCounts.set(char, (letterCounts.get(char) ?? 0) + 1);
+        }
+      }
+      if (hasDigit) withDigit += 1;
+    }
+    const basic = 'abcdefghijklmnopqrstuvwxyz'.split('').map((letter) => ({ letter, count: letterCounts.get(letter) ?? 0 }));
+    const rare = basic.filter((row) => row.count < RARE_LETTER_MIN).sort((a, b) => a.count - b.count || a.letter.localeCompare(b.letter));
+    const other = sortedByCount(
+      [...letterCounts].filter(([letter]) => !/^[a-z]$/.test(letter)).map(([letter, count]) => ({ letter, count })),
+      (row) => row.letter,
+    );
+
+    return {
+      lang,
+      text: summarizeLengths(texts.map((text) => text.length), getTextLength(lang)),
+      explanation: summarizeLengths(explanations.map((text) => text.length), EXPLANATION_LENGTH),
+      sources: {
+        pages: pages.length,
+        domains: domains.length,
+        topDomains: domains.slice(0, TOP_DOMAINS),
+        topPage: pages[0] ?? null,
+      },
+      digits: { sentences: texts.length, withDigit, counts: digitCounts },
+      letters: { rare, other },
+    };
+  });
+}
+
+/**
+ * Warnings for a source page that serves too much of one category: more than `SOURCE_SHARE_LIMIT`
+ * percent of its sentences, in a category of at least `MIN_FOR_SOURCE_CHECK`. The `#fragment` does
+ * not count as another page. Only the page is checked, not the domain (an encyclopedia may
+ * legitimately be the domain of many sentences).
+ */
+export function findSourceWarnings(files: readonly DetailFile[]): string[] {
+  const warnings: string[] = [];
+  for (const file of files) {
+    const withSource = file.items.filter((item) => item.source !== undefined);
+    if (withSource.length < MIN_FOR_SOURCE_CHECK) continue;
+    const counts = new Map<string, number>();
+    for (const item of withSource) {
+      const { page } = describeSourceUrl(item.source!.url);
+      counts.set(page, (counts.get(page) ?? 0) + 1);
+    }
+    for (const [page, count] of [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))) {
+      const share = percentOf(count, withSource.length);
+      if (share > SOURCE_SHARE_LIMIT) {
+        warnings.push(
+          `${file.lang}/${file.category}: ${page} is the source of ${count} of ${withSource.length} sentences (${share}%), at most ${SOURCE_SHARE_LIMIT}% is advised.`,
+        );
+      }
+    }
+  }
+  return warnings;
+}
+
+function formatLength(label: string, summary: LengthSummary | null, unit: string): string[] {
+  if (!summary) return [];
+  const near = summary.nearLimit > 0 ? `; ${summary.nearLimit} at ${NEAR_LIMIT_SHARE * 100}% of the maximum or more` : '';
+  return [
+    `  ${label} length: min ${summary.min}, median ${summary.median}, max ${summary.max} (allowed ${summary.allowedMin}-${summary.allowedMax} ${unit})${near}`,
+  ];
+}
+
+function formatDetails(details: LangDetails): string[] {
+  const lines = [
+    ...formatLength('text', details.text, 'characters'),
+    ...formatLength('explanation', details.explanation, 'characters'),
+  ];
+  const { sources, digits, letters } = details;
+  if (sources.pages > 0) {
+    const domains = sources.topDomains.map((row) => `${row.domain} ${row.count}`).join(', ');
+    lines.push(`  sources: ${sources.pages} page(s) on ${sources.domains} domain(s); most used: ${domains}`);
+    if (sources.topPage && sources.topPage.count > 1) {
+      lines.push(`  most used page: ${sources.topPage.url} (${sources.topPage.count} sentences)`);
+    }
+  }
+  if (digits.sentences > 0) {
+    const perDigit = digits.counts.map((count, digit) => `${digit}:${count}`).join(' ');
+    lines.push(
+      `  digits: in ${digits.withDigit} of ${digits.sentences} sentences (${percentOf(digits.withDigit, digits.sentences)}%); ${perDigit}`,
+    );
+  }
+  if (letters.rare.length > 0) {
+    lines.push(
+      `  letters under ${RARE_LETTER_MIN} occurrences: ${letters.rare.map((row) => `${row.letter} ${row.count}`).join(', ')}`,
+    );
+  }
+  if (letters.other.length > 0) {
+    lines.push(`  other letters: ${letters.other.map((row) => `${row.letter} ${row.count}`).join(', ')}`);
+  }
+  return lines;
+}
+
 /** Human-readable warnings; an empty list means the corpus meets the targets. */
 export function findWarnings(stats: readonly LangStats[], registeredIds: readonly string[]): string[] {
   const warnings: string[] = [];
@@ -237,6 +454,7 @@ export function formatStats(
   stats: readonly LangStats[],
   warnings: readonly string[],
   notes: readonly string[] = [],
+  details: readonly LangDetails[] = [],
 ): string {
   const lines: string[] = [];
   for (const lang of stats) {
@@ -253,6 +471,8 @@ export function formatStats(
       const { min, median, max, threshold } = lang.scores;
       lines.push(`  scores: min ${min}, median ${median}, max ${max}; threshold ${threshold} (the median splits 50/50)`);
     }
+    const found = details.find((row) => row.lang === lang.lang);
+    if (found) lines.push(...formatDetails(found));
     lines.push('');
   }
   lines.push(

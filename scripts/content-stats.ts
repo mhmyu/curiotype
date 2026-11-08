@@ -1,4 +1,12 @@
-import { computeContentStats, findCategoryNotes, findWarnings, formatScores, formatStats } from '../src/lib/content-stats.ts';
+import {
+  computeContentDetails,
+  computeContentStats,
+  findCategoryNotes,
+  findSourceWarnings,
+  findWarnings,
+  formatScores,
+  formatStats,
+} from '../src/lib/content-stats.ts';
 import {
   DEFAULT_CORPUS_DIR,
   DEFAULT_REGISTRY_PATH,
@@ -11,7 +19,8 @@ import {
 
 /**
  * `pnpm content:stats` prints sentence counts per language, category, and
- * difficulty, the spread of the difficulty scores, and warns when a category is
+ * difficulty, the spread of the difficulty scores, the length of text and explanation against
+ * their limits, how the sources, digits and letters are spread, and warns when a category is
  * below the target, the easy/hard mix drifts from 50/50, a sentence file uses a
  * category that `src/content/categories.json` does not list, or a listed
  * category has no file. A category that exists in only some languages is
@@ -34,12 +43,13 @@ try {
   process.exit(1);
 }
 const stats = computeContentStats(files, registeredIds);
-const warnings = findWarnings(stats, registeredIds);
+const warnings = [...findWarnings(stats, registeredIds), ...findSourceWarnings(files)];
+const details = computeContentDetails(files);
 const notes = findCategoryNotes(stats);
 
 if (argv.includes('--scores')) {
   console.log(formatScores(files));
   console.log('');
 }
-console.log(formatStats(stats, warnings, notes));
+console.log(formatStats(stats, warnings, notes, details));
 if (argv.includes('--strict') && warnings.length > 0) process.exitCode = 1;

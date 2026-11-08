@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   TARGET_PER_CATEGORY,
+  computeContentDetails,
   computeContentStats,
+  describeSourceUrl,
+  findSourceWarnings,
   findCategoryNotes,
   findWarnings,
   formatScores,
@@ -9,7 +12,7 @@ import {
   percentOf,
   summarizeScores,
 } from './content-stats.ts';
-import type { StatsFile } from './content-stats.ts';
+import type { DetailFile, StatsFile } from './content-stats.ts';
 
 /** The categories listed in `categories.json` for most tests (the same four the site ships with). */
 const FOUR = ['science', 'history', 'technology', 'health'];
@@ -275,5 +278,123 @@ describe('scores', () => {
     expect(lines[0]).toContain('en: threshold 100');
     expect(lines[1]).toMatch(/en-science-002\s+55\s+easy\s+<- labelled "hard", must be "easy"/);
     expect(lines[2]).toMatch(/en-science-001\s+130\s+hard$/);
+  });
+});
+
+
+describe('describeSourceUrl', () => {
+  it('drops the fragment and a leading www, keeps path and query', () => {
+    expect(describeSourceUrl('https://www.nasa.gov/venus?x=1#facts')).toEqual({
+      page: 'https://www.nasa.gov/venus?x=1',
+      domain: 'nasa.gov',
+    });
+  });
+
+  it('keeps an unparsable value as it is', () => {
+    expect(describeSourceUrl('not a url')).toEqual({ page: 'not a url', domain: 'not a url' });
+  });
+});
+
+function detailFile(lang: string, category: string, items: DetailFile['items']): DetailFile {
+  return { lang, category, items };
+}
+
+describe('computeContentDetails', () => {
+  it('summarizes text and explanation length against their allowed range', () => {
+    const long = 'x'.repeat(200);
+    const [en] = computeContentDetails([
+      detailFile('en', 'science', [
+        { text: textOfLength(60), explanation: 'e'.repeat(50) },
+        { text: textOfLength(160), explanation: long },
+      ]),
+    ]);
+    expect(en.text).toEqual({ count: 2, min: 60, median: 110, max: 160, allowedMin: 50, allowedMax: 170, nearLimit: 1 });
+    expect(en.explanation).toMatchObject({ min: 50, max: 200, allowedMin: 40, allowedMax: 220, nearLimit: 1 });
+  });
+
+  it('has no length summary without text or explanation', () => {
+    const [en] = computeContentDetails([detailFile('en', 'science', [{ source: { url: 'https://a.org/x' } }])]);
+    expect(en.text).toBeNull();
+    expect(en.explanation).toBeNull();
+  });
+
+  it('counts pages without the fragment, domains, and the most used page', () => {
+    const [en] = computeContentDetails([
+      detailFile('en', 'science', [
+        { source: { url: 'https://en.wikipedia.org/wiki/Bone#Structure' } },
+        { source: { url: 'https://en.wikipedia.org/wiki/Bone#Function' } },
+        { source: { url: 'https://www.who.int/news' } },
+      ]),
+    ]);
+    expect(en.sources.pages).toBe(2);
+    expect(en.sources.domains).toBe(2);
+    expect(en.sources.topDomains[0]).toEqual({ domain: 'en.wikipedia.org', count: 2 });
+    expect(en.sources.topPage).toEqual({ url: 'https://en.wikipedia.org/wiki/Bone', count: 2 });
+  });
+
+  it('counts digits per digit and the sentences that have one', () => {
+    const [en] = computeContentDetails([
+      detailFile('en', 'science', [{ text: 'In 1969 and 2 more.' }, { text: 'No numbers here.' }]),
+    ]);
+    expect(en.digits.sentences).toBe(2);
+    expect(en.digits.withDigit).toBe(1);
+    expect(en.digits.counts).toEqual([0, 1, 1, 0, 0, 0, 1, 0, 0, 2]);
+  });
+
+  it('lists rare letters from a to z (rarest first) and the letters outside it', () => {
+    const [es] = computeContentDetails([detailFile('es', 'science', [{ text: 'Camión, mañana.' }])]);
+    expect(es.letters.rare[0]).toEqual({ letter: 'b', count: 0 });
+    expect(es.letters.rare.find((row) => row.letter === 'a')?.count).toBe(4);
+    expect(es.letters.other).toEqual([
+      { letter: 'ñ', count: 1 },
+      { letter: 'ó', count: 1 },
+    ]);
+  });
+
+  it('uses the length range of the language', () => {
+    const [id] = computeContentDetails([detailFile('id', 'science', [{ text: textOfLength(60) }])]);
+    expect(id.text).toMatchObject({ allowedMin: 55, allowedMax: 190 });
+  });
+});
+
+describe('findSourceWarnings', () => {
+  const items = (urls: string[]) => urls.map((url) => ({ source: { url } }));
+
+  it('warns when one page serves more than 10% of a category of at least 20', () => {
+    const urls = [...Array(3).fill('https://a.org/p#x'), ...Array.from({ length: 17 }, (_, i) => `https://b.org/${i}`)];
+    const warnings = findSourceWarnings([detailFile('en', 'science', items(urls))]);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('en/science: https://a.org/p is the source of 3 of 20 sentences (15%)');
+  });
+
+  it('accepts exactly 10% and ignores small categories', () => {
+    const ok = [...Array(2).fill('https://a.org/p'), ...Array.from({ length: 18 }, (_, i) => `https://b.org/${i}`)];
+    expect(findSourceWarnings([detailFile('en', 'science', items(ok))])).toEqual([]);
+    expect(findSourceWarnings([detailFile('en', 'science', items(Array(19).fill('https://a.org/p')))])).toEqual([]);
+  });
+
+  it('does not warn about a domain that serves many different pages', () => {
+    const urls = Array.from({ length: 30 }, (_, i) => `https://en.wikipedia.org/wiki/Page_${i}`);
+    expect(findSourceWarnings([detailFile('en', 'science', items(urls))])).toEqual([]);
+  });
+});
+
+describe('formatStats with details', () => {
+  it('prints the detail lines under the scores of the language', () => {
+    const files: DetailFile[] = [
+      detailFile('en', 'science', [
+        { text: textOfLength(60), explanation: 'e'.repeat(50), source: { url: 'https://a.org/p' } },
+      ]),
+    ];
+    const text = formatStats(compute([file('en', 'science', 1, 0)]), [], [], computeContentDetails(files));
+    expect(text).toContain('text length: min 60, median 60, max 60 (allowed 50-170 characters)');
+    expect(text).toContain('explanation length: min 50');
+    expect(text).toContain('sources: 1 page(s) on 1 domain(s); most used: a.org 1');
+    expect(text).toContain('digits: in 0 of 1 sentences (0%)');
+    expect(text).toContain('letters under 30 occurrences:');
+  });
+
+  it('prints nothing extra when no details are given', () => {
+    expect(formatStats(compute([file('en', 'science', 1, 0)]), [])).not.toContain('text length');
   });
 });

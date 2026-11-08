@@ -179,7 +179,7 @@ Before committing a sentence, confirm all of these:
 
 ## 9. Automatic checks
 
-Two more tools help the owner, outside the build: `pnpm content:stats` shows how many sentences each language and category has and the spread of the difficulty scores and where the easy/hard mix drifts from 50/50, and `pnpm content:check-sources` (also run weekly on GitHub) tells which source links no longer open. Neither blocks a pull request.
+Two more tools help the owner, outside the build: `pnpm content:stats` shows how many sentences each language and category has and the spread of the difficulty scores and where the easy/hard mix drifts from 50/50, the length of your texts and explanations against their limits, how many sentences share one source page (more than 10% of a category of 20 or more gives a warning), digits and rare letters, and `pnpm content:check-sources` (also run weekly on GitHub) tells which source links no longer open. Neither blocks a pull request.
 
 `pnpm build` enforces the mechanical rules above and prints the sentence id with the rule it broke. The numbers are defined in `src/lib/content-rules.ts`; keep this guide in sync when you change them.
 

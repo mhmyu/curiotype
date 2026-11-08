@@ -340,7 +340,7 @@ Quick checklist, in this order:
 
 - Open pull requests and issues: review, merge or reply to each.
 - Look at new `fact-report` and `needs-source` items.
-- Run `pnpm content:stats` to see sentence counts per language, category and difficulty and where they drift from 50/50 or below the 100 target (it only prints; warnings do not mean anything is broken).
+- Run `pnpm content:stats` to see sentence counts per language, category and difficulty and where they drift from 50/50 or below the 100 target. It also prints, per language, the length of the texts and explanations against their limits (and how many sit at 90% of the maximum or more: if many explanations press against 220, consider a higher limit), the pages and domains used as sources (a warning appears when one page is the source of more than 10% of a category of 20 or more sentences), how often each digit occurs (the number row of the statistics heat map needs digits in the corpus) and the letters with fewer than 30 occurrences (their keys fill slowly). It only prints; warnings do not mean anything is broken).
 - Glance at the **Actions** tab for red runs on `main`.
 
 **Monthly**

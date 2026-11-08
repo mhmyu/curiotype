@@ -8,7 +8,7 @@ export interface CorpusFile {
   path: string;
   lang: string;
   category: string;
-  items: { id: string; difficulty: string; text: string; source: { url: string } }[];
+  items: { id: string; difficulty: string; text: string; explanation: string; source: { url: string } }[];
 }
 
 /**

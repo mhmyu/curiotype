@@ -56,7 +56,7 @@ Before the browser tests run for the first time: `pnpm exec playwright install c
 | `pnpm assets:favicon-ico` | Rebuild only `public/favicon.ico` from `public/favicon.svg` |
 | `pnpm assets:screenshots` | Re-shoot the install-dialog screenshots in `public/screenshots/` (run `pnpm build` first) |
 | `pnpm content:add-category <name> --id "<label>" --en "<label>"` | Add a sentence category: appends it to `src/content/categories.json` and creates a placeholder file per sentence language (`--langs`, `--order`, `--dry-run`; see `CONTENT_GUIDE.md`) |
-| `pnpm content:stats` | Count sentences per language, category and difficulty; show the score spread (`--scores`: the score and level of every sentence); warn below 100 or off 50/50 |
+| `pnpm content:stats` | Count sentences per language, category and difficulty; show the score spread (`--scores`: the score and level of every sentence), the length of text and explanation, the spread of sources, digits and rare letters; warn below 100, off 50/50, or when one source page serves more than 10% of a category |
 | `pnpm content:check-sources` | Request every source URL and report broken links (needs a network) |
 
 ## Project structure

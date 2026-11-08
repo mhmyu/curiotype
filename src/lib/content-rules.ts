@@ -1,7 +1,7 @@
 import type { ContentLang } from '../i18n/config';
-import { DIFFICULTY_THRESHOLDS, getDifficultyThreshold, scoreSentence } from './difficulty';
+import { DIFFICULTY_THRESHOLDS, getDifficultyThreshold, scoreSentence } from './difficulty.ts';
 import type { DifficultyThresholds } from './difficulty';
-import { PLACEHOLDER_MARKER, hasPlaceholder } from './placeholder';
+import { PLACEHOLDER_MARKER, hasPlaceholder } from './placeholder.ts';
 import type { Category, Difficulty } from './taxonomy';
 
 /**
