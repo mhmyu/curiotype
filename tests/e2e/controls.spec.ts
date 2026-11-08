@@ -69,7 +69,7 @@ test('duration and count are selects: mm:ss for Time, numbers for Count; only th
 }) => {
   await openHome(page);
   const durations = durationSelect(page);
-  await expect(durations).toHaveValue('30');
+  await expect(durations).toHaveValue('60');
   await expect(durations.getByRole('option')).toHaveText(['00:15', '00:30', '01:00', '02:00']);
   await expect(countSelect(page)).toHaveCount(0);
 

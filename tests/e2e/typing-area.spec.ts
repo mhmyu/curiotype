@@ -129,11 +129,11 @@ test('the timer keeps running while the input has no focus', async ({ page }) =>
     const [minutes, rest] = ((await clock.textContent()) ?? '').trim().split(':').map(Number);
     return (minutes ?? Number.NaN) * 60 + (rest ?? Number.NaN);
   };
-  expect(await seconds()).toBeGreaterThanOrEqual(29);
+  expect(await seconds()).toBeGreaterThanOrEqual(59);
   await input.blur();
 
-  // About two seconds later the countdown must have moved on (30 s default duration).
-  await expect.poll(seconds).toBeLessThanOrEqual(28);
+  // About two seconds later the countdown must have moved on (60 s default duration).
+  await expect.poll(seconds).toBeLessThanOrEqual(58);
 });
 
 /*

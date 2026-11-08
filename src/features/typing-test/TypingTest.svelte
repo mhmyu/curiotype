@@ -129,7 +129,7 @@
   let loaded = $state(false);
   let settings = $state<TestSettings>({
     mode: 'time',
-    durationSec: 30,
+    durationSec: 60,
     sentenceCount: 3,
     category: 'all',
     difficulty: 'all',
