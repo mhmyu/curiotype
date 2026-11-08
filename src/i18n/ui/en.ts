@@ -302,6 +302,7 @@ export const en: Dictionary = {
     aboutBody: [
       'curiotype is a free typing test that uses real facts instead of random words. Every sentence you type comes from science, history, technology or health, and has a source you can check yourself.',
       'It is made for students, writers, programmers and anyone who wants to type faster and more accurately while learning something. You can use it in English or Indonesian, on a computer or on a phone, without an account.',
+      'Curious about the world? Type to find out. That is where the name curiotype comes from: curious + type.',
     ],
     howTitle: 'How it works',
     steps: [

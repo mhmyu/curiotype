@@ -302,6 +302,7 @@ export const id: Dictionary = {
     aboutBody: [
       'curiotype adalah tes mengetik gratis yang memakai fakta nyata, bukan kata acak. Setiap kalimat yang kamu ketik berasal dari sains, sejarah, teknologi, atau kesehatan, dan punya sumber yang bisa kamu periksa sendiri.',
       'Situs ini dibuat untuk pelajar, penulis, programmer, dan siapa saja yang ingin mengetik lebih cepat dan lebih akurat sambil belajar sesuatu. Bisa dipakai dalam bahasa Indonesia atau Inggris, di komputer atau di HP, tanpa akun.',
+      'Penasaran dengan dunia? Ketik untuk mencari tahu. Dari situlah nama curiotype lahir: curious + type.',
     ],
     howTitle: 'Cara kerja',
     steps: [
