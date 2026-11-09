@@ -47,7 +47,7 @@ One file per language and category: `src/content/sentences/<lang>/<category>.jso
 
 ### Languages with accents (`es`, `pt-br`, `fr`, `de`)
 
-These four languages are still **drafts** (`DRAFT_LANGUAGES` in `src/config/languages.ts`): the build checks them, but visitors do not see them until the language is launched. Their accented letters are **required**: write `águila`, never `aguila`. A character that is hard to type on the normal keyboard of the language is **forbidden**: choose another word.
+`es` is launched; `pt-br`, `fr` and `de` are still **drafts** (`DRAFT_LANGUAGES` in `src/config/languages.ts`): the build checks all four, but visitors do not see a draft until it is launched. Their accented letters are **required**: write `águila`, never `aguila`. A character that is hard to type on the normal keyboard of the language is **forbidden**: choose another word.
 
 | Language | Letters allowed besides ASCII | Not allowed (why) |
 | -------- | ----------------------------- | ----------------- |

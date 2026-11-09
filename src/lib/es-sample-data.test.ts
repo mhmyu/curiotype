@@ -8,7 +8,7 @@ import { classifyDifficulty } from './difficulty';
 /**
  * The Spanish sample sentences (T37b, spec 21.5) are checked here with the same rules as the build,
  * so a broken sample fails `pnpm test:run` and not only `pnpm build`. The facts and sources are NOT
- * verified (the owner does that before launch); this test only guards the mechanical rules.
+ * verified (the owner does that); this test only guards the mechanical rules.
  */
 const files = readCorpus('src/content/sentences').filter((file) => file.lang === 'es');
 
@@ -16,8 +16,8 @@ const files = readCorpus('src/content/sentences').filter((file) => file.lang ===
 const SAMPLE_CATEGORIES = ['health', 'history', 'science', 'technology'];
 
 describe('es sample sentences', () => {
-  it('is a draft language with five sentences in each category', () => {
-    expect(isDraftLanguage('es')).toBe(true);
+  it('is a launched language with five sentences in each category', () => {
+    expect(isDraftLanguage('es')).toBe(false);
     expect(files.map((file) => file.category).sort()).toEqual(SAMPLE_CATEGORIES);
     for (const file of files) expect(file.items).toHaveLength(5);
   });

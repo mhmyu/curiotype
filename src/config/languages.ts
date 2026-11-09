@@ -12,7 +12,7 @@
  */
 
 /** Sentence language codes that are still drafts. Lowercase, like the folder names. */
-export const DRAFT_LANGUAGES: readonly string[] = ['es', 'pt-br', 'fr', 'de'];
+export const DRAFT_LANGUAGES: readonly string[] = ['pt-br', 'fr', 'de'];
 
 /** Whether a sentence language is still a draft. */
 export function isDraftLanguage(code: string, drafts: readonly string[] = DRAFT_LANGUAGES): boolean {

@@ -13,7 +13,6 @@ import {
 import type { ItemToCheck, LanguageRules, RuleTables, TextLengthTable } from './content-rules';
 import { DIFFICULTY_THRESHOLDS, classifyDifficulty } from './difficulty';
 import type { DifficultyThresholds } from './difficulty';
-import { DRAFT_LANGUAGES } from '../config/languages';
 import type { Language } from '../i18n/config';
 import type { Category } from './taxonomy';
 
@@ -289,9 +288,12 @@ function tablesFor(
   };
 }
 
+/** Languages with their own character rules (launched or still drafts). */
+const ACCENTED_LANGUAGES = ['de', 'es', 'fr', 'pt-br'];
+
 describe('per-language character rules', () => {
-  it('ship rules for the draft languages only: id and en keep the ASCII default', () => {
-    expect(Object.keys(LANGUAGE_RULES).sort()).toEqual([...DRAFT_LANGUAGES].sort());
+  it('ship rules for the accented languages only: id and en keep the ASCII default', () => {
+    expect(Object.keys(LANGUAGE_RULES).sort()).toEqual(ACCENTED_LANGUAGES);
     expect(getLanguageRules('id')).toBe(DEFAULT_LANGUAGE_RULES);
     expect(getLanguageRules('en')).toBe(DEFAULT_LANGUAGE_RULES);
     expect(getLanguageRules('vi')).toBe(DEFAULT_LANGUAGE_RULES);
@@ -369,7 +371,7 @@ describe('per-language length ranges', () => {
 // Rules of the draft languages (T37a, spec 21.2). Each language has passing sentences (every
 // accented letter it allows, upper and lower case) and failing ones (each forbidden character).
 // Letters are \u escapes so this file stays NFC and the characters under test are unambiguous.
-describe('draft languages: character rules (spec 21.2)', () => {
+describe('accented languages: character rules', () => {
   /** A sentence of `lang` with `body` inside, padded with plain letters to a valid length. */
   function sentenceWith(body: string): string {
     const filler = 'a'.repeat(70);
@@ -398,17 +400,17 @@ describe('draft languages: character rules (spec 21.2)', () => {
     de: '\u1E9E',
   };
 
-  it('has a rule, a length range and a threshold for every draft language', () => {
-    for (const lang of DRAFT_LANGUAGES) {
+  it('has a rule, a length range and a threshold for every accented language', () => {
+    for (const lang of ACCENTED_LANGUAGES) {
       expect(lang in LANGUAGE_RULES, `${lang} rules`).toBe(true);
       expect(lang in TEXT_LENGTH, `${lang} length`).toBe(true);
       expect(lang in DIFFICULTY_THRESHOLDS, `${lang} threshold`).toBe(true);
     }
   });
 
-  it('starts every draft length range at the en range x 1.15, rounded (57.5 -> 58, 195.5 -> 196)', () => {
+  it('starts every accented-language length range at the en range x 1.15, rounded (57.5 -> 58, 195.5 -> 196)', () => {
     const [enMin, enMax] = TEXT_LENGTH.en;
-    for (const lang of DRAFT_LANGUAGES) {
+    for (const lang of ACCENTED_LANGUAGES) {
       expect(TEXT_LENGTH[lang], lang).toEqual([Math.round((enMin * 115) / 100), Math.round((enMax * 115) / 100)]);
     }
   });
@@ -429,15 +431,15 @@ describe('draft languages: character rules (spec 21.2)', () => {
     }
   });
 
-  it('rejects a letter that belongs to another draft language', () => {
+  it('rejects a letter that belongs to another accented language', () => {
     expect(problemsOf('es', '\u00E7')).toHaveLength(1); // c-cedilla is not Spanish
     expect(problemsOf('de', '\u00E9')).toHaveLength(1); // e-acute is not German
     expect(problemsOf('pt-br', '\u00F1')).toHaveLength(1); // n-tilde is not Portuguese
     expect(problemsOf('fr', '\u00F5')).toHaveLength(1); // o-tilde is not French
   });
 
-  it('rejects the curly apostrophe and quotes, the long dash and emoji in every draft language', () => {
-    for (const lang of DRAFT_LANGUAGES) {
+  it('rejects the curly apostrophe and quotes, the long dash and emoji in every accented language', () => {
+    for (const lang of ACCENTED_LANGUAGES) {
       for (const ch of ['\u2019', '\u201C', '\u2014', '\u{1F600}']) {
         expect(problemsOf(lang, `x${ch}y`), `${lang} U+${ch.codePointAt(0)!.toString(16)}`).toHaveLength(1);
       }
@@ -460,7 +462,7 @@ describe('draft languages: character rules (spec 21.2)', () => {
   });
 
   it('keeps every letter rule in Unicode NFC (no decomposed letter in a rule)', () => {
-    for (const lang of DRAFT_LANGUAGES) {
+    for (const lang of ACCENTED_LANGUAGES) {
       const { allowedChar, hint } = getLanguageRules(lang);
       expect(hint).toBe(hint.normalize('NFC'));
       expect(allowedChar.source).toBe(allowedChar.source.normalize('NFC'));

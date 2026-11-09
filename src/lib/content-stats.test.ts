@@ -205,15 +205,17 @@ describe('formatStats', () => {
   });
 
   it('marks a draft language and lists the drafts once', () => {
-    const stats = compute([file('es', 'science', 3, 2), file('en', 'science', 3, 2)]);
+    const stats = compute([file('fr', 'science', 3, 2), file('en', 'science', 3, 2), file('es', 'science', 3, 2)]);
     expect(stats.map((s) => [s.lang, s.draft])).toEqual([
       ['en', false],
-      ['es', true],
+      ['es', false],
+      ['fr', true],
     ]);
     const text = formatStats(stats, []);
-    expect(text).toContain('es: 5 sentences (draft: not offered in the production language select)');
+    expect(text).toContain('fr: 5 sentences (draft: not offered in the production language select)');
     expect(text).toContain('en: 5 sentences\n');
-    expect(text).toContain('Draft languages: es.');
+    expect(text).toContain('es: 5 sentences\n');
+    expect(text).toContain('Draft languages: fr.');
   });
 
   it('prints no draft line when no language is a draft', () => {

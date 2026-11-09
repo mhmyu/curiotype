@@ -13,19 +13,20 @@ test('switching the sentence language keeps the interface and the URL', { tag: '
   await expect(input).toBeVisible();
 
   const select = contentLangSelect(page, id);
-  const englishName = await page.evaluate(
-    () => new Intl.DisplayNames(['id'], { type: 'language' }).of('en') as string,
-  );
+  const [englishName, spanishName] = await page.evaluate(() => {
+    const names = new Intl.DisplayNames(['id'], { type: 'language' });
+    return [names.of('en') as string, names.of('es') as string];
+  });
 
   // The sentence language starts as the interface language. On the home page the options show
   // short codes; the full names are the tooltips (title), the select's own title names the current one.
   await expect(select).toHaveValue('id');
   const codes = await select.locator('option').allTextContents();
-  expect(codes.map((code) => code.trim()).sort()).toEqual(['EN', 'ID']);
+  expect(codes.map((code) => code.trim()).sort()).toEqual(['EN', 'ES', 'ID']);
   const titles = await select.locator('option').evaluateAll((options) =>
     options.map((option) => option.getAttribute('title')),
   );
-  expect([...titles].sort()).toEqual(['Indonesia', englishName].sort());
+  expect([...titles].sort()).toEqual(['Indonesia', englishName, spanishName].sort());
   await expect(select).toHaveAttribute('title', 'Indonesia');
 
   await select.selectOption('en');
@@ -76,21 +77,19 @@ test('switching the sentence language keeps the interface and the URL', { tag: '
   );
 });
 
-// A draft language (DRAFT_LANGUAGES) is built and usable, but not offered in a production build.
-test('a draft language set in the settings is used and stays in the select', async ({ page }) => {
-  await page.addInitScript(
-    ([key]) => localStorage.setItem(key, JSON.stringify({ contentLang: 'es' })),
-    [SETTINGS_KEY],
-  );
+// Spanish is launched: it is offered in the select; a language that is still a draft is not.
+test('Spanish is offered in the select and its sentences are used', async ({ page }) => {
   await page.goto('/id/');
   const input = page.getByLabel(id.test.inputLabel);
   await expect(input).toBeVisible();
 
-  // The draft in use stays listed (the select is never empty); the others do not appear.
   const select = contentLangSelect(page, id);
-  await expect(select).toHaveValue('es');
   await expect(select.locator('option[value="es"]')).toHaveText('ES');
   await expect(select.locator('option[value="pt-br"]')).toHaveCount(0);
+
+  await select.selectOption('es');
+  await expect(select).toHaveValue('es');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'id');
 
   await chooseMode(page, 'quote', id);
   const text = input.locator('xpath=preceding-sibling::div[1]');

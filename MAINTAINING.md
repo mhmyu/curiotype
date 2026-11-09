@@ -391,7 +391,7 @@ Quick checklist, in this order:
 
 Tick each item before you announce the site.
 
-- [ ] **Verify or replace the sample sentences** (40 in `id` and `en`, and 20 draft sentences in `es`). The shipped sentences only exercise the flow: every fact must be checked and every source (currently English Wikipedia pages) replaced by a proper one (see `CONTENT_GUIDE.md`, section 4).
+- [ ] **Verify or replace the sample sentences** (40 in `id` and `en`, and 20 sentences in `es`, which is already launched). The shipped sentences only exercise the flow: every fact must be checked and every source (currently English Wikipedia pages) replaced by a proper one (see `CONTENT_GUIDE.md`, section 4).
 - [ ] **At least 100 sentences per category per language**, roughly 50% easy and 50% hard. (A language still in `DRAFT_LANGUAGES` is not offered to visitors; see [10.1](#101-launch-a-draft-language) for what it needs before you launch it.)
 - [ ] **Recalibrate the difficulty thresholds** (`DIFFICULTY_THRESHOLDS` in `src/lib/difficulty.ts`) once a language nears 100 sentences per category: run `pnpm content:stats`, compare each threshold with the median score it prints, and if you move one, relabel the sentences with `pnpm content:stats --scores` (the build lists any label that no longer matches).
 - [ ] **Copyright line.** `LICENSE` says "The typing contributors"; replace it with your own name if you prefer. Leave `LICENSE-CONTENT` as it is.
@@ -406,10 +406,10 @@ Tick each item before you announce the site.
 
 ### 10.1 Launch a draft language
 
-The languages `es`, `pt-br`, `fr` and `de` are **drafts**: the build checks them, but the sentence language select on the live site does not list them (it lists them when you run `pnpm dev`). A language is launched by deleting its code from one line in `src/config/languages.ts`. Do that only when every box below is ticked for that language.
+`es` is launched. The languages `pt-br`, `fr` and `de` are **drafts**: the build checks them, but the sentence language select on the live site does not list them (it lists them when you run `pnpm dev`). A language is launched by deleting its code from one line in `src/config/languages.ts`. Do that only when every box below is ticked for that language.
 
 - [ ] **Enough sentences.** At least about 20 per category (the final target is 100). `pnpm content:stats` prints the counts and marks draft languages.
-- [ ] **Facts and sources verified** by you or someone who knows the language, with a source in that language where one exists. `pnpm content:check-sources` tells which links do not open. The `es` sentences that ship with the project are samples and are **not** verified.
+- [ ] **Facts and sources verified** by you or someone who knows the language, with a source in that language where one exists. `pnpm content:check-sources` tells which links do not open. The `es` sentences that ship with the project are samples and are **not** verified, although the language is already live: do this check for `es` as soon as you can, and replace or fix what is wrong.
 - [ ] **Difficulty calibrated.** Run `pnpm content:stats --scores`: the median score it prints for the language should be close to its threshold (`DIFFICULTY_THRESHOLDS` in `src/lib/difficulty.ts`), so about half the sentences are easy. If you move the threshold, relabel the sentences with the levels the command shows; the build lists every label that no longer matches. Check the length range (`TEXT_LENGTH` in `src/lib/content-rules.ts`) the same way.
 - [ ] **Accents typed by hand.** On a computer with the **keyboard layout of that language** (add it in the system settings if needed), run `pnpm dev`, choose the language, and type a few accented sentences: no false error marks, the cursor never sticks, a dead key (press the accent key, then the letter) gives the right letter. Repeat on a real **phone**. Look also that the accented letters are drawn in the same serif font as the others. (The automated test only simulates input; this check cannot be automated.)
 - [ ] **Heat map layout.** Open the statistics page in that language: the keys should follow its keyboard (AZERTY for French, QWERTZ for German). `KEYBOARD_ROWS` in `src/features/stats/weak-keys.ts` is where a layout is defined.
