@@ -32,22 +32,22 @@
     "content:add-category": "node scripts/add-category.ts"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.4",
-    "@astrojs/svelte": "^9.1.2",
+    "@astrojs/sitemap": "^3.7.6",
+    "@astrojs/svelte": "^9.1.6",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/lora": "^5.3.0",
-    "@tailwindcss/vite": "^4.3.3",
-    "astro": "^7.4.4",
-    "svelte": "^5.57.3",
-    "tailwindcss": "^4.3.3"
+    "@tailwindcss/vite": "^4.3.5",
+    "astro": "^7.4.13",
+    "svelte": "^5.59.0",
+    "tailwindcss": "^4.3.5"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.65.1",
     "@types/node": "^22.20.5",
     "typescript": "^6.0.0",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.1"
   },
   "license": "MIT",
   "packageManager": "pnpm@12.15.0"
